@@ -1,0 +1,602 @@
+/* -*- Mode: C ; c-basic-offset: 2 -*- */
+/*****************************************************************************
+ *
+ *   Copyright (C) 2006 Nedko Arnaudov <nedko@arnaudov.name>
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; version 2 of the License
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ *****************************************************************************/
+
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <assert.h>
+#include <math.h>
+
+#include "common.h"
+#include "lv2.h"
+#include "lv2-miditype.h"
+#include "lv2-midifunctions.h"
+#include "zynadd.peg"
+#include "zynadd.h"
+#include "addsynth.h"
+#include "dynparam.h"
+#include "lv2dynparam.h"
+
+struct zynadd
+{
+  uint32_t sample_rate;
+  char * bundle_path;
+  void ** ports;
+
+  zyn_addsynth_handle synth;
+
+  zyn_sample_type synth_output_left[SOUND_BUFFER_SIZE];
+  zyn_sample_type synth_output_right[SOUND_BUFFER_SIZE];
+
+  uint32_t synth_output_offset; /* offset of unread data within synth_output_xxx audio buffers */
+
+  lv2dynparam_plugin_instance dynparams;
+  lv2dynparam_plugin_parameter param_stereo;
+  lv2dynparam_plugin_parameter param_random_grouping;
+  lv2dynparam_plugin_parameter param_master_volume;
+  lv2dynparam_plugin_parameter param_velocity_sensing;
+  lv2dynparam_plugin_parameter param_pan_randomize;
+  lv2dynparam_plugin_parameter param_panorama;
+  lv2dynparam_plugin_parameter param_punch_strength;
+  lv2dynparam_plugin_parameter param_punch_time;
+  lv2dynparam_plugin_parameter param_punch_stretch;
+  lv2dynparam_plugin_parameter param_punch_velocity_sensing;
+};
+
+#define zynadd_ptr ((struct zynadd *)context)
+
+void
+zynadd_stereo_changed(
+  void * context,
+  BOOL value)
+{
+  printf("zynadd_stereo_changed() called.\n");
+  zyn_addsynth_set_stereo(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_pan_randomize_changed(
+  void * context,
+  BOOL value)
+{
+  printf("zynadd_pan_randomize_changed() called.\n");
+  zyn_addsynth_panorama_set_random(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_pan_changed(
+  void * context,
+  float value)
+{
+  printf("zynadd_pan_changed() called.\n");
+  zyn_addsynth_set_panorama(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_volume_changed(
+  void * context,
+  float value)
+{
+  printf("zynadd_volume_changed() called.\n");
+  zyn_addsynth_set_volume(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_velocity_sensing_changed(
+  void * context,
+  float value)
+{
+  printf("zynadd_velocity_sensing_changed() called.\n");
+  zyn_addsynth_set_velocity_sensing(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_punch_strength_changed(
+  void * context,
+  float value)
+{
+  printf("zynadd_punch_strength_changed() called.\n");
+  zyn_addsynth_set_punch_strength(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_punch_time_changed(
+  void * context,
+  float value)
+{
+  printf("zynadd_punch_time_changed() called.\n");
+  zyn_addsynth_set_punch_time(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_punch_stretch_changed(
+  void * context,
+  float value)
+{
+  printf("zynadd_punch_stretch_changed() called.\n");
+  zyn_addsynth_set_punch_stretch(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_punch_velocity_sensing_changed(
+  void * context,
+  float value)
+{
+  printf("zynadd_punch_velocity_sensing_changed() called.\n");
+  zyn_addsynth_set_punch_velocity_sensing(zynadd_ptr->synth, value);
+}
+
+void
+zynadd_random_grouping_changed(
+  void * context,
+  BOOL value)
+{
+  printf("zynadd_random_grouping_changed() called.\n");
+  zyn_addsynth_set_random_grouping(zynadd_ptr->synth, value);
+}
+
+#undef zynadd_ptr
+
+LV2_Handle
+zynadd_instantiate(
+  const LV2_Descriptor * descriptor,
+  uint32_t sample_rate,
+  const char * bundle_path,
+  const LV2_Host_Feature ** host_features)
+{
+  struct zynadd * zynadd_ptr;
+  const LV2_Host_Feature * feature_ptr;
+  lv2dynparam_plugin_group amplitude_group;
+  lv2dynparam_plugin_group amplitude_envelope_group;
+  lv2dynparam_plugin_group amplitude_lfo_group;
+  lv2dynparam_plugin_group amplitude_punch_group;
+  lv2dynparam_plugin_group filter_group;
+  lv2dynparam_plugin_group filter_envelope_group;
+  lv2dynparam_plugin_group filter_lfo_group;
+  lv2dynparam_plugin_group frequency_group;
+  lv2dynparam_plugin_group frequency_envelope_group;
+  lv2dynparam_plugin_group frequency_lfo_group;
+
+  printf("zynadd_create_plugin_instance() called.\n");
+  printf("sample_rate = %u\n", (unsigned int)sample_rate);
+  printf("bundle_path = \"%s\"\n", bundle_path);
+
+//  if (host_features != NULL && *host_features != NULL)
+  {
+    feature_ptr = *host_features;
+    while (feature_ptr)
+    {
+//      printf("Host feature <%s> detected\n", feature_ptr->URI);
+      feature_ptr++;
+    }
+
+//    printf("end of host features.\n");
+  }
+
+  zynadd_ptr = malloc(sizeof(struct zynadd));
+  if (zynadd_ptr == NULL)
+  {
+    goto fail;
+  }
+  
+  zynadd_ptr->bundle_path = strdup(bundle_path);
+  if (zynadd_ptr->bundle_path == NULL)
+  {
+    goto fail_free_instance;
+  }
+
+  zynadd_ptr->ports = malloc(peg_n_ports * sizeof(void *));
+  if (zynadd_ptr->ports == NULL)
+  {
+    goto fail_free_bundle_path;
+  }
+
+  zynadd_ptr->sample_rate = sample_rate;
+
+  if (!zyn_addsynth_create(&zynadd_ptr->synth))
+  {
+    goto fail_free_ports;
+  }
+
+  zynadd_ptr->synth_output_offset = SOUND_BUFFER_SIZE;
+
+  if (!lv2dynparam_plugin_instantiate(
+        (LV2_Handle)zynadd_ptr,
+        "zynadd",
+        &zynadd_ptr->dynparams))
+  {
+    goto fail_destroy_synth;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        NULL,
+        "Amplitude",
+        &amplitude_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        NULL,
+        "Filter",
+        &filter_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        NULL,
+        "Frequency",
+        &frequency_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_boolean_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "Stereo",
+        zyn_addsynth_is_stereo(zynadd_ptr->synth),
+        zynadd_stereo_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_stereo))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_boolean_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "Random grouping",
+        zyn_addsynth_is_random_grouping(zynadd_ptr->synth),
+        zynadd_random_grouping_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_random_grouping))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_float_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "Master volume",
+        zyn_addsynth_get_volume(zynadd_ptr->synth),
+        0.0,
+        100.0,
+        zynadd_volume_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_master_volume))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_float_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "Velocity sensing",
+        zyn_addsynth_get_velocity_sensing(zynadd_ptr->synth),
+        0.0,
+        100.0,
+        zynadd_velocity_sensing_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_velocity_sensing))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_boolean_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "Pan randomize",
+        zyn_addsynth_panorama_is_random(zynadd_ptr->synth),
+        zynadd_pan_randomize_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_pan_randomize))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_float_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "Panorama",
+        zyn_addsynth_get_panorama(zynadd_ptr->synth),
+        -1.0,
+        1.0,
+        zynadd_pan_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_panorama))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "Punch",
+        &amplitude_punch_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_float_add(
+        zynadd_ptr->dynparams,
+        amplitude_punch_group,
+        "Strength",
+        zyn_addsynth_get_punch_strength(zynadd_ptr->synth),
+        0.0,
+        100.0,
+        zynadd_punch_strength_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_punch_strength))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_float_add(
+        zynadd_ptr->dynparams,
+        amplitude_punch_group,
+        "Time",
+        zyn_addsynth_get_punch_time(zynadd_ptr->synth),
+        0.0,
+        100.0,
+        zynadd_punch_time_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_punch_time))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_float_add(
+        zynadd_ptr->dynparams,
+        amplitude_punch_group,
+        "Stretch",
+        zyn_addsynth_get_punch_stretch(zynadd_ptr->synth),
+        0.0,
+        100.0,
+        zynadd_punch_stretch_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_punch_stretch))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_param_float_add(
+        zynadd_ptr->dynparams,
+        amplitude_punch_group,
+        "Velocity sensing",
+        zyn_addsynth_get_punch_velocity_sensing(zynadd_ptr->synth),
+        0.0,
+        100.0,
+        zynadd_punch_velocity_sensing_changed,
+        zynadd_ptr,
+        &zynadd_ptr->param_punch_velocity_sensing))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "Envelope",
+        &amplitude_envelope_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        amplitude_group,
+        "LFO",
+        &amplitude_lfo_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        filter_group,
+        "Envelope",
+        &filter_envelope_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        filter_group,
+        "LFO",
+        &filter_lfo_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        frequency_group,
+        "Envelope",
+        &frequency_envelope_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  if (!lv2dynparam_plugin_group_add(
+        zynadd_ptr->dynparams,
+        frequency_group,
+        "LFO",
+        &frequency_lfo_group))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  return (LV2_Handle)zynadd_ptr;
+
+fail_clean_dynparams:
+  lv2dynparam_plugin_cleanup(zynadd_ptr->dynparams);
+
+fail_destroy_synth:
+  zyn_addsynth_destroy(zynadd_ptr->synth);
+
+fail_free_ports:
+  free(zynadd_ptr->ports);
+
+fail_free_bundle_path:
+  free(zynadd_ptr->bundle_path);
+
+fail_free_instance:
+  free(zynadd_ptr);
+
+fail:
+  printf("zynadd_instantiate() failed.\n");
+  return NULL;
+}
+
+#define zynadd_ptr ((struct zynadd *)instance)
+
+/* The run() callback. This is the function that gets called by the host
+   when it wants to run the plugin. The parameter is the number of sample
+   frames to process. */
+void
+zynadd_run(
+  LV2_Handle instance,
+  uint32_t samples_count)
+{
+  LV2_MIDIState midi;
+  double event_time;
+  uint32_t event_size;
+  unsigned char* event;
+  uint32_t now;
+  uint32_t fill;
+  uint32_t synth_output_offset_future;
+/*   char fake_event[2]; */
+
+/*   printf("%u\n", sample_count); fflush(stdout); */
+
+  midi.midi = (LV2_MIDI *)zynadd_ptr->ports[peg_midi_in];
+  midi.frame_count = samples_count;
+  midi.position = 0;
+
+  now = 0;
+  event_time = -1.0;
+    
+  while (now < samples_count)
+  {
+    fill = samples_count - now;
+    synth_output_offset_future = zynadd_ptr->synth_output_offset;
+
+    if (synth_output_offset_future == SOUND_BUFFER_SIZE)
+    {
+      synth_output_offset_future = 0;
+    }
+
+    if (fill > SOUND_BUFFER_SIZE - synth_output_offset_future)
+    {
+      fill = SOUND_BUFFER_SIZE - synth_output_offset_future;
+    }
+
+    while (event_time < now + fill)
+    {
+      if (event_time < 0)         /* we need to extract next event */
+      {
+        lv2midi_get_event(&midi, &event_time, &event_size, &event);
+/*         if (event[0] == 0x90) */
+/*         { */
+/*           event_time = 0; */
+/*           fake_event[0] = 0x90; */
+/*           fake_event[1] = 69; */
+/*         } */
+        lv2midi_step(&midi);
+      }
+
+      if (event_time >= 0 && event_time < now + fill)
+      {
+/*         printf("%02X\n", (unsigned int)event[0]); */
+        switch (event[0])
+        {
+        case 0x90:                /* note on */
+          zyn_addsynth_note_on(zynadd_ptr->synth, event[1]);
+          break;
+        case 0x80:                /* note off */
+          zyn_addsynth_note_off(zynadd_ptr->synth, event[1]);
+          break;
+        }
+
+        event_time = -1.0;
+      }
+    }
+
+    if (zynadd_ptr->synth_output_offset == SOUND_BUFFER_SIZE)
+    {
+      zyn_addsynth_get_audio_output(zynadd_ptr->synth, zynadd_ptr->synth_output_left, zynadd_ptr->synth_output_right);
+      zynadd_ptr->synth_output_offset = 0;
+    }
+
+    assert(zynadd_ptr->synth_output_offset == synth_output_offset_future);
+
+    memcpy((float *)(zynadd_ptr->ports[peg_output_left]) + now, zynadd_ptr->synth_output_left, fill * sizeof(float));
+    memcpy((float *)(zynadd_ptr->ports[peg_output_right]) + now, zynadd_ptr->synth_output_right, fill * sizeof(float));
+
+    zynadd_ptr->synth_output_offset += fill;
+    assert(zynadd_ptr->synth_output_offset <= SOUND_BUFFER_SIZE);
+    now += fill;
+    assert(now <= samples_count);
+  }
+}
+
+void
+zynadd_cleanup(
+  LV2_Handle instance)
+{
+/*   printf("zynadd_cleanup\n"); */
+  zyn_addsynth_destroy(zynadd_ptr->synth);
+  free(zynadd_ptr->ports);
+  free(zynadd_ptr->bundle_path);
+  free(zynadd_ptr);
+}
+
+void
+zynadd_connect_port(
+  LV2_Handle instance,
+  uint32_t port,
+  void * data_location)
+{
+  if (port >= peg_n_ports)
+  {
+    assert(0);
+    return;
+  }
+
+  zynadd_ptr->ports[port] = data_location;
+}
+
+void *
+zynadd_extension_data(
+  const char * URI)
+{
+  if (strcmp(URI, LV2DYNPARAM_URI) == 0)
+  {
+    return g_lv2dynparam_plugin_extension_data;
+  }
+
+  return NULL;
+}
