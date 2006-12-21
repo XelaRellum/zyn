@@ -21,13 +21,6 @@
 #ifndef ZYNADD_H__6EC1E456_7DD7_4536_B8D3_F23BE4583A23__INCLUDED
 #define ZYNADD_H__6EC1E456_7DD7_4536_B8D3_F23BE4583A23__INCLUDED
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-#if 0
-} /* Adjust editor indent */
-#endif
-
 LV2_Handle
 zynadd_instantiate(
   const LV2_Descriptor * descriptor,
@@ -53,12 +46,5 @@ zynadd_cleanup(
 void *
 zynadd_extension_data(
   const char * URI); 
-
-#if 0
-{ /* Adjust editor indent */
-#endif
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 
 #endif /* #ifndef ZYNADD_H__6EC1E456_7DD7_4536_B8D3_F23BE4583A23__INCLUDED */
