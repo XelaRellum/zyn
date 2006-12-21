@@ -34,6 +34,82 @@
 #include "dynparam.h"
 #include "lv2dynparam.h"
 
+#define LV2DYNPARAM_PARAMETER_TYPE_BOOL      1
+#define LV2DYNPARAM_PARAMETER_TYPE_FLOAT     2
+
+#define LV2DYNPARAM_PARAMETER_STEREO                        0
+#define LV2DYNPARAM_PARAMETER_RANDOM_GROUPING               1
+#define LV2DYNPARAM_PARAMETER_MASTER_VOLUME                 2
+#define LV2DYNPARAM_PARAMETER_VELOCITY_SENSING              3
+#define LV2DYNPARAM_PARAMETER_PAN_RANDOMIZE                 4
+#define LV2DYNPARAM_PARAMETER_PANORAMA                      5
+#define LV2DYNPARAM_PARAMETER_PUNCH_STRENGTH                6
+#define LV2DYNPARAM_PARAMETER_PUNCH_TIME                    7
+#define LV2DYNPARAM_PARAMETER_PUNCH_STRETCH                 8
+#define LV2DYNPARAM_PARAMETER_PUNCH_VELOCITY_SENSING        9
+#define LV2DYNPARAM_PARAMETERS_COUNT                       10
+
+#define LV2DYNPARAM_GROUP_INVALID                          -2
+#define LV2DYNPARAM_GROUP_ROOT                             -1
+
+#define LV2DYNPARAM_GROUP_AMPLITUDE                         0
+#define LV2DYNPARAM_GROUP_FILTER                            1
+#define LV2DYNPARAM_GROUP_FREQUENCY                         2
+
+#define LV2DYNPARAM_GROUP_AMPLITUDE_PUNCH                   3
+#define LV2DYNPARAM_GROUP_AMPLITUDE_ENVELOPE                4
+#define LV2DYNPARAM_GROUP_AMPLITUDE_LFO                     5
+
+#define LV2DYNPARAM_GROUP_FILTER_ENVELOPE                   6
+#define LV2DYNPARAM_GROUP_FILTER_LFO                        7
+
+#define LV2DYNPARAM_GROUP_FREQUENCY_ENVELOPE                8
+#define LV2DYNPARAM_GROUP_FREQUENCY_LFO                     9
+
+#define LV2DYNPARAM_GROUPS_COUNT                           10
+
+struct group_descriptor
+{
+  int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
+  const char * name;            /* group name */
+};
+
+struct parameter_descriptor
+{
+  int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
+  const char * name;            /* parameter name */
+
+  unsigned int type;            /* one of LV2DYNPARAM_PARAMETER_TYPE_XXX */
+
+  union
+  {
+    lv2dynparam_plugin_param_boolean_changed boolean;
+    lv2dynparam_plugin_param_float_changed fpoint;
+  } value_changed_callback;
+
+  union
+  {
+    BOOL (* boolean)(zyn_addsynth_handle handle);
+    float (* fpoint)(zyn_addsynth_handle handle);
+  } get_value;
+
+  union
+  {
+    float fpoint;
+  } min;
+
+  union
+  {
+    float fpoint;
+  } max;
+};
+
+/* descriptors containing parent group index */
+/* array elements through child index */
+/* this defines the tree hierarchy */
+struct group_descriptor g_map_groups[LV2DYNPARAM_GROUPS_COUNT];
+struct parameter_descriptor g_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+
 struct zynadd
 {
   uint32_t sample_rate;
@@ -48,111 +124,150 @@ struct zynadd
   uint32_t synth_output_offset; /* offset of unread data within synth_output_xxx audio buffers */
 
   lv2dynparam_plugin_instance dynparams;
-  lv2dynparam_plugin_parameter param_stereo;
-  lv2dynparam_plugin_parameter param_random_grouping;
-  lv2dynparam_plugin_parameter param_master_volume;
-  lv2dynparam_plugin_parameter param_velocity_sensing;
-  lv2dynparam_plugin_parameter param_pan_randomize;
-  lv2dynparam_plugin_parameter param_panorama;
-  lv2dynparam_plugin_parameter param_punch_strength;
-  lv2dynparam_plugin_parameter param_punch_time;
-  lv2dynparam_plugin_parameter param_punch_stretch;
-  lv2dynparam_plugin_parameter param_punch_velocity_sensing;
+
+  lv2dynparam_plugin_group groups[LV2DYNPARAM_GROUPS_COUNT];
+  lv2dynparam_plugin_parameter parameters[LV2DYNPARAM_PARAMETERS_COUNT];
 };
 
 #define zynadd_ptr ((struct zynadd *)context)
 
-void
-zynadd_stereo_changed(
-  void * context,
-  BOOL value)
-{
-  printf("zynadd_stereo_changed() called.\n");
-  zyn_addsynth_set_stereo(zynadd_ptr->synth, value);
-}
+#define IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(ident)      \
+  void                                                    \
+  zynadd_ ## ident ## _changed(                           \
+    void * context,                                       \
+    BOOL value)                                           \
+  {                                                       \
+    printf("zynadd_" #ident "_changed() called.\n");      \
+    zyn_addsynth_set_ ## ident(zynadd_ptr->synth, value); \
+  }
 
-void
-zynadd_pan_randomize_changed(
-  void * context,
-  BOOL value)
-{
-  printf("zynadd_pan_randomize_changed() called.\n");
-  zyn_addsynth_panorama_set_random(zynadd_ptr->synth, value);
-}
+#define IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(ident)     \
+  void                                                    \
+  zynadd_ ## ident ## _changed(                           \
+    void * context,                                       \
+    float value)                                          \
+  {                                                       \
+    printf("zynadd_" #ident "_changed() called.\n");      \
+    zyn_addsynth_set_ ## ident(zynadd_ptr->synth, value); \
+  }
 
-void
-zynadd_pan_changed(
-  void * context,
-  float value)
-{
-  printf("zynadd_pan_changed() called.\n");
-  zyn_addsynth_set_panorama(zynadd_ptr->synth, value);
-}
-
-void
-zynadd_volume_changed(
-  void * context,
-  float value)
-{
-  printf("zynadd_volume_changed() called.\n");
-  zyn_addsynth_set_volume(zynadd_ptr->synth, value);
-}
-
-void
-zynadd_velocity_sensing_changed(
-  void * context,
-  float value)
-{
-  printf("zynadd_velocity_sensing_changed() called.\n");
-  zyn_addsynth_set_velocity_sensing(zynadd_ptr->synth, value);
-}
-
-void
-zynadd_punch_strength_changed(
-  void * context,
-  float value)
-{
-  printf("zynadd_punch_strength_changed() called.\n");
-  zyn_addsynth_set_punch_strength(zynadd_ptr->synth, value);
-}
-
-void
-zynadd_punch_time_changed(
-  void * context,
-  float value)
-{
-  printf("zynadd_punch_time_changed() called.\n");
-  zyn_addsynth_set_punch_time(zynadd_ptr->synth, value);
-}
-
-void
-zynadd_punch_stretch_changed(
-  void * context,
-  float value)
-{
-  printf("zynadd_punch_stretch_changed() called.\n");
-  zyn_addsynth_set_punch_stretch(zynadd_ptr->synth, value);
-}
-
-void
-zynadd_punch_velocity_sensing_changed(
-  void * context,
-  float value)
-{
-  printf("zynadd_punch_velocity_sensing_changed() called.\n");
-  zyn_addsynth_set_punch_velocity_sensing(zynadd_ptr->synth, value);
-}
-
-void
-zynadd_random_grouping_changed(
-  void * context,
-  BOOL value)
-{
-  printf("zynadd_random_grouping_changed() called.\n");
-  zyn_addsynth_set_random_grouping(zynadd_ptr->synth, value);
-}
+IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(stereo)
+IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(pan_random)
+IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(panorama)
+IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(volume)
+IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(velocity_sensing)
+IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(punch_strength)
+IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(punch_time)
+IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(punch_stretch)
+IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(punch_velocity_sensing)
+IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(random_grouping)
 
 #undef zynadd_ptr
+
+#define LV2DYNPARAM_GROUP(group) LV2DYNPARAM_GROUP_ ## group
+#define LV2DYNPARAM_PARAMETER(parameter) LV2DYNPARAM_PARAMETER_ ## parameter
+
+#define LV2DYNPARAM_GROUP_INIT(parent_group, group, name_value)         \
+  g_map_groups[LV2DYNPARAM_GROUP(group)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;
+
+#define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, parameter, name_value, ident) \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].name = name_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].value_changed_callback.boolean = zynadd_ ## ident ## _changed; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].get_value.boolean = zyn_addsynth_is_ ## ident;
+
+#define LV2DYNPARAM_PARAMETER_INIT_FLOAT(parent_group, parameter, name_value, ident, min_value, max_value) \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].name = name_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].value_changed_callback.fpoint = zynadd_ ## ident ## _changed; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].get_value.fpoint = zyn_addsynth_get_ ## ident; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].min.fpoint = min_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].max.fpoint = max_value;
+
+void zynadd_map_initialise() __attribute__((constructor));
+void zynadd_map_initialise()
+{
+  int i;
+
+  for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
+  {
+    g_map_groups[i].parent = LV2DYNPARAM_GROUP_INVALID;
+  }
+
+  for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
+  {
+    g_map_parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
+  }
+
+  LV2DYNPARAM_GROUP_INIT(ROOT, AMPLITUDE, "Amplitude");
+  {
+    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, STEREO, "Stereo", stereo);
+    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, RANDOM_GROUPING, "Random Grouping", random_grouping);
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, MASTER_VOLUME, "Master Volume", volume, 0, 100);
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, VELOCITY_SENSING, "Velocity sensing", velocity_sensing, 0, 100);
+    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, PAN_RANDOMIZE, "Pan randomize", pan_random);
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, PANORAMA, "Panorama", panorama, -1, 1);
+
+    LV2DYNPARAM_GROUP_INIT(AMPLITUDE, AMPLITUDE_PUNCH, "Punch");
+    {
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRENGTH, "Strength", punch_strength, 0, 100);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_TIME, "Time", punch_time, 0, 100);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRETCH, "Stretch", punch_stretch, 0, 100);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_VELOCITY_SENSING, "Velocity sensing", punch_velocity_sensing, 0, 100);
+    }
+
+    LV2DYNPARAM_GROUP_INIT(AMPLITUDE, AMPLITUDE_ENVELOPE, "Envelope");
+    {
+    }
+
+    LV2DYNPARAM_GROUP_INIT(AMPLITUDE, AMPLITUDE_LFO, "LFO");
+    {
+    }
+  }
+
+  LV2DYNPARAM_GROUP_INIT(ROOT, FILTER, "Filter");
+  {
+    LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_ENVELOPE, "Envelope");
+    {
+    }
+
+    LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_LFO, "LFO");
+    {
+    }
+  }
+
+  LV2DYNPARAM_GROUP_INIT(ROOT, FREQUENCY, "Frequency");
+  {
+    LV2DYNPARAM_GROUP_INIT(FREQUENCY, FREQUENCY_ENVELOPE, "Envelope");
+    {
+    }
+
+    LV2DYNPARAM_GROUP_INIT(FREQUENCY, FREQUENCY_LFO, "LFO");
+    {
+    }
+  }
+
+  /* santity check that we have filled all values */
+
+  for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
+  {
+    assert(g_map_parameters[i].parent != LV2DYNPARAM_GROUP_INVALID);
+  }
+
+  for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
+  {
+    assert(g_map_groups[i].parent != LV2DYNPARAM_GROUP_INVALID);
+
+    assert(g_map_groups[i].name != NULL);
+
+    /* check that parents are with smaller indexes than children */
+    /* this checks for loops too */
+    assert(g_map_groups[i].parent < i);
+  }
+}
 
 LV2_Handle
 zynadd_instantiate(
@@ -163,16 +278,7 @@ zynadd_instantiate(
 {
   struct zynadd * zynadd_ptr;
   const LV2_Host_Feature * feature_ptr;
-  lv2dynparam_plugin_group amplitude_group;
-  lv2dynparam_plugin_group amplitude_envelope_group;
-  lv2dynparam_plugin_group amplitude_lfo_group;
-  lv2dynparam_plugin_group amplitude_punch_group;
-  lv2dynparam_plugin_group filter_group;
-  lv2dynparam_plugin_group filter_envelope_group;
-  lv2dynparam_plugin_group filter_lfo_group;
-  lv2dynparam_plugin_group frequency_group;
-  lv2dynparam_plugin_group frequency_envelope_group;
-  lv2dynparam_plugin_group frequency_lfo_group;
+  int i;
 
   printf("zynadd_create_plugin_instance() called.\n");
   printf("sample_rate = %u\n", (unsigned int)sample_rate);
@@ -225,228 +331,54 @@ zynadd_instantiate(
     goto fail_destroy_synth;
   }
 
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        NULL,
-        "Amplitude",
-        &amplitude_group))
+  for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
-    goto fail_clean_dynparams;
+    if (!lv2dynparam_plugin_group_add(
+          zynadd_ptr->dynparams,
+          g_map_groups[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_groups[i].parent],
+          g_map_groups[i].name,
+          zynadd_ptr->groups + i))
+    {
+      goto fail_clean_dynparams;
+    }
   }
 
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        NULL,
-        "Filter",
-        &filter_group))
+  for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
-    goto fail_clean_dynparams;
-  }
+    switch (g_map_parameters[i].type)
+    {
+    case LV2DYNPARAM_PARAMETER_TYPE_BOOL:
+      if (!lv2dynparam_plugin_param_boolean_add(
+            zynadd_ptr->dynparams,
+            g_map_parameters[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_parameters[i].parent],
+            g_map_parameters[i].name,
+            g_map_parameters[i].get_value.boolean(zynadd_ptr->synth),
+            g_map_parameters[i].value_changed_callback.boolean,
+            zynadd_ptr,
+            zynadd_ptr->parameters + i))
+      {
+        goto fail_clean_dynparams;
+      }
+      break;
 
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        NULL,
-        "Frequency",
-        &frequency_group))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_boolean_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "Stereo",
-        zyn_addsynth_is_stereo(zynadd_ptr->synth),
-        zynadd_stereo_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_stereo))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_boolean_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "Random grouping",
-        zyn_addsynth_is_random_grouping(zynadd_ptr->synth),
-        zynadd_random_grouping_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_random_grouping))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_float_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "Master volume",
-        zyn_addsynth_get_volume(zynadd_ptr->synth),
-        0.0,
-        100.0,
-        zynadd_volume_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_master_volume))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_float_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "Velocity sensing",
-        zyn_addsynth_get_velocity_sensing(zynadd_ptr->synth),
-        0.0,
-        100.0,
-        zynadd_velocity_sensing_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_velocity_sensing))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_boolean_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "Pan randomize",
-        zyn_addsynth_panorama_is_random(zynadd_ptr->synth),
-        zynadd_pan_randomize_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_pan_randomize))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_float_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "Panorama",
-        zyn_addsynth_get_panorama(zynadd_ptr->synth),
-        -1.0,
-        1.0,
-        zynadd_pan_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_panorama))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "Punch",
-        &amplitude_punch_group))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_float_add(
-        zynadd_ptr->dynparams,
-        amplitude_punch_group,
-        "Strength",
-        zyn_addsynth_get_punch_strength(zynadd_ptr->synth),
-        0.0,
-        100.0,
-        zynadd_punch_strength_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_punch_strength))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_float_add(
-        zynadd_ptr->dynparams,
-        amplitude_punch_group,
-        "Time",
-        zyn_addsynth_get_punch_time(zynadd_ptr->synth),
-        0.0,
-        100.0,
-        zynadd_punch_time_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_punch_time))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_float_add(
-        zynadd_ptr->dynparams,
-        amplitude_punch_group,
-        "Stretch",
-        zyn_addsynth_get_punch_stretch(zynadd_ptr->synth),
-        0.0,
-        100.0,
-        zynadd_punch_stretch_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_punch_stretch))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_param_float_add(
-        zynadd_ptr->dynparams,
-        amplitude_punch_group,
-        "Velocity sensing",
-        zyn_addsynth_get_punch_velocity_sensing(zynadd_ptr->synth),
-        0.0,
-        100.0,
-        zynadd_punch_velocity_sensing_changed,
-        zynadd_ptr,
-        &zynadd_ptr->param_punch_velocity_sensing))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "Envelope",
-        &amplitude_envelope_group))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        amplitude_group,
-        "LFO",
-        &amplitude_lfo_group))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        filter_group,
-        "Envelope",
-        &filter_envelope_group))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        filter_group,
-        "LFO",
-        &filter_lfo_group))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        frequency_group,
-        "Envelope",
-        &frequency_envelope_group))
-  {
-    goto fail_clean_dynparams;
-  }
-
-  if (!lv2dynparam_plugin_group_add(
-        zynadd_ptr->dynparams,
-        frequency_group,
-        "LFO",
-        &frequency_lfo_group))
-  {
-    goto fail_clean_dynparams;
+    case LV2DYNPARAM_PARAMETER_TYPE_FLOAT:
+      if (!lv2dynparam_plugin_param_float_add(
+            zynadd_ptr->dynparams,
+            g_map_parameters[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_parameters[i].parent],
+            g_map_parameters[i].name,
+            g_map_parameters[i].get_value.fpoint(zynadd_ptr->synth),
+            g_map_parameters[i].min.fpoint,
+            g_map_parameters[i].max.fpoint,
+            g_map_parameters[i].value_changed_callback.fpoint,
+            zynadd_ptr,
+            zynadd_ptr->parameters + i))
+      {
+        goto fail_clean_dynparams;
+      }
+      break;
+    default:
+      assert(0);
+    }
   }
 
   return (LV2_Handle)zynadd_ptr;

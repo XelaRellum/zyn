@@ -64,11 +64,11 @@ zyn_addsynth_set_panorama(
   float value);
 
 BOOL
-zyn_addsynth_panorama_is_random(
+zyn_addsynth_is_pan_random(
   zyn_addsynth_handle handle);
 
 void
-zyn_addsynth_panorama_set_random(
+zyn_addsynth_set_pan_random(
   zyn_addsynth_handle handle,
   BOOL random);
 

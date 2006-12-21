@@ -240,14 +240,14 @@ zyn_addsynth_set_panorama(
 }
 
 BOOL
-zyn_addsynth_panorama_is_random(
+zyn_addsynth_is_pan_random(
   zyn_addsynth_handle handle)
 {
   return zyn_addsynth_ptr->random_panorama;
 }
 
 void
-zyn_addsynth_panorama_set_random(
+zyn_addsynth_set_pan_random(
   zyn_addsynth_handle handle,
   BOOL random)
 {
