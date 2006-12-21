@@ -75,6 +75,8 @@ $(PLUGIN_NAME).lv2: $(BUNDLE_FILES)
 zynadd.so: $(PLUGIN_OBJECTS)
 	@echo "Creating LV2 shared library $@ ..."
 	@g++ -shared -fPIC $(LDFLAGS) $(PLUGIN_OBJECTS) $(LIBRARIES) -o $@
+	@echo "Checking for undefined zyn symbols"
+	@nm $@ |grep ' U zyn' ; RESULT=$$? ; if test $${RESULT} -eq 0; then rm zynadd.so; fi ; test ! $${RESULT} -eq 0
 
 DEPFILES = $(ALL_SOURCES_CXX:.cpp=.dep) $(ALL_SOURCES_C:.c=.dep)
 
