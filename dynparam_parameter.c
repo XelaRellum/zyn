@@ -20,8 +20,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+/* #include <stdio.h> */
+#include <assert.h>
 
+#include "common.h"
 #include "lv2.h"
 #include "lv2dynparam.h"
 #include "dynparam.h"
@@ -159,7 +161,7 @@ void
 lv2dynparam_plugin_parameter_change(
   lv2dynparam_parameter_handle parameter)
 {
-  printf("lv2dynparam_plugin_parameter_change() called.\n");
+  //printf("lv2dynparam_plugin_parameter_change() called.\n");
 
   switch (parameter_ptr->type)
   {
@@ -183,7 +185,6 @@ lv2dynparam_plugin_parameter_change(
 void
 lv2dynparam_plugin_param_notify(
   struct lv2dynparam_plugin_instance * instance_ptr,
-  struct lv2dynparam_plugin_group * group_ptr,
   struct lv2dynparam_plugin_parameter * param_ptr)
 {
   if (instance_ptr->host_callbacks == NULL)
@@ -192,19 +193,36 @@ lv2dynparam_plugin_param_notify(
     return;
   }
 
-  if (param_ptr->host_notified)
+  switch (param_ptr->pending)
   {
-    /* Already notified */
+  case LV2DYNPARAM_PENDING_NOTHING:
+    /* There is nothing to notify for */
     return;
-  }
-
-  if (instance_ptr->host_callbacks->parameter_appear(
-        instance_ptr->host_context,
-        group_ptr->host_context,
-        param_ptr,
-        &param_ptr->host_context))
-  {
-    param_ptr->host_notified = TRUE;
+  case LV2DYNPARAM_PENDING_APPEAR:
+/*     printf("Appearing %s\n", param_ptr->name); */
+    if (instance_ptr->host_callbacks->parameter_appear(
+          instance_ptr->host_context,
+          param_ptr->group_ptr->host_context,
+          param_ptr,
+          &param_ptr->host_context))
+    {
+      param_ptr->pending = LV2DYNPARAM_PENDING_NOTHING;
+      instance_ptr->pending--;
+    }
+    return;
+  case LV2DYNPARAM_PENDING_DISAPPEAR:
+/*     printf("Disappering %s\n", param_ptr->name); */
+    if (instance_ptr->host_callbacks->parameter_disappear(
+          instance_ptr->host_context,
+          param_ptr->host_context))
+    {
+      param_ptr->pending = LV2DYNPARAM_PENDING_NOTHING;
+      list_del(&param_ptr->siblings);
+      instance_ptr->pending--;
+    }
+    return;
+  default:
+    assert(0);
   }
 }
 
@@ -222,6 +240,7 @@ lv2dynparam_plugin_param_boolean_add(
 {
   struct lv2dynparam_plugin_parameter * param_ptr;
   struct lv2dynparam_plugin_group * group_ptr;
+  struct list_head * node_ptr;
 
   if (group == NULL)
   {
@@ -232,6 +251,39 @@ lv2dynparam_plugin_param_boolean_add(
     group_ptr = (struct lv2dynparam_plugin_group *)group;
   }
 
+  /* Search for same parameter in pending disappear state, and try to reuse it */
+  list_for_each(node_ptr, &group_ptr->child_parameters)
+  {
+    param_ptr = list_entry(node_ptr, struct lv2dynparam_plugin_parameter, siblings);
+
+    assert(param_ptr->group_ptr == group_ptr);
+
+    if (strcmp(param_ptr->name, name) == 0)
+    {
+      if (param_ptr->pending != LV2DYNPARAM_PENDING_DISAPPEAR)
+      {
+        assert(0);                /* groups cannot contain two parameters with same names */
+        return FALSE;
+      }
+
+      if (param_ptr->type != LV2DYNPARAM_PARAMETER_TYPE_BOOLEAN)
+      {
+        /* There is pending disappear of parameter with same name but of different type */
+        break;
+      }
+
+      param_ptr->data.boolean = value;
+      param_ptr->plugin_callback.boolean = callback;
+      param_ptr->plugin_callback_context = callback_context;
+      param_ptr->pending = LV2DYNPARAM_PENDING_CHANGE;
+
+      *param_handle_ptr = (lv2dynparam_parameter_handle)param_ptr;
+
+      return TRUE;
+    }
+  }
+
+  /* FIXME: don't sleep */
   param_ptr = malloc(sizeof(struct lv2dynparam_plugin_parameter));
   if (param_ptr == NULL)
   {
@@ -246,15 +298,17 @@ lv2dynparam_plugin_param_boolean_add(
     goto fail_free_param;
   }
 
+  param_ptr->group_ptr = group_ptr;
   param_ptr->data.boolean = value;
   param_ptr->plugin_callback.boolean = callback;
   param_ptr->plugin_callback_context = callback_context;
 
-  param_ptr->host_notified = FALSE;
-
-  lv2dynparam_plugin_param_notify(instance_ptr, group_ptr, param_ptr);
+  param_ptr->pending = LV2DYNPARAM_PENDING_APPEAR;
+  instance_ptr->pending++;
 
   list_add_tail(&param_ptr->siblings, &group_ptr->child_parameters);
+
+  lv2dynparam_plugin_param_notify(instance_ptr, param_ptr);
 
   *param_handle_ptr = (lv2dynparam_parameter_handle)param_ptr;
 
@@ -281,6 +335,7 @@ lv2dynparam_plugin_param_float_add(
 {
   struct lv2dynparam_plugin_parameter * param_ptr;
   struct lv2dynparam_plugin_group * group_ptr;
+  struct list_head * node_ptr;
 
   if (group == NULL)
   {
@@ -291,6 +346,41 @@ lv2dynparam_plugin_param_float_add(
     group_ptr = (struct lv2dynparam_plugin_group *)group;
   }
 
+  /* Search for same parameter in pending disappear state, and try to reuse it */
+  list_for_each(node_ptr, &group_ptr->child_parameters)
+  {
+    param_ptr = list_entry(node_ptr, struct lv2dynparam_plugin_parameter, siblings);
+
+    assert(param_ptr->group_ptr == group_ptr);
+
+    if (strcmp(param_ptr->name, name) == 0)
+    {
+      if (param_ptr->pending != LV2DYNPARAM_PENDING_DISAPPEAR)
+      {
+        assert(0);                /* groups cannot contain two parameters with same names */
+        return FALSE;
+      }
+
+      if (param_ptr->type != LV2DYNPARAM_PARAMETER_TYPE_BOOLEAN)
+      {
+        /* There is pending disappear of parameter with same name but of different type */
+        break;
+      }
+
+      param_ptr->data.fpoint.value = value;
+      param_ptr->data.fpoint.min = min;
+      param_ptr->data.fpoint.max = max;
+      param_ptr->plugin_callback.fpoint = callback;
+      param_ptr->plugin_callback_context = callback_context;
+      param_ptr->pending = LV2DYNPARAM_PENDING_CHANGE;
+
+      *param_handle_ptr = (lv2dynparam_parameter_handle)param_ptr;
+
+      return TRUE;
+    }
+  }
+
+  /* FIXME: don't sleep */
   param_ptr = malloc(sizeof(struct lv2dynparam_plugin_parameter));
   if (param_ptr == NULL)
   {
@@ -305,17 +395,19 @@ lv2dynparam_plugin_param_float_add(
     goto fail_free_param;
   }
 
+  param_ptr->group_ptr = group_ptr;
   param_ptr->data.fpoint.value = value;
   param_ptr->data.fpoint.min = min;
   param_ptr->data.fpoint.max = max;
   param_ptr->plugin_callback.fpoint = callback;
   param_ptr->plugin_callback_context = callback_context;
 
-  param_ptr->host_notified = FALSE;
-
-  lv2dynparam_plugin_param_notify(instance_ptr, group_ptr, param_ptr);
+  param_ptr->pending = LV2DYNPARAM_PENDING_APPEAR;
+  instance_ptr->pending++;
 
   list_add_tail(&param_ptr->siblings, &group_ptr->child_parameters);
+
+  lv2dynparam_plugin_param_notify(instance_ptr, param_ptr);
 
   *param_handle_ptr = (lv2dynparam_parameter_handle)param_ptr;
 
@@ -326,4 +418,25 @@ fail_free_param:
 
 fail:
   return FALSE;
+}
+
+BOOL
+lv2dynparam_plugin_param_remove(
+  lv2dynparam_plugin_instance instance_handle,
+  lv2dynparam_plugin_parameter parameter)
+{
+  /* If in pending appear - delete it right now */
+  if (parameter_ptr->pending == LV2DYNPARAM_PENDING_APPEAR)
+  {
+    instance_ptr->pending--;
+    list_del(&parameter_ptr->siblings);
+    lv2dynparam_plugin_parameter_free(parameter_ptr);
+    return TRUE;
+  }
+
+  parameter_ptr->pending = LV2DYNPARAM_PENDING_DISAPPEAR;
+  instance_ptr->pending++;
+  lv2dynparam_plugin_param_notify(instance_ptr, parameter_ptr);
+
+  return TRUE;
 }

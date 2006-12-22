@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "lv2.h"
 #include "lv2dynparam.h"
@@ -29,7 +30,9 @@
 
 BOOL
 lv2dynparam_plugin_group_init(
+  struct lv2dynparam_plugin_instance * instance_ptr,
   struct lv2dynparam_plugin_group * group_ptr,
+  struct lv2dynparam_plugin_group * parent_group_ptr,
   unsigned int type,
   const char * name)
 {
@@ -40,16 +43,19 @@ lv2dynparam_plugin_group_init(
   }
 
   group_ptr->type = type;
+  group_ptr->group_ptr = parent_group_ptr;
   INIT_LIST_HEAD(&group_ptr->child_groups);
   INIT_LIST_HEAD(&group_ptr->child_parameters);
 
-  group_ptr->host_notified = FALSE;
+  group_ptr->pending = LV2DYNPARAM_PENDING_APPEAR;
+  instance_ptr->pending++;
 
   return TRUE;
 }
 
 BOOL
 lv2dynparam_plugin_group_new(
+  struct lv2dynparam_plugin_instance * instance_ptr,
   struct lv2dynparam_plugin_group * parent_group_ptr,
   unsigned int type,
   const char * name,
@@ -65,7 +71,7 @@ lv2dynparam_plugin_group_new(
     goto exit;
   }
 
-  if (!lv2dynparam_plugin_group_init(group_ptr, type, name))
+  if (!lv2dynparam_plugin_group_init(instance_ptr, group_ptr, parent_group_ptr, type, name))
   {
     ret = FALSE;
     goto free;
@@ -122,37 +128,66 @@ lv2dynparam_plugin_group_free(
 void
 lv2dynparam_plugin_group_notify(
   struct lv2dynparam_plugin_instance * instance_ptr,
-  struct lv2dynparam_plugin_group * parent_group_ptr,
   struct lv2dynparam_plugin_group * group_ptr)
 {
   struct list_head * node_ptr;
   struct lv2dynparam_plugin_group * child_group_ptr;
   struct lv2dynparam_plugin_parameter * child_param_ptr;
 
-  if (!group_ptr->host_notified)
+  if (instance_ptr->host_callbacks == NULL)
   {
-    if (!instance_ptr->host_callbacks->group_appear(
+    /* Host not attached */
+    return;
+  }
+
+  switch (group_ptr->pending)
+  {
+  case LV2DYNPARAM_PENDING_NOTHING:
+    /* There is nothing to notify for */
+    return;
+  case LV2DYNPARAM_PENDING_APPEAR:
+    if (instance_ptr->host_callbacks->group_appear(
           instance_ptr->host_context,
-          (parent_group_ptr == NULL)?NULL:parent_group_ptr->host_context,
+          group_ptr->group_ptr == NULL ? NULL : group_ptr->group_ptr->host_context, /* host context of parent group */
           (lv2dynparam_group_handle)group_ptr,
           &group_ptr->host_context))
     {
-      return;
+      group_ptr->pending = LV2DYNPARAM_PENDING_NOTHING;
+      instance_ptr->pending--;
     }
 
-    group_ptr->host_notified = TRUE;
-  }
+    list_for_each(node_ptr, &group_ptr->child_groups)
+    {
+      child_group_ptr = list_entry(node_ptr, struct lv2dynparam_plugin_group, siblings);
 
-  list_for_each(node_ptr, &group_ptr->child_groups)
-  {
-    child_group_ptr = list_entry(node_ptr, struct lv2dynparam_plugin_group, siblings);
-    lv2dynparam_plugin_group_notify(instance_ptr, group_ptr, child_group_ptr);
-  }
+      assert(child_group_ptr->group_ptr == group_ptr);
 
-  list_for_each(node_ptr, &group_ptr->child_parameters)
-  {
-    child_param_ptr = list_entry(node_ptr, struct lv2dynparam_plugin_parameter, siblings);
-    lv2dynparam_plugin_param_notify(instance_ptr, group_ptr, child_param_ptr);
+      lv2dynparam_plugin_group_notify(instance_ptr, child_group_ptr);
+
+      if (instance_ptr->pending == 0)
+      {
+        /* optimization */
+        return;
+      }
+    }
+
+    list_for_each(node_ptr, &group_ptr->child_parameters)
+    {
+      child_param_ptr = list_entry(node_ptr, struct lv2dynparam_plugin_parameter, siblings);
+
+      assert(child_param_ptr->group_ptr == group_ptr);
+
+      lv2dynparam_plugin_param_notify(instance_ptr, child_param_ptr);
+
+      if (instance_ptr->pending == 0)
+      {
+        /* optimization */
+        return;
+      }
+    }
+    return;
+  default:
+    assert(0);
   }
 }
 
@@ -229,6 +264,7 @@ lv2dynparam_plugin_group_add(
   struct lv2dynparam_plugin_group * group_ptr;
 
   if (!lv2dynparam_plugin_group_new(
+        instance_ptr,
         parent_group_ptr == NULL ? &instance_ptr->root_group: parent_group_ptr,
         LV2DYNPARAM_GROUP_TYPE_GENERIC,
         name,
@@ -236,6 +272,8 @@ lv2dynparam_plugin_group_add(
   {
     return FALSE;
   }
+
+  lv2dynparam_plugin_group_notify(instance_ptr, group_ptr);
 
   *group_handle_ptr = (lv2dynparam_plugin_group)group_ptr;
 

@@ -43,12 +43,12 @@ void
 lv2dynparam_plugin_cleanup(
   lv2dynparam_plugin_instance instance_ptr);
 
-typedef void
+typedef BOOL
 (*lv2dynparam_plugin_param_boolean_changed)(
   void * context,
   BOOL value);
 
-typedef void
+typedef BOOL
 (*lv2dynparam_plugin_param_float_changed)(
   void * context,
   float value);
@@ -82,13 +82,17 @@ lv2dynparam_plugin_param_float_add(
   void * callback_context,
   lv2dynparam_plugin_parameter * param_ptr);
 
-void
-lv2dynparam_plugin_param_boolean_change(
-  lv2dynparam_plugin_parameter param,
-  int value);
-
-void
-lv2dynparam_plugin_param_boolean_remove(
+/* called by plugin when it decides to remove parameter */
+BOOL
+lv2dynparam_plugin_param_remove(
+  lv2dynparam_plugin_instance instance,
   lv2dynparam_plugin_parameter param);
+
+/* called by plugin when it decides to change bool parameter value */
+BOOL
+lv2dynparam_plugin_param_boolean_change(
+  lv2dynparam_plugin_instance instance,
+  lv2dynparam_plugin_parameter param,
+  BOOL value);
 
 #endif /* #ifndef DYNPARAM_H__84DA2DA3_61BD_45AC_B202_6A08F27D56F5__INCLUDED */

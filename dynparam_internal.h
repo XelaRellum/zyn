@@ -40,21 +40,33 @@
 #define LV2DYNPARAM_PARAMETER_TYPE_BOOLEAN   6
 #define LV2DYNPARAM_PARAMETER_TYPE_BOOLEAN_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/parameter_boolean"
 
+#define LV2DYNPARAM_PENDING_NOTHING    0 /* nothing pending */
+#define LV2DYNPARAM_PENDING_APPEAR     1 /* pending appear */
+#define LV2DYNPARAM_PENDING_DISAPPEAR  2 /* pending disappear */
+#define LV2DYNPARAM_PENDING_CHANGE     3 /* pending change */
+
 struct lv2dynparam_plugin_group
 {
-  struct list_head siblings;
+  struct list_head siblings;    /* siblings in parent group child_parameters */
+
+  struct lv2dynparam_plugin_group * group_ptr; /* parent group */
+
   unsigned int type;
   char * name;
   struct list_head child_groups;
   struct list_head child_parameters;
 
-  BOOL host_notified;
+  unsigned int pending;         /* One of LV2DYNPARAM_PENDING_XXX */
+
   void * host_context;
 };
 
 struct lv2dynparam_plugin_parameter
 {
-  struct list_head siblings;
+  struct list_head siblings;    /* siblings in parent group child_parameters */
+
+  struct lv2dynparam_plugin_group * group_ptr; /* parent group */
+
   unsigned int type;
   char * name;
   union
@@ -93,7 +105,8 @@ struct lv2dynparam_plugin_parameter
   } plugin_callback;
   void * plugin_callback_context;
 
-  BOOL host_notified;
+  unsigned int pending;         /* One of LV2DYNPARAM_PENDING_XXX */
+
   void * host_context;
 };
 
@@ -104,6 +117,8 @@ struct lv2dynparam_plugin_instance
   struct lv2dynparam_plugin_group root_group;
   struct lv2dynparam_host_callbacks * host_callbacks;
   void * host_context;
+
+  unsigned int pending;
 };
 
 unsigned char
@@ -114,7 +129,9 @@ lv2dynparam_plugin_host_attach(
 
 BOOL
 lv2dynparam_plugin_group_init(
+  struct lv2dynparam_plugin_instance * instance_ptr,
   struct lv2dynparam_plugin_group * group_ptr,
+  struct lv2dynparam_plugin_group * parent_group_ptr,
   unsigned int type,
   const char * name);
 
@@ -129,7 +146,6 @@ lv2dynparam_plugin_group_free(
 void
 lv2dynparam_plugin_group_notify(
   struct lv2dynparam_plugin_instance * instance_ptr,
-  struct lv2dynparam_plugin_group * parent_group_ptr,
   struct lv2dynparam_plugin_group * group_ptr);
 
 unsigned char
@@ -151,7 +167,6 @@ lv2dynparam_plugin_parameter_free(
 void
 lv2dynparam_plugin_param_notify(
   struct lv2dynparam_plugin_instance * instance_ptr,
-  struct lv2dynparam_plugin_group * group_ptr,
   struct lv2dynparam_plugin_parameter * param_ptr);
 
 unsigned char

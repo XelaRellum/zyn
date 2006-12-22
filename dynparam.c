@@ -72,7 +72,9 @@ lv2dynparam_plugin_instantiate(
   instance_ptr->lv2instance = lv2instance;
 
   if (!lv2dynparam_plugin_group_init(
+        instance_ptr,
         &instance_ptr->root_group,
+        NULL,
         LV2DYNPARAM_GROUP_TYPE_GENERIC,
         root_group_name))
   {
@@ -83,6 +85,8 @@ lv2dynparam_plugin_instantiate(
   list_add_tail(&instance_ptr->siblings, &g_instances);
 
   instance_ptr->host_callbacks = NULL;
+
+  instance_ptr->pending = 0;
 
   *instance_handle_ptr = instance_ptr;
 
@@ -120,7 +124,10 @@ instance_found:
   instance_ptr->host_callbacks = host_callbacks;
   instance_ptr->host_context = instance_host_context;
 
-  lv2dynparam_plugin_group_notify(instance_ptr, NULL, &instance_ptr->root_group);
+  if (instance_ptr->pending != 0) /* optimization */
+  {
+    lv2dynparam_plugin_group_notify(instance_ptr, &instance_ptr->root_group);
+  }
 
   return TRUE;
 }
