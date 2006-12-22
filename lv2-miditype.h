@@ -12,7 +12,7 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    GNU Lesser General Public License for more details.
     
     You should have received a copy of the GNU Lesser General Public License
     along with this program; if not, write to the Free Software
@@ -26,12 +26,12 @@
 
 /** This data structure is used to contain the MIDI events for one run() 
     cycle. The port buffer for a LV2 port that has the datatype 
-    <http://ll-plugins.nongnu.org/lv2/namespace#miditype> should be a pointer 
+    <http://ll-plugins.nongnu.org/lv2/ext/miditype> should be a pointer 
     to an instance of this struct. 
 
     To store two Note On events on MIDI channel 0 in a buffer, with timestamps
-    12 and 35.5, you could use something like this code (assuming that midi_data
-    is a variable of type LV2_MIDI):
+    12 and 35.5, you could use something like this code (assuming that 
+    midi_data is a variable of type LV2_MIDI):
     @code
     
       size_t buffer_offset = 0;
@@ -71,8 +71,8 @@
         buffer_offset += sizeof(double);
         size_t size = *(size_t*)(midi_data->data + buffer_offset);
         buffer_offset += sizeof(size_t);
-        do_something_with_event(timestamp, size, midi_data->data + 
-                                buffer_offset);
+        do_something_with_event(timestamp, size, 
+                                midi_data->data + buffer_offset);
         buffer_offset += size;
       }
         

@@ -45,9 +45,9 @@ zynadd_instantiate(
   struct zynadd * zynadd_ptr;
   const LV2_Host_Feature * feature_ptr;
 
-  printf("zynadd_create_plugin_instance() called.\n");
-  printf("sample_rate = %u\n", (unsigned int)sample_rate);
-  printf("bundle_path = \"%s\"\n", bundle_path);
+/*   printf("zynadd_create_plugin_instance() called.\n"); */
+/*   printf("sample_rate = %u\n", (unsigned int)sample_rate); */
+/*   printf("bundle_path = \"%s\"\n", bundle_path); */
 
 //  if (host_features != NULL && *host_features != NULL)
   {
@@ -108,7 +108,7 @@ fail_free_instance:
   free(zynadd_ptr);
 
 fail:
-  printf("zynadd_instantiate() failed.\n");
+/*   printf("zynadd_instantiate() failed.\n"); */
   return NULL;
 }
 
