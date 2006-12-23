@@ -35,10 +35,11 @@ lv2dynparam_plugin_group_init(
   struct lv2dynparam_plugin_instance * instance_ptr,
   struct lv2dynparam_plugin_group * group_ptr,
   struct lv2dynparam_plugin_group * parent_group_ptr,
-  unsigned int type,
-  const char * name)
+  const char * name,
+  const char * type_uri)
 {
   size_t name_size;
+  size_t type_uri_size;
 
   LOG_DEBUG("lv2dynparam_plugin_group_init() called for \"%s\"", name);
 
@@ -49,9 +50,15 @@ lv2dynparam_plugin_group_init(
     return FALSE;
   }
 
-  memcpy(group_ptr->name, name, name_size);
+  type_uri_size = strlen(type_uri) + 1;
+  if (type_uri_size >= LV2DYNPARAM_MAX_STRING_SIZE)
+  {
+    assert(0);
+    return FALSE;
+  }
 
-  group_ptr->type = type;
+  memcpy(group_ptr->name, name, name_size);
+  memcpy(group_ptr->type_uri, type_uri, type_uri_size);
   group_ptr->group_ptr = parent_group_ptr;
   INIT_LIST_HEAD(&group_ptr->child_groups);
   INIT_LIST_HEAD(&group_ptr->child_parameters);
@@ -66,8 +73,8 @@ BOOL
 lv2dynparam_plugin_group_new(
   struct lv2dynparam_plugin_instance * instance_ptr,
   struct lv2dynparam_plugin_group * parent_group_ptr,
-  unsigned int type,
   const char * name,
+  const char * type_uri,
   struct lv2dynparam_plugin_group ** group_ptr_ptr)
 {
   BOOL ret;
@@ -80,7 +87,7 @@ lv2dynparam_plugin_group_new(
     goto exit;
   }
 
-  if (!lv2dynparam_plugin_group_init(instance_ptr, group_ptr, parent_group_ptr, type, name))
+  if (!lv2dynparam_plugin_group_init(instance_ptr, group_ptr, parent_group_ptr, name, type_uri))
   {
     ret = FALSE;
     goto free;
@@ -208,26 +215,12 @@ lv2dynparam_plugin_group_get_type_uri(
   char * buffer)
 {
   size_t s;
-  const char * uri;
 
-  switch (group_ptr->type)
-  {
-  case LV2DYNPARAM_GROUP_TYPE_GENERIC:
-    uri = LV2DYNPARAM_GROUP_TYPE_GENERIC_URI;
-    break;
-  case LV2DYNPARAM_GROUP_TYPE_ADSR:
-    uri = LV2DYNPARAM_GROUP_TYPE_ADSR_URI;
-    break;
-  default:
-    assert(0);
-    return;
-  }
-
-  s = strlen(uri) + 1;
+  s = strlen(group_ptr->type_uri) + 1;
 
   assert(s <= LV2DYNPARAM_MAX_STRING_SIZE);
 
-  memcpy(buffer, uri, s);
+  memcpy(buffer, group_ptr->type_uri, s);
 }
 
 void
@@ -255,6 +248,7 @@ lv2dynparam_plugin_group_add(
   lv2dynparam_plugin_instance instance_handle,
   lv2dynparam_plugin_group parent_group,
   const char * name,
+  const char * type_uri,
   lv2dynparam_plugin_group * group_handle_ptr)
 {
   struct lv2dynparam_plugin_group * group_ptr;
@@ -264,8 +258,8 @@ lv2dynparam_plugin_group_add(
   if (!lv2dynparam_plugin_group_new(
         instance_ptr,
         parent_group_ptr == NULL ? &instance_ptr->root_group: parent_group_ptr,
-        LV2DYNPARAM_GROUP_TYPE_GENERIC,
         name,
+        type_uri,
         &group_ptr))
   {
     return FALSE;

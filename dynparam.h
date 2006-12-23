@@ -58,6 +58,7 @@ lv2dynparam_plugin_group_add(
   lv2dynparam_plugin_instance instance,
   lv2dynparam_plugin_group parent_group,
   const char * name,
+  const char * type_uri,
   lv2dynparam_plugin_group * group_ptr);
 
 BOOL

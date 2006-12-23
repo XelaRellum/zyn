@@ -43,8 +43,8 @@ struct lv2dynparam_plugin_group
 
   struct lv2dynparam_plugin_group * group_ptr; /* parent group */
 
-  unsigned int type;
   char name[LV2DYNPARAM_MAX_STRING_SIZE];
+  char type_uri[LV2DYNPARAM_MAX_STRING_SIZE];
   struct list_head child_groups;
   struct list_head child_parameters;
 
@@ -124,8 +124,8 @@ lv2dynparam_plugin_group_init(
   struct lv2dynparam_plugin_instance * instance_ptr,
   struct lv2dynparam_plugin_group * group_ptr,
   struct lv2dynparam_plugin_group * parent_group_ptr,
-  unsigned int type,
-  const char * name);
+  const char * name,
+  const char * type_uri);
 
 void
 lv2dynparam_plugin_group_clean(

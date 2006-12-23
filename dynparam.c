@@ -77,8 +77,8 @@ lv2dynparam_plugin_instantiate(
         instance_ptr,
         &instance_ptr->root_group,
         NULL,
-        LV2DYNPARAM_GROUP_TYPE_GENERIC,
-        root_group_name))
+        root_group_name,
+        LV2DYNPARAM_GROUP_TYPE_GENERIC_URI))
   {
     ret = FALSE;
     goto free;

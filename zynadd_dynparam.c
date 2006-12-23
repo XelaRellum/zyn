@@ -293,6 +293,7 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
           zynadd_ptr->dynparams,
           g_map_groups[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_groups[i].parent],
           g_map_groups[i].name,
+          g_map_groups[i].type_uri,
           zynadd_ptr->groups + i))
     {
       goto fail_clean_dynparams;
