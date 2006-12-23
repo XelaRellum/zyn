@@ -26,6 +26,9 @@
 #include "dynparam.h"
 #include "zynadd_internal.h"
 
+#define LOG_LEVEL LOG_LEVEL_ERROR
+#include "log.h"
+
 struct group_descriptor
 {
   int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
@@ -78,11 +81,10 @@ struct parameter_descriptor g_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
     void * context,                                       \
     BOOL value)                                           \
   {                                                       \
+    LOG_DEBUG("zynadd_" #ident "_changed() called.");     \
     zyn_addsynth_set_ ## ident(zynadd_ptr->synth, value); \
     return TRUE;                                          \
   }
-
-/* printf("zynadd_" #ident "_changed() called.\n"); */
 
 #define IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(ident)     \
   BOOL                                                    \
@@ -90,11 +92,10 @@ struct parameter_descriptor g_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
     void * context,                                       \
     float value)                                          \
   {                                                       \
+    LOG_DEBUG("zynadd_" #ident "_changed() called.");     \
     zyn_addsynth_set_ ## ident(zynadd_ptr->synth, value); \
     return TRUE;                                          \
   }
-
-/* printf("zynadd_" #ident "_changed() called.\n"); */
 
 BOOL
 zynadd_pan_random_changed(
@@ -247,11 +248,13 @@ void zynadd_map_initialise()
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
+    LOG_DEBUG("parameter %d with parent %d", i, g_map_groups[i].parent);
     assert(g_map_parameters[i].parent != LV2DYNPARAM_GROUP_INVALID);
   }
 
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
+    LOG_DEBUG("group %d with parent %d", i, g_map_groups[i].parent);
     assert(g_map_groups[i].parent != LV2DYNPARAM_GROUP_INVALID);
 
     assert(g_map_groups[i].name != NULL);
@@ -277,6 +280,8 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
 
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
+    LOG_DEBUG("Adding group \"%s\"", g_map_groups[i].name);
+
     if (!lv2dynparam_plugin_group_add(
           zynadd_ptr->dynparams,
           g_map_groups[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_groups[i].parent],
@@ -289,6 +294,8 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
+    LOG_DEBUG("Adding parameter \"%s\"", g_map_parameters[i].name);
+
     if (g_map_parameters[i].placeholder)
     {
       /* we handle these manually */
