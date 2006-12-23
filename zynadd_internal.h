@@ -43,17 +43,18 @@
 #define LV2DYNPARAM_GROUP_FILTER                            1
 #define LV2DYNPARAM_GROUP_FREQUENCY                         2
 
-#define LV2DYNPARAM_GROUP_AMPLITUDE_PUNCH                   3
-#define LV2DYNPARAM_GROUP_AMPLITUDE_ENVELOPE                4
-#define LV2DYNPARAM_GROUP_AMPLITUDE_LFO                     5
+#define LV2DYNPARAM_GROUP_AMPLITUDE_PANORAMA                3
+#define LV2DYNPARAM_GROUP_AMPLITUDE_PUNCH                   4
+#define LV2DYNPARAM_GROUP_AMPLITUDE_ENVELOPE                5
+#define LV2DYNPARAM_GROUP_AMPLITUDE_LFO                     6
 
-#define LV2DYNPARAM_GROUP_FILTER_ENVELOPE                   6
-#define LV2DYNPARAM_GROUP_FILTER_LFO                        7
+#define LV2DYNPARAM_GROUP_FILTER_ENVELOPE                   7
+#define LV2DYNPARAM_GROUP_FILTER_LFO                        8
 
-#define LV2DYNPARAM_GROUP_FREQUENCY_ENVELOPE                8
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO                     9
+#define LV2DYNPARAM_GROUP_FREQUENCY_ENVELOPE                9
+#define LV2DYNPARAM_GROUP_FREQUENCY_LFO                    10
 
-#define LV2DYNPARAM_GROUPS_COUNT                           10
+#define LV2DYNPARAM_GROUPS_COUNT                           11
 
 struct zynadd
 {
