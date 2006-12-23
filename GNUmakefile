@@ -32,7 +32,26 @@ GENDEP_CXX = set -e; $(GCC_PREFIX)g++ -MM $(CXXFLAGS) $< | sed $(GENDEP_SED_EXPR
 BUNDLE_FILES = manifest.ttl zynadd.ttl zynadd.so
 
 # These are the source files for the plugin
-PLUGIN_SOURCES_CXX = addnote_cpp.cpp addsynth.cpp
+PLUGIN_SOURCES_CXX = addsynth.cpp
+
+PLUGIN_SOURCES_CXX += cpp/ADnote.cpp
+PLUGIN_SOURCES_CXX += cpp/LFO.cpp
+PLUGIN_SOURCES_CXX += cpp/FilterParams.cpp
+PLUGIN_SOURCES_CXX += cpp/ADnoteParameters.cpp
+PLUGIN_SOURCES_CXX += cpp/EnvelopeParams.cpp
+PLUGIN_SOURCES_CXX += cpp/Filter.cpp
+PLUGIN_SOURCES_CXX += cpp/AnalogFilter.cpp
+PLUGIN_SOURCES_CXX += cpp/FormantFilter.cpp
+PLUGIN_SOURCES_CXX += cpp/Presets.cpp
+PLUGIN_SOURCES_CXX += cpp/Envelope.cpp
+PLUGIN_SOURCES_CXX += cpp/OscilGen.cpp
+PLUGIN_SOURCES_CXX += cpp/FFTwrapper.cpp
+PLUGIN_SOURCES_CXX += cpp/Distorsion.cpp
+PLUGIN_SOURCES_CXX += cpp/SVFilter.cpp
+PLUGIN_SOURCES_CXX += cpp/LFOParams.cpp
+PLUGIN_SOURCES_CXX += cpp/Resonance.cpp
+PLUGIN_SOURCES_CXX += cpp/Controller.cpp
+
 PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c dynparam.c dynparam_group.c dynparam_parameter.c zynadd_dynparam.c log.c
 PLUGIN_HEADERS = lv2plugin.hpp lv2.h lv2-miditype.h lv2-midifunctions.h zynadd.peg
 
@@ -60,7 +79,7 @@ zyn: addnote_cpp.o main.o util.o
 
 # Remove all generated files
 clean:
-	-rm -rf $(PLUGIN_NAME).lv2 zynadd.so zynadd_gtk *.dep *.o zyn zynadd.peg
+	-rm -rf $(PLUGIN_NAME).lv2 zynadd.so zynadd_gtk *.dep *.o zyn zynadd.peg cpp/*.dep cpp/*.o
 
 rebuild: clean zyn
 

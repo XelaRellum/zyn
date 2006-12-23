@@ -23,10 +23,10 @@
 #ifndef FORMANT_FILTER_H
 #define FORMANT_FILTER_H
 
-//#include "globals.h"
+#include "globals.h"
 #include "Filter_.h"
 #include "AnalogFilter.h"
-//#include "FilterParams.h"
+#include "FilterParams.h"
 
 
 class FormantFilter:public Filter_{

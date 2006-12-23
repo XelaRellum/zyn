@@ -23,7 +23,7 @@
 #ifndef DISTORSION_H
 #define DISTORSION_H
 
-//#include "globals.h"
+#include "globals.h"
 //#include "AnalogFilter.h"
 //#include "Effect.h"
 
