@@ -52,7 +52,7 @@ struct lv2dynparam_plugin_group
   struct lv2dynparam_plugin_group * group_ptr; /* parent group */
 
   unsigned int type;
-  char * name;
+  char name[LV2DYNPARAM_MAX_STRING_SIZE];
   struct list_head child_groups;
   struct list_head child_parameters;
 
@@ -68,7 +68,7 @@ struct lv2dynparam_plugin_parameter
   struct lv2dynparam_plugin_group * group_ptr; /* parent group */
 
   unsigned int type;
-  char * name;
+  char name[LV2DYNPARAM_MAX_STRING_SIZE];
   union
   {
     struct
@@ -148,17 +148,15 @@ lv2dynparam_plugin_group_notify(
   struct lv2dynparam_plugin_instance * instance_ptr,
   struct lv2dynparam_plugin_group * group_ptr);
 
-unsigned char
+void
 lv2dynparam_plugin_group_get_type_uri(
   lv2dynparam_group_handle group,
-  char * buffer,
-  size_t buffer_size);
+  char * buffer);
 
-unsigned char
+void
 lv2dynparam_plugin_group_get_name(
   lv2dynparam_group_handle group,
-  char * buffer,
-  size_t buffer_size);
+  char * buffer);
 
 void
 lv2dynparam_plugin_parameter_free(
@@ -169,17 +167,15 @@ lv2dynparam_plugin_param_notify(
   struct lv2dynparam_plugin_instance * instance_ptr,
   struct lv2dynparam_plugin_parameter * param_ptr);
 
-unsigned char
+void
 lv2dynparam_plugin_parameter_get_type_uri(
   lv2dynparam_parameter_handle parameter,
-  char * buffer,
-  size_t buffer_size);
+  char * buffer);
 
-unsigned char
+void
 lv2dynparam_plugin_parameter_get_name(
   lv2dynparam_parameter_handle parameter,
-  char * buffer,
-  size_t buffer_size);
+  char * buffer);
 
 void
 lv2dynparam_plugin_parameter_get_value(

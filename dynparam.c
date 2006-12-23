@@ -27,6 +27,8 @@
 #include "dynparam.h"
 #include "list.h"
 #include "dynparam_internal.h"
+#define LOG_LEVEL LOG_LEVEL_DEBUG
+#include "log.h"
 
 static struct lv2dynparam_plugin_callbacks g_lv2dynparam_plugin_callbacks =
 {
@@ -124,7 +126,8 @@ instance_found:
   instance_ptr->host_callbacks = host_callbacks;
   instance_ptr->host_context = instance_host_context;
 
-  if (instance_ptr->pending != 0) /* optimization */
+  //LOG_DEBUG("lv2dynparam_plugin_host_attach(): instance_ptr->pending is %u", instance_ptr->pending);
+  //if (instance_ptr->pending != 0) /* optimization */
   {
     lv2dynparam_plugin_group_notify(instance_ptr, &instance_ptr->root_group);
   }

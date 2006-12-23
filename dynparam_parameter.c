@@ -30,6 +30,9 @@
 #include "list.h"
 #include "dynparam_internal.h"
 
+//#define LOG_LEVEL LOG_LEVEL_DEBUG
+#include "log.h"
+
 void
 lv2dynparam_plugin_parameter_free(struct lv2dynparam_plugin_parameter * param_ptr)
 {
@@ -39,11 +42,10 @@ lv2dynparam_plugin_parameter_free(struct lv2dynparam_plugin_parameter * param_pt
 
 #define parameter_ptr ((struct lv2dynparam_plugin_parameter *)parameter)
 
-unsigned char
+void
 lv2dynparam_plugin_parameter_get_type_uri(
   lv2dynparam_parameter_handle parameter,
-  char * buffer,
-  size_t buffer_size)
+  char * buffer)
 {
   size_t s;
   const char * uri;
@@ -69,43 +71,29 @@ lv2dynparam_plugin_parameter_get_type_uri(
     uri = LV2DYNPARAM_PARAMETER_TYPE_BOOLEAN_URI;
     break;
   default:
-    return FALSE;
+    assert(0);
+    return;
   }
 
-  s = strlen(uri);
+  s = strlen(uri) + 1;
 
-  s++;
-
-  if (s > buffer_size)
-  {
-    return FALSE;
-  }
+  assert(s <= LV2DYNPARAM_MAX_STRING_SIZE);
 
   memcpy(buffer, uri, s);
-
-  return TRUE;
 }
 
-unsigned char
+void
 lv2dynparam_plugin_parameter_get_name(
   lv2dynparam_parameter_handle parameter,
-  char * buffer,
-  size_t buffer_size)
+  char * buffer)
 {
   size_t s;
 
-  s = strlen(parameter_ptr->name);
+  s = strlen(parameter_ptr->name) + 1;
 
-  s++;
-
-  if (s > buffer_size)
-  {
-    return FALSE;
-  }
+  assert(s <= LV2DYNPARAM_MAX_STRING_SIZE);
 
   memcpy(buffer, parameter_ptr->name, s);
-
-  return TRUE;
 }
 
 void
@@ -241,6 +229,16 @@ lv2dynparam_plugin_param_boolean_add(
   struct lv2dynparam_plugin_parameter * param_ptr;
   struct lv2dynparam_plugin_group * group_ptr;
   struct list_head * node_ptr;
+  size_t name_size;
+
+  LOG_DEBUG("lv2dynparam_plugin_param_boolean_add() called for \"%s\"", name);
+
+  name_size = strlen(name) + 1;
+  if (name_size >= LV2DYNPARAM_MAX_STRING_SIZE)
+  {
+    assert(0);
+    return FALSE;
+  }
 
   if (group == NULL)
   {
@@ -287,16 +285,12 @@ lv2dynparam_plugin_param_boolean_add(
   param_ptr = malloc(sizeof(struct lv2dynparam_plugin_parameter));
   if (param_ptr == NULL)
   {
-    goto fail;
+    return FALSE;
   }
 
   param_ptr->type = LV2DYNPARAM_PARAMETER_TYPE_BOOLEAN;
 
-  param_ptr->name = strdup(name);
-  if (param_ptr->name == NULL)
-  {
-    goto fail_free_param;
-  }
+  memcpy(param_ptr->name, name, name_size);
 
   param_ptr->group_ptr = group_ptr;
   param_ptr->data.boolean = value;
@@ -313,12 +307,6 @@ lv2dynparam_plugin_param_boolean_add(
   *param_handle_ptr = (lv2dynparam_parameter_handle)param_ptr;
 
   return TRUE;
-
-fail_free_param:
-  free(param_ptr);
-
-fail:
-  return FALSE;
 }
 
 BOOL
@@ -336,6 +324,16 @@ lv2dynparam_plugin_param_float_add(
   struct lv2dynparam_plugin_parameter * param_ptr;
   struct lv2dynparam_plugin_group * group_ptr;
   struct list_head * node_ptr;
+  size_t name_size;
+
+  LOG_DEBUG("lv2dynparam_plugin_param_float_add() called for \"%s\"", name);
+
+  name_size = strlen(name) + 1;
+  if (name_size >= LV2DYNPARAM_MAX_STRING_SIZE)
+  {
+    assert(0);
+    return FALSE;
+  }
 
   if (group == NULL)
   {
@@ -384,16 +382,12 @@ lv2dynparam_plugin_param_float_add(
   param_ptr = malloc(sizeof(struct lv2dynparam_plugin_parameter));
   if (param_ptr == NULL)
   {
-    goto fail;
+    return FALSE;
   }
 
   param_ptr->type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT;
 
-  param_ptr->name = strdup(name);
-  if (param_ptr->name == NULL)
-  {
-    goto fail_free_param;
-  }
+  memcpy(param_ptr->name, name, name_size);
 
   param_ptr->group_ptr = group_ptr;
   param_ptr->data.fpoint.value = value;
@@ -412,12 +406,6 @@ lv2dynparam_plugin_param_float_add(
   *param_handle_ptr = (lv2dynparam_parameter_handle)param_ptr;
 
   return TRUE;
-
-fail_free_param:
-  free(param_ptr);
-
-fail:
-  return FALSE;
 }
 
 BOOL
