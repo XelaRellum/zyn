@@ -25,6 +25,7 @@
 #include "addsynth.h"
 #include "dynparam.h"
 #include "zynadd_internal.h"
+#include "lv2dynparam.h"
 
 #define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
@@ -33,6 +34,7 @@ struct group_descriptor
 {
   int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
   const char * name;            /* group name */
+  const char * type_uri;        /* group type */
 };
 
 struct parameter_descriptor
@@ -159,9 +161,10 @@ IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(random_grouping)
 #define LV2DYNPARAM_GROUP(group) LV2DYNPARAM_GROUP_ ## group
 #define LV2DYNPARAM_PARAMETER(parameter) LV2DYNPARAM_PARAMETER_ ## parameter
 
-#define LV2DYNPARAM_GROUP_INIT(parent_group, group, name_value)         \
+#define LV2DYNPARAM_GROUP_INIT_GENERIC(parent_group, group, name_value) \
   g_map_groups[LV2DYNPARAM_GROUP(group)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;
+  g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;             \
+  g_map_groups[LV2DYNPARAM_GROUP(group)].type_uri = LV2DYNPARAM_GROUP_TYPE_GENERIC_URI
 
 #define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, parameter, name_value, ident, placeholder_value) \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
@@ -196,16 +199,20 @@ void zynadd_map_initialise()
     g_map_parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
   }
 
-  LV2DYNPARAM_GROUP_INIT(ROOT, AMPLITUDE, "Amplitude");
+  LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, AMPLITUDE, "Amplitude");
   {
     LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, STEREO, "Stereo", stereo, FALSE);
     LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, RANDOM_GROUPING, "Random Grouping", random_grouping, FALSE);
     LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, MASTER_VOLUME, "Master Volume", volume, 0, 100, FALSE);
     LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, VELOCITY_SENSING, "Velocity sensing", velocity_sensing, 0, 100, FALSE);
-    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, PAN_RANDOMIZE, "Pan randomize", pan_random, TRUE);
-    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, PANORAMA, "Panorama", panorama, -1, 1, TRUE);
 
-    LV2DYNPARAM_GROUP_INIT(AMPLITUDE, AMPLITUDE_PUNCH, "Punch");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_PANORAMA, "Panorama");
+    {
+      LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE_PANORAMA, PAN_RANDOMIZE, "Randomize", pan_random, TRUE);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PANORAMA, PANORAMA, "Panorama", panorama, -1, 1, TRUE);
+    }
+
+    LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_PUNCH, "Punch");
     {
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRENGTH, "Strength", punch_strength, 0, 100, FALSE);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_TIME, "Time", punch_time, 0, 100, FALSE);
@@ -213,33 +220,33 @@ void zynadd_map_initialise()
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_VELOCITY_SENSING, "Velocity sensing", punch_velocity_sensing, 0, 100, FALSE);
     }
 
-    LV2DYNPARAM_GROUP_INIT(AMPLITUDE, AMPLITUDE_ENVELOPE, "Envelope");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_ENVELOPE, "Envelope");
     {
     }
 
-    LV2DYNPARAM_GROUP_INIT(AMPLITUDE, AMPLITUDE_LFO, "LFO");
-    {
-    }
-  }
-
-  LV2DYNPARAM_GROUP_INIT(ROOT, FILTER, "Filter");
-  {
-    LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_ENVELOPE, "Envelope");
-    {
-    }
-
-    LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_LFO, "LFO");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_LFO, "LFO");
     {
     }
   }
 
-  LV2DYNPARAM_GROUP_INIT(ROOT, FREQUENCY, "Frequency");
+  LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, FILTER, "Filter");
   {
-    LV2DYNPARAM_GROUP_INIT(FREQUENCY, FREQUENCY_ENVELOPE, "Envelope");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(FILTER, FILTER_ENVELOPE, "Envelope");
     {
     }
 
-    LV2DYNPARAM_GROUP_INIT(FREQUENCY, FREQUENCY_LFO, "LFO");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(FILTER, FILTER_LFO, "LFO");
+    {
+    }
+  }
+
+  LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, FREQUENCY, "Frequency");
+  {
+    LV2DYNPARAM_GROUP_INIT_GENERIC(FREQUENCY, FREQUENCY_ENVELOPE, "Envelope");
+    {
+    }
+
+    LV2DYNPARAM_GROUP_INIT_GENERIC(FREQUENCY, FREQUENCY_LFO, "LFO");
     {
     }
   }
