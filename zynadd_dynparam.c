@@ -88,15 +88,15 @@ struct parameter_descriptor g_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
     return TRUE;                                          \
   }
 
-#define IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(ident)     \
-  BOOL                                                    \
-  zynadd_ ## ident ## _changed(                           \
-    void * context,                                       \
-    float value)                                          \
-  {                                                       \
-    LOG_DEBUG("zynadd_" #ident "_changed() called.");     \
-    zyn_addsynth_set_ ## ident(zynadd_ptr->synth, value); \
-    return TRUE;                                          \
+#define IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(ident)                   \
+  BOOL                                                                  \
+  zynadd_ ## ident ## _changed(                                         \
+    void * context,                                                     \
+    float value)                                                        \
+  {                                                                     \
+    LOG_DEBUG("zynadd_" #ident "_changed() called. Value is %f", value); \
+    zyn_addsynth_set_ ## ident(zynadd_ptr->synth, value);               \
+    return TRUE;                                                        \
   }
 
 BOOL
