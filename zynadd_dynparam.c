@@ -166,6 +166,11 @@ IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(random_grouping)
   g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;             \
   g_map_groups[LV2DYNPARAM_GROUP(group)].type_uri = LV2DYNPARAM_GROUP_TYPE_GENERIC_URI
 
+#define LV2DYNPARAM_GROUP_INIT_CUSTOM(parent_group, group, name_value, type) \
+  g_map_groups[LV2DYNPARAM_GROUP(group)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;             \
+  g_map_groups[LV2DYNPARAM_GROUP(group)].type_uri = type
+
 #define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, parameter, name_value, ident, placeholder_value) \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].name = name_value; \
@@ -206,7 +211,7 @@ void zynadd_map_initialise()
     LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, MASTER_VOLUME, "Master Volume", volume, 0, 100, FALSE);
     LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, VELOCITY_SENSING, "Velocity sensing", velocity_sensing, 0, 100, FALSE);
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_PANORAMA, "Panorama");
+    LV2DYNPARAM_GROUP_INIT_CUSTOM(AMPLITUDE, AMPLITUDE_PANORAMA, "Panorama", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
     {
       LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE_PANORAMA, PAN_RANDOMIZE, "Randomize", pan_random, TRUE);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PANORAMA, PANORAMA, "Panorama", panorama, -1, 1, TRUE);
