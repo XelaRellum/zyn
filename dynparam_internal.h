@@ -22,23 +22,15 @@
 #define DYNPARAM_INTERNAL_H__1A466106_9E02_4FA2_9D30_888795C93BC9__INCLUDED
 
 #define LV2DYNPARAM_GROUP_TYPE_GENERIC   0
-#define LV2DYNPARAM_GROUP_TYPE_GENERIC_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/group_generic"
 #define LV2DYNPARAM_GROUP_TYPE_ADSR      1
-#define LV2DYNPARAM_GROUP_TYPE_ADSR_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/group_adsr"
 
 #define LV2DYNPARAM_PARAMETER_TYPE_COMMAND   0
 #define LV2DYNPARAM_PARAMETER_TYPE_FLOAT     1
-#define LV2DYNPARAM_PARAMETER_TYPE_FLOAT_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/parameter_float"
 #define LV2DYNPARAM_PARAMETER_TYPE_INT       2
-#define LV2DYNPARAM_PARAMETER_TYPE_INT_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/parameter_int"
 #define LV2DYNPARAM_PARAMETER_TYPE_NOTE      3
-#define LV2DYNPARAM_PARAMETER_TYPE_NOTE_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/parameter_note"
 #define LV2DYNPARAM_PARAMETER_TYPE_STRING    4
-#define LV2DYNPARAM_PARAMETER_TYPE_STRING_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/parameter_string"
 #define LV2DYNPARAM_PARAMETER_TYPE_FILENAME  5
-#define LV2DYNPARAM_PARAMETER_TYPE_FILENAME_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/parameter_filename"
 #define LV2DYNPARAM_PARAMETER_TYPE_BOOLEAN   6
-#define LV2DYNPARAM_PARAMETER_TYPE_BOOLEAN_URI "http://nedko.arnaudov.name/soft/zyn/lv2dynparam/parameter_boolean"
 
 #define LV2DYNPARAM_PENDING_NOTHING    0 /* nothing pending */
 #define LV2DYNPARAM_PENDING_APPEAR     1 /* pending appear */
