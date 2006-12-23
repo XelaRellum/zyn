@@ -33,7 +33,7 @@ BUNDLE_FILES = manifest.ttl zynadd.ttl zynadd.so
 
 # These are the source files for the plugin
 PLUGIN_SOURCES_CXX = addnote_cpp.cpp addsynth.cpp
-PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c dynparam.c dynparam_group.c dynparam_parameter.c zyandd_dynparam.c
+PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c dynparam.c dynparam_group.c dynparam_parameter.c zyandd_dynparam.c log.c
 PLUGIN_HEADERS = lv2plugin.hpp lv2.h lv2-miditype.h lv2-midifunctions.h zynadd.peg
 
 # Derived variables - do not edit

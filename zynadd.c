@@ -34,6 +34,8 @@
 #include "dynparam.h"
 #include "lv2dynparam.h"
 #include "zynadd_internal.h"
+//#define LOG_LEVEL LOG_LEVEL_DEBUG
+#include "log.h"
 
 LV2_Handle
 zynadd_instantiate(
@@ -45,9 +47,9 @@ zynadd_instantiate(
   struct zynadd * zynadd_ptr;
   const LV2_Host_Feature * feature_ptr;
 
-/*   printf("zynadd_create_plugin_instance() called.\n"); */
-/*   printf("sample_rate = %u\n", (unsigned int)sample_rate); */
-/*   printf("bundle_path = \"%s\"\n", bundle_path); */
+  LOG_DEBUG("zynadd_create_plugin_instance() called.");
+  LOG_DEBUG("sample_rate = %u", (unsigned int)sample_rate);
+  LOG_DEBUG("bundle_path = \"%s\"", bundle_path);
 
 //  if (host_features != NULL && *host_features != NULL)
   {
