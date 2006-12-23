@@ -38,7 +38,7 @@ PLUGIN_HEADERS = lv2plugin.hpp lv2.h lv2-miditype.h lv2-midifunctions.h zynadd.p
 
 # Derived variables - do not edit
 PLUGIN_OBJECTS = $(subst .cpp,.o,$(PLUGIN_SOURCES_CXX)) $(subst .c,.o,$(PLUGIN_SOURCES_C))
-ALL_SOURCES_CXX = $(sort $(PLUGIN_SOURCES_CXX) main.cpp)
+ALL_SOURCES_CXX = $(sort $(PLUGIN_SOURCES_CXX))
 ALL_SOURCES_C = $(sort $(PLUGIN_SOURCES_C))
 ALL_HEADERS = $(sort $(PLUGIN_HEADERS))
 
