@@ -23,8 +23,6 @@
 #ifndef ENVELOPE_PARAMS_H
 #define ENVELOPE_PARAMS_H
 
-#include "Presets.h"
-
 #define MAX_ENVELOPE_POINTS 40
 #define MIN_ENVELOPE_DB -40
 
@@ -34,7 +32,7 @@
 #define ZYN_ENVELOPE_MODE_ADSR_FILTER  4 // ADSR_filter parameters (filter parameters)
 #define ZYN_ENVELOPE_MODE_ASR_BW       5 // ASR_bw parameters (bandwidth parameters)
 
-class EnvelopeParams: public Presets
+class EnvelopeParams
 {
 public:
   EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelease_);

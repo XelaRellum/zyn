@@ -25,7 +25,9 @@
 #include "globals.h"
 #include "EnvelopeParams.h"
 
-EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelease_):Presets()
+EnvelopeParams::EnvelopeParams(
+  unsigned char Penvstretch_,
+  unsigned char Pforcedrelease_)
 {
   int i;
     
@@ -70,8 +72,6 @@ REALTYPE EnvelopeParams::getdt(char i)
  */
 void EnvelopeParams::ADSRinit(char A_dt,char D_dt,char S_val,char R_dt)
 {
-  setpresettype("Penvamplitude");
-
   m_mode = ZYN_ENVELOPE_MODE_ADSR;
 
   PA_dt = A_dt;
@@ -88,8 +88,6 @@ void EnvelopeParams::ADSRinit(char A_dt,char D_dt,char S_val,char R_dt)
 
 void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt)
 {
-  setpresettype("Penvamplitude");
-
   m_mode = ZYN_ENVELOPE_MODE_ADSR_DB;
 
   PA_dt = A_dt;
@@ -106,8 +104,6 @@ void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt)
 
 void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt)
 {
-  setpresettype("Penvfrequency");
-
   m_mode = ZYN_ENVELOPE_MODE_ASR;
 
   PA_val = A_val;
@@ -124,8 +120,6 @@ void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt)
 
 void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,char R_dt,char R_val)
 {
-  setpresettype("Penvfilter");
-
   m_mode = ZYN_ENVELOPE_MODE_ADSR_FILTER;
 
   PA_val = A_val;
@@ -144,8 +138,6 @@ void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,c
 
 void EnvelopeParams::ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt)
 {
-  setpresettype("Penvbandwidth");
-
   m_mode = ZYN_ENVELOPE_MODE_ASR_BW;
 
   PA_val = A_val;
@@ -219,8 +211,8 @@ EnvelopeParams::converttofree()
     Penvdt[2] = PR_dt;
     Penvval[2] = PR_val;
     break;
-  };
-};
+  }
+}
 
 void EnvelopeParams::defaults()
 {
@@ -239,7 +231,7 @@ void EnvelopeParams::defaults()
   m_free_mode = FALSE;
 
   converttofree();
-};
+}
 
 void EnvelopeParams::store2defaults()
 {
@@ -253,4 +245,4 @@ void EnvelopeParams::store2defaults()
   DD_val=PD_val;
   DS_val=PS_val;
   DR_val=PR_val;
-};
+}
