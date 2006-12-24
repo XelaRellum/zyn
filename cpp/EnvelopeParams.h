@@ -49,6 +49,10 @@ public:
 
   REALTYPE getdt(char i);
 
+  friend class Envelope;
+private:
+  void store2defaults();
+
   /* MIDI parameters? */
   BOOL m_free_mode;             // free or ADSR/ASR mode
   unsigned char Penvpoints;
@@ -69,9 +73,6 @@ public:
 
   unsigned int m_mode;          // one of ZYN_ENVELOPE_MODE_XXX
 
-private:
-  void store2defaults();
-
   /* Default parameters */
   unsigned char Denvstretch;
   unsigned char Dforcedrelease;
@@ -86,4 +87,3 @@ private:
 };
 
 #endif
-
