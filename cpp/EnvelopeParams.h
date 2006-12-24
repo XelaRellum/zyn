@@ -23,17 +23,23 @@
 #ifndef ENVELOPE_PARAMS_H
 #define ENVELOPE_PARAMS_H
 
-#include "globals.h"
-//#include "../Misc/XMLwrapper.h"
 #include "Presets.h"
 
 #define MAX_ENVELOPE_POINTS 40
 #define MIN_ENVELOPE_DB -40
 
-class EnvelopeParams:public Presets{
+#define ZYN_ENVELOPE_MODE_ADSR         1 // ADSR parameters (linear amplitude)
+#define ZYN_ENVELOPE_MODE_ADSR_DB      2 // ADSR_dB parameters (dB amplitude)
+#define ZYN_ENVELOPE_MODE_ASR          3 // ASR parameters (frequency LFO)
+#define ZYN_ENVELOPE_MODE_ADSR_FILTER  4 // ADSR_filter parameters (filter parameters)
+#define ZYN_ENVELOPE_MODE_ASR_BW       5 // ASR_bw parameters (bandwidth parameters)
+
+class EnvelopeParams: public Presets
+{
 public:
   EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelease_);
   ~EnvelopeParams();
+
   void ADSRinit(char A_dt,char D_dt,char S_val,char R_dt);
   void ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt);
   void ASRinit(char A_val,char A_dt,char R_val,char R_dt);
@@ -41,32 +47,29 @@ public:
   void ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt);
   void converttofree();
 
-//  void add2XML(XMLwrapper *xml);
   void defaults();
-//  void getfromXML(XMLwrapper *xml);
 
   REALTYPE getdt(char i);
 
-  /* Parametrii MIDI */
-  unsigned char Pfreemode;//1 daca este in modul free sau 0 daca este in mod ADSR,ASR,...
+  /* MIDI parameters? */
+  BOOL m_free_mode;             // free or ADSR/ASR mode
   unsigned char Penvpoints;
-  unsigned char Penvsustain;//127 pentru dezactivat
+  unsigned char Penvsustain;    // 127 pentru dezactivat
   unsigned char Penvdt[MAX_ENVELOPE_POINTS];
   unsigned char Penvval[MAX_ENVELOPE_POINTS];
-  unsigned char Penvstretch;//64=normal stretch (piano-like), 0=no stretch
-  unsigned char Pforcedrelease;//0 - OFF, 1 - ON
-  unsigned char Plinearenvelope;//if the amplitude envelope is linear
-  
-  unsigned char PA_dt,PD_dt,PR_dt,
-    PA_val,PD_val,PS_val,PR_val;
+  unsigned char Penvstretch;    // 64 = normal stretch (piano-like), 0 = no stretch
+  unsigned char Pforcedrelease; // 0 - OFF, 1 - ON
+  unsigned char Plinearenvelope; //if the amplitude envelope is linear
 
+  unsigned char PA_dt;
+  unsigned char PD_dt;
+  unsigned char PR_dt;
+  unsigned char PA_val;
+  unsigned char PD_val;
+  unsigned char PS_val;
+  unsigned char PR_val;
 
-
-  int Envmode;// 1 for ADSR parameters (linear amplitude)
-  // 2 for ADSR_dB parameters (dB amplitude)
-  // 3 for ASR parameters (frequency LFO)
-  // 4 for ADSR_filter parameters (filter parameters)
-  // 5 for ASR_bw parameters (bandwidth parameters)
+  unsigned int m_mode;          // one of ZYN_ENVELOPE_MODE_XXX
 
 private:
   void store2defaults();
@@ -75,12 +78,14 @@ private:
   unsigned char Denvstretch;
   unsigned char Dforcedrelease;
   unsigned char Dlinearenvelope;
-  unsigned char DA_dt,DD_dt,DR_dt,
-    DA_val,DD_val,DS_val,DR_val;
-
-
+  unsigned char DA_dt;
+  unsigned char DD_dt;
+  unsigned char DR_dt;
+  unsigned char DA_val;
+  unsigned char DD_val;
+  unsigned char DS_val;
+  unsigned char DR_val;
 };
-
 
 #endif
 

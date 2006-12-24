@@ -20,146 +20,243 @@
 
 */
 
-#include <stdio.h>
 #include "Envelope.h"
 
-Envelope::Envelope(EnvelopeParams *envpars,REALTYPE basefreq){
-    int i;
-    envpoints=envpars->Penvpoints;
-    if (envpoints>MAX_ENVELOPE_POINTS) envpoints=MAX_ENVELOPE_POINTS;
-    envsustain=(envpars->Penvsustain==0)?-1:envpars->Penvsustain;
-    forcedrelase=envpars->Pforcedrelease;
-    envstretch=pow(440.0/basefreq,envpars->Penvstretch/64.0);
-    linearenvelope=envpars->Plinearenvelope;
+Envelope::Envelope(
+  EnvelopeParams * envpars,
+  float basefreq)
+{
+  int i;
+  float buffer_duration;
+  unsigned int mode;
 
-    if (envpars->Pfreemode==0) envpars->converttofree();
-	
-    REALTYPE bufferdt=SOUND_BUFFER_SIZE/(REALTYPE)SAMPLE_RATE;
+  envpoints = envpars->Penvpoints;
 
-    int mode=envpars->Envmode;
+  if (envpoints>MAX_ENVELOPE_POINTS)
+  {
+    envpoints = MAX_ENVELOPE_POINTS;
+  }
 
-    //for amplitude envelopes
-    if ((mode==1)&&(linearenvelope==0)) mode=2;//change to log envelope
-    if ((mode==2)&&(linearenvelope!=0)) mode=1;//change to linear
+  envsustain = (envpars->Penvsustain==0) ? -1 : envpars->Penvsustain;
+  forcedrelase = envpars->Pforcedrelease;
+  envstretch = pow(440.0/basefreq, envpars->Penvstretch/64.0);
+  linearenvelope = envpars->Plinearenvelope;
 
-    for (i=0;i<MAX_ENVELOPE_POINTS;i++) {
-        REALTYPE tmp=envpars->getdt(i)/1000.0*envstretch;
-	if (tmp>bufferdt) envdt[i]=bufferdt/tmp;
-	    else envdt[i]=2.0;//any value larger than 1
+  if (!envpars->m_free_mode)
+  {
+    envpars->converttofree();
+  }
 
-	switch (mode){
-	    case 2:envval[i]=(1.0-envpars->Penvval[i]/127.0)*MIN_ENVELOPE_DB;
-		   break;
-	    case 3:envval[i]=(pow(2,6.0*fabs(envpars->Penvval[i]-64.0)/64.0)-1.0)*100.0;
-		   if (envpars->Penvval[i]<64) envval[i]=-envval[i];
-		   break;
-	    case 4:envval[i]=(envpars->Penvval[i]-64.0)/64.0*6.0;//6 octaves (filtru)
-		   break;
-	    case 5:envval[i]=(envpars->Penvval[i]-64.0)/64.0*10;
-		   break;
-	    default:envval[i]=envpars->Penvval[i]/127.0;
-	};
-	
+  buffer_duration = SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
+
+  mode = envpars->m_mode;
+
+  // for amplitude envelopes
+  if (mode == ZYN_ENVELOPE_MODE_ADSR && linearenvelope == 0)
+  {
+    mode = ZYN_ENVELOPE_MODE_ADSR_DB; // change to log envelope
+  }
+
+  if (mode == ZYN_ENVELOPE_MODE_ADSR_DB && linearenvelope != 0)
+  {
+    mode = ZYN_ENVELOPE_MODE_ADSR; // change to linear
+  }
+
+  for (i = 0 ; i < MAX_ENVELOPE_POINTS ; i++)
+  {
+    float tmp = envpars->getdt(i) / 1000.0 * envstretch;
+    if (tmp > buffer_duration)
+    {
+      envdt[i] = buffer_duration / tmp;
+    }
+    else
+    {
+      envdt[i]=2.0;             //any value larger than 1
+    }
+
+    switch (mode)
+    {
+    case 2:
+      envval[i]=(1.0-envpars->Penvval[i]/127.0)*MIN_ENVELOPE_DB;
+      break;
+    case 3:
+      envval[i]=(pow(2,6.0*fabs(envpars->Penvval[i]-64.0)/64.0)-1.0)*100.0;
+      if (envpars->Penvval[i]<64) envval[i]=-envval[i];
+      break;
+    case 4:
+      envval[i]=(envpars->Penvval[i]-64.0)/64.0*6.0;//6 octaves (filtru)
+      break;
+    case 5:envval[i]=(envpars->Penvval[i]-64.0)/64.0*10;
+      break;
+    default:envval[i]=envpars->Penvval[i]/127.0;
     };
+  };
 
-    envdt[0]=1.0;
+  envdt[0] = 1.0;
 
-    currentpoint=1;//the envelope starts from 1
-    keyreleased=0;
-    t=0.0;
-    envfinish=0;
-    inct=envdt[1];
-    envoutval=0.0;
-};
+  currentpoint = 1; // the envelope starts from 1
+  keyreleased = 0;
+  t = 0.0;
+  envfinish = 0;
+  inct = envdt[1];
+  envoutval = 0.0;
+}
 
-Envelope::~Envelope(){
-};
-
+Envelope::~Envelope()
+{
+}
 
 /*
  * Relase the key (note envelope)
  */
-void Envelope::relasekey(){
-    if (keyreleased==1) return;
-    keyreleased=1;
-    if (forcedrelase!=0) t=0.0;
-};
+void
+Envelope::relasekey()
+{
+  if (keyreleased == 1)
+  {
+    return;
+  }
+
+  keyreleased=1;
+
+  if (forcedrelase != 0)
+  {
+    t = 0.0;
+  }
+}
 
 /*
  * Envelope Output
  */
-REALTYPE Envelope::envout(){
-    REALTYPE out;
+float
+Envelope::envout()
+{
+  float out;
 
-    if (envfinish!=0) {//if the envelope is finished
-	envoutval=envval[envpoints-1];
-	return(envoutval);
-    };
-    if ((currentpoint==envsustain+1)&&(keyreleased==0)) {//if it is sustaining now
-	envoutval=envval[envsustain];
-	return(envoutval);
-    };
+  if (envfinish != 0)             // if the envelope is finished
+  {
+    envoutval = envval[envpoints - 1];
+    return envoutval;
+  }
 
-    if ((keyreleased!=0) && (forcedrelase!=0)){//do the forced release	
-	
-        int tmp=(envsustain<0) ? (envpoints-1):(envsustain+1);//if there is no sustain point, use the last point for release
+  if ((currentpoint == envsustain + 1) && (keyreleased == 0)) // if it is sustaining now
+  {
+    envoutval = envval[envsustain];
+    return envoutval;
+  }
 
-	if (envdt[tmp]<0.00000001) out=envval[tmp];
-    	    else out=envoutval+(envval[tmp]-envoutval)*t;
-	t+=envdt[tmp]*envstretch;
+  if ((keyreleased != 0) && (forcedrelase != 0)) // do the forced release
+  {
+    int tmp = (envsustain < 0) ? (envpoints - 1) : (envsustain + 1); // if there is no sustain point, use the last point for release
 
-	if (t>=1.0) {
-               currentpoint=envsustain+2;
-	       forcedrelase=0;
-	       t=0.0;
-	       inct=envdt[currentpoint];
-	       if ((currentpoint>=envpoints)||(envsustain<0)) envfinish=1;
-	    };
-	return(out);
-    };
-    if (inct>=1.0) out=envval[currentpoint];
-	else out=envval[currentpoint-1]+(envval[currentpoint]-envval[currentpoint-1])*t;
+    if (envdt[tmp] < 0.00000001)
+    {
+      out = envval[tmp];
+    }
+    else
+    {
+      out = envoutval + (envval[tmp] - envoutval) * t;
+    }
 
-    t+=inct;
-    if (t>=1.0){
-	if (currentpoint>=envpoints-1) envfinish=1;
-	    else currentpoint++;
-	t=0.0;
-	inct=envdt[currentpoint];
-    };
+    t += envdt[tmp] * envstretch;
 
-    envoutval=out;    
-    return (out);
-};
+    if (t >= 1.0)
+    {
+      currentpoint = envsustain + 2;
+      forcedrelase = 0;
+      t = 0.0;
+      inct = envdt[currentpoint];
+      if (currentpoint >= envpoints || envsustain < 0)
+      {
+        envfinish = 1;
+      }
+    }
+
+    return out;
+  }
+
+  if (inct>=1.0)
+  {
+    out = envval[currentpoint];
+  }
+  else
+  {
+    out = envval[currentpoint - 1] + (envval[currentpoint] - envval[currentpoint - 1]) * t;
+  }
+
+  t += inct;
+
+  if (t >= 1.0)
+  {
+    if (currentpoint >= envpoints - 1)
+    {
+      envfinish = 1;
+    }
+    else
+    {
+      currentpoint++;
+    }
+
+    t = 0.0;
+
+    inct = envdt[currentpoint];
+  }
+
+  envoutval = out;
+
+  return out;
+}
 
 /*
  * Envelope Output (dB)
  */
-REALTYPE Envelope::envout_dB(){
-    REALTYPE out;
-    if (linearenvelope!=0) return (envout());
-    
-    if ((currentpoint==1)&&((keyreleased==0)||(forcedrelase==0))) {//first point is always lineary interpolated
-	REALTYPE v1=dB2rap(envval[0]);
-	REALTYPE v2=dB2rap(envval[1]);
-	out=v1+(v2-v1)*t;
-	
-	t+=inct; 
-	if (t>=1.0) {
-	    t=0.0;
-	    inct=envdt[2];
-	    currentpoint++;
-	    out=v2;
-	};
-	
-	if (out>0.001) envoutval=rap2dB(out);
-		else envoutval=-40.0;
-    } else out=dB2rap(envout());
+float
+Envelope::envout_dB()
+{
+  float out;
 
-    return(out);
-};
+  if (linearenvelope != 0)
+  {
+    return envout();
+  }
 
-int Envelope::finished(){
-    return(envfinish);
-};
+  // first point is always lineary interpolated
+  if (currentpoint == 1 &&
+      (keyreleased == 0 || forcedrelase == 0))
+  {
+    float v1 = dB2rap(envval[0]);
+    float v2 = dB2rap(envval[1]);
+    out = v1 + (v2 - v1) * t;
 
+    t += inct;
+
+    if (t >= 1.0)
+    {
+      t = 0.0;
+      inct = envdt[2];
+      currentpoint++;
+      out = v2;
+    }
+
+    if (out > 0.001)
+    {
+      envoutval=rap2dB(out);
+    }
+    else
+    {
+      envoutval=-40.0;
+    }
+  }
+  else
+  {
+    out = dB2rap(envout());
+  }
+
+  return out;
+}
+
+int
+Envelope::finished()
+{
+  return envfinish;
+}

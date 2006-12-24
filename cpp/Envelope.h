@@ -27,31 +27,35 @@
 #include "globals.h"
 #include "EnvelopeParams.h"
 
-class Envelope{
+class Envelope
+{
 public:
-  Envelope(EnvelopeParams *envpars,REALTYPE basefreq);
+  Envelope(EnvelopeParams * envpars, float basefreq);
   ~Envelope();
+
   void relasekey();
+
   REALTYPE envout();
   REALTYPE envout_dB();
-  int finished();//returns 1 if the envelope is finished
+
+  int finished();               //returns 1 if the envelope is finished
+
 private:
   int envpoints;
-  int envsustain;//"-1" means disabled
-  REALTYPE envdt[MAX_ENVELOPE_POINTS];//millisecons
-  REALTYPE envval[MAX_ENVELOPE_POINTS];// [0.0 .. 1.0]
-  REALTYPE envstretch; 
+  int envsustain;               // "-1" means disabled
+  float envdt[MAX_ENVELOPE_POINTS]; // millisecons
+  float envval[MAX_ENVELOPE_POINTS]; // [0.0 .. 1.0]
+  float envstretch; 
   int linearenvelope;
 
-  int currentpoint; //current envelope point (starts from 1)
+  int currentpoint;             // current envelope point (starts from 1)
   int forcedrelase;
-  char keyreleased; //if the key was released 
+  char keyreleased;             // if the key was released 
   char envfinish;    
-  REALTYPE t;   // the time from the last point
-  REALTYPE inct;// the time increment 
-  REALTYPE envoutval;//used to do the forced release
+  float t;                      // the time from the last point
+  float inct;                   // the time increment 
+  float envoutval;              // used to do the forced release
 };
-
 
 #endif
 
