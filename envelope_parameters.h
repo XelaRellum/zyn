@@ -35,7 +35,7 @@
 class EnvelopeParams
 {
 public:
-  EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelease_);
+  EnvelopeParams(unsigned char Penvstretch_, BOOL forced_release);
   ~EnvelopeParams();
 
   void ADSRinit(char A_dt,char D_dt,char S_val,char R_dt);
@@ -54,12 +54,16 @@ private:
   void store2defaults();
 
   BOOL m_free_mode;             // free or ADSR/ASR mode
+
   unsigned char Penvpoints;
   unsigned char Penvsustain;    // 127 pentru dezactivat
   unsigned char Penvdt[MAX_ENVELOPE_POINTS];
   unsigned char Penvval[MAX_ENVELOPE_POINTS];
+
   unsigned char Penvstretch;    // 64 = normal stretch (piano-like), 0 = no stretch
-  unsigned char Pforcedrelease; // 0 - OFF, 1 - ON
+
+  BOOL m_forced_release;
+
   unsigned char Plinearenvelope; //if the amplitude envelope is linear
 
   unsigned char m_attack_duration;
@@ -74,12 +78,17 @@ private:
   unsigned int m_mode;          // one of ZYN_ENVELOPE_MODE_XXX
 
   /* Default parameters */
+
   unsigned char Denvstretch;
-  unsigned char Dforcedrelease;
+
+  BOOL m_forced_release_default;
+
   unsigned char Dlinearenvelope;
+
   unsigned char m_attack_duration_default;
   unsigned char m_decay_duration_default;
   unsigned char m_release_duration_default;
+
   unsigned char m_attack_value_default;
   unsigned char m_decay_value_default;
   unsigned char m_sustain_value_default;

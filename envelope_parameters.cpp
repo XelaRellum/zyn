@@ -27,7 +27,7 @@
 
 EnvelopeParams::EnvelopeParams(
   unsigned char Penvstretch_,
-  unsigned char Pforcedrelease_)
+  BOOL forced_release)
 {
   int i;
     
@@ -50,7 +50,7 @@ EnvelopeParams::EnvelopeParams(
   Penvpoints = 1;
   m_mode = ZYN_ENVELOPE_MODE_ADSR;
   Penvstretch = Penvstretch_;
-  Pforcedrelease = Pforcedrelease_;        
+  m_forced_release = forced_release;        
   m_free_mode = TRUE;
   Plinearenvelope = 0;
     
@@ -217,7 +217,7 @@ EnvelopeParams::converttofree()
 void EnvelopeParams::defaults()
 {
   Penvstretch = Denvstretch;
-  Pforcedrelease = Dforcedrelease;
+  m_forced_release = m_forced_release_default;
   Plinearenvelope = Dlinearenvelope;
 
   m_attack_duration = m_attack_duration_default;
@@ -237,7 +237,7 @@ void EnvelopeParams::defaults()
 void EnvelopeParams::store2defaults()
 {
   Denvstretch = Penvstretch;
-  Dforcedrelease = Pforcedrelease;
+  m_forced_release_default = m_forced_release;
   Dlinearenvelope = Plinearenvelope;
 
   m_attack_duration_default = m_attack_duration;

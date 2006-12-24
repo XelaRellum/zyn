@@ -42,7 +42,7 @@ Envelope::Envelope(
   }
 
   envsustain = (parameters_ptr->Penvsustain == 0) ? -1 : parameters_ptr->Penvsustain;
-  forcedrelase = parameters_ptr->Pforcedrelease;
+  m_forced_release = parameters_ptr->m_forced_release;
   envstretch = pow(440.0 / basefreq, parameters_ptr->Penvstretch / 64.0);
   linearenvelope = parameters_ptr->Plinearenvelope;
 
@@ -104,7 +104,7 @@ Envelope::Envelope(
   envdt[0] = 1.0;
 
   currentpoint = 1; // the envelope starts from 1
-  keyreleased = 0;
+  m_key_released = FALSE;
   t = 0.0;
   m_finished = FALSE;
   inct = envdt[1];
@@ -121,14 +121,14 @@ Envelope::~Envelope()
 void
 Envelope::relasekey()
 {
-  if (keyreleased == 1)
+  if (m_key_released)
   {
     return;
   }
 
-  keyreleased=1;
+  m_key_released = TRUE;
 
-  if (forcedrelase != 0)
+  if (m_forced_release)
   {
     t = 0.0;
   }
@@ -148,13 +148,13 @@ Envelope::envout()
     return envoutval;
   }
 
-  if ((currentpoint == envsustain + 1) && (keyreleased == 0)) // if it is sustaining now
+  if ((currentpoint == envsustain + 1) && !m_key_released) // if it is sustaining now
   {
     envoutval = envval[envsustain];
     return envoutval;
   }
 
-  if ((keyreleased != 0) && (forcedrelase != 0)) // do the forced release
+  if (m_key_released && m_forced_release) // do the forced release
   {
     int tmp = (envsustain < 0) ? (envpoints - 1) : (envsustain + 1); // if there is no sustain point, use the last point for release
 
@@ -172,7 +172,7 @@ Envelope::envout()
     if (t >= 1.0)
     {
       currentpoint = envsustain + 2;
-      forcedrelase = 0;
+      m_forced_release = FALSE;
       t = 0.0;
       inct = envdt[currentpoint];
       if (currentpoint >= envpoints || envsustain < 0)
@@ -231,7 +231,7 @@ Envelope::envout_dB()
 
   // first point is always lineary interpolated
   if (currentpoint == 1 &&
-      (keyreleased == 0 || forcedrelase == 0))
+      (!m_key_released || !m_forced_release))
   {
     float v1 = dB2rap(envval[0]);
     float v2 = dB2rap(envval[1]);

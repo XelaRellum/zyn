@@ -45,8 +45,8 @@ private:
   int linearenvelope;
 
   int currentpoint;             // current envelope point (starts from 1)
-  int forcedrelase;
-  char keyreleased;             // if the key was released
+  BOOL m_forced_release;
+  BOOL m_key_released;          // whether the key was released or not
   BOOL m_finished;              // whether envelope has finished or not
   float t;                      // the time from the last point
   float inct;                   // the time increment
