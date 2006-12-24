@@ -53,7 +53,6 @@ public:
 private:
   void store2defaults();
 
-  /* MIDI parameters? */
   BOOL m_free_mode;             // free or ADSR/ASR mode
   unsigned char Penvpoints;
   unsigned char Penvsustain;    // 127 pentru dezactivat
@@ -63,13 +62,14 @@ private:
   unsigned char Pforcedrelease; // 0 - OFF, 1 - ON
   unsigned char Plinearenvelope; //if the amplitude envelope is linear
 
-  unsigned char PA_dt;
-  unsigned char PD_dt;
-  unsigned char PR_dt;
-  unsigned char PA_val;
-  unsigned char PD_val;
-  unsigned char PS_val;
-  unsigned char PR_val;
+  unsigned char m_attack_duration;
+  unsigned char m_decay_duration;
+  unsigned char m_release_duration;
+
+  unsigned char m_attack_value;
+  unsigned char m_decay_value;
+  unsigned char m_sustain_value;
+  unsigned char m_release_value;
 
   unsigned int m_mode;          // one of ZYN_ENVELOPE_MODE_XXX
 
@@ -77,13 +77,13 @@ private:
   unsigned char Denvstretch;
   unsigned char Dforcedrelease;
   unsigned char Dlinearenvelope;
-  unsigned char DA_dt;
-  unsigned char DD_dt;
-  unsigned char DR_dt;
-  unsigned char DA_val;
-  unsigned char DD_val;
-  unsigned char DS_val;
-  unsigned char DR_val;
+  unsigned char m_attack_duration_default;
+  unsigned char m_decay_duration_default;
+  unsigned char m_release_duration_default;
+  unsigned char m_attack_value_default;
+  unsigned char m_decay_value_default;
+  unsigned char m_sustain_value_default;
+  unsigned char m_release_value_default;
 };
 
 #endif

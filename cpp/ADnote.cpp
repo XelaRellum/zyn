@@ -916,14 +916,20 @@ inline void ADnote::ComputeVoiceNoise(int nvoice){
 
 /*
  * Compute the ADnote samples
- * Returns 0 if the note is finished
  */
-int ADnote::noteout(REALTYPE * outl,REALTYPE *outr){
+void
+ADnote::noteout(
+  REALTYPE * outl,
+  REALTYPE * outr)
+{
   int i,nvoice;
 
   silence_two_buffers(outl, outr, SOUND_BUFFER_SIZE);
 
-  if (!m_note_enabled) return(0);
+  if (!m_note_enabled)
+  {
+    return;
+  }
 
   silence_two_buffers(m_bypassl, m_bypassr, SOUND_BUFFER_SIZE);
 
@@ -972,11 +978,17 @@ int ADnote::noteout(REALTYPE * outl,REALTYPE *outr){
     if (NoteVoicePar[nvoice].VoiceFilter!=NULL) NoteVoicePar[nvoice].VoiceFilter->filterout(&m_tmpwave[0]);
 
     //check if the amplitude envelope is finished, if yes, the voice will be fadeout
-    if (NoteVoicePar[nvoice].AmpEnvelope!=NULL) {
-      if (NoteVoicePar[nvoice].AmpEnvelope->finished()!=0)
-        for (i=0;i<SOUND_BUFFER_SIZE;i++)
-          m_tmpwave[i]*=1.0-(REALTYPE)i/(REALTYPE)SOUND_BUFFER_SIZE;
-      //the voice is killed later
+    if (NoteVoicePar[nvoice].AmpEnvelope != NULL)
+    {
+      if (NoteVoicePar[nvoice].AmpEnvelope->finished())
+      {
+        for (i=0 ; i < SOUND_BUFFER_SIZE ; i++)
+        {
+          m_tmpwave[i] *= 1.0 - (REALTYPE)i / (REALTYPE)SOUND_BUFFER_SIZE;
+        }
+      }
+
+      // the voice is killed later
     }
 
 
@@ -1024,9 +1036,13 @@ int ADnote::noteout(REALTYPE * outl,REALTYPE *outr){
         for (i=0;i<SOUND_BUFFER_SIZE;i++) m_bypassl[i]+=m_tmpwave[i]*NoteVoicePar[nvoice].Volume;
       }
     }
-    // chech if there is necesary to proces the voice longer (if the Amplitude envelope isn't finished)
-    if (NoteVoicePar[nvoice].AmpEnvelope!=NULL) {
-      if (NoteVoicePar[nvoice].AmpEnvelope->finished()!=0) KillVoice(nvoice);
+    // check if there is necesary to proces the voice longer (if the Amplitude envelope isn't finished)
+    if (NoteVoicePar[nvoice].AmpEnvelope != NULL)
+    {
+      if (NoteVoicePar[nvoice].AmpEnvelope->finished())
+      {
+        KillVoice(nvoice);
+      }
     }
   }
 
@@ -1092,15 +1108,20 @@ int ADnote::noteout(REALTYPE * outl,REALTYPE *outr){
 
   // Check if the global amplitude is finished.
   // If it does, disable the note
-  if (m_note_global_parameters.AmpEnvelope->finished()!=0) {
-    for (i=0;i<SOUND_BUFFER_SIZE;i++) {//fade-out
-      REALTYPE tmp=1.0-(REALTYPE)i/(REALTYPE)SOUND_BUFFER_SIZE;
-      outl[i]*=tmp;
-      outr[i]*=tmp;
+  if (m_note_global_parameters.AmpEnvelope->finished())
+  {
+    for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
+    {
+      // fade-out
+
+      REALTYPE tmp = 1.0 - (REALTYPE)i / (REALTYPE)SOUND_BUFFER_SIZE;
+
+      outl[i] *= tmp;
+      outr[i] *= tmp;
     }
+
     KillNote();
   }
-  return(1);
 }
 
 /*
@@ -1110,15 +1131,39 @@ void ADnote::relasekey()
 {
   int nvoice;
 
-  for (nvoice=0;nvoice<NUM_VOICES;nvoice++)
+  for (nvoice = 0 ; nvoice < NUM_VOICES ; nvoice++)
   {
-    if (!NoteVoicePar[nvoice].enabled) continue;
-    if (NoteVoicePar[nvoice].AmpEnvelope!=NULL) NoteVoicePar[nvoice].AmpEnvelope->relasekey();
-    if (NoteVoicePar[nvoice].FreqEnvelope!=NULL) NoteVoicePar[nvoice].FreqEnvelope->relasekey();
-    if (NoteVoicePar[nvoice].FilterEnvelope!=NULL) NoteVoicePar[nvoice].FilterEnvelope->relasekey();
-    if (NoteVoicePar[nvoice].FMFreqEnvelope!=NULL) NoteVoicePar[nvoice].FMFreqEnvelope->relasekey();
-    if (NoteVoicePar[nvoice].FMAmpEnvelope!=NULL) NoteVoicePar[nvoice].FMAmpEnvelope->relasekey();
+    if (!NoteVoicePar[nvoice].enabled)
+    {
+      continue;
+    }
+
+    if (NoteVoicePar[nvoice].AmpEnvelope != NULL)
+    {
+      NoteVoicePar[nvoice].AmpEnvelope->relasekey();
+    }
+
+    if (NoteVoicePar[nvoice].FreqEnvelope != NULL)
+    {
+      NoteVoicePar[nvoice].FreqEnvelope->relasekey();
+    }
+
+    if (NoteVoicePar[nvoice].FilterEnvelope != NULL)
+    {
+      NoteVoicePar[nvoice].FilterEnvelope->relasekey();
+    }
+
+    if (NoteVoicePar[nvoice].FMFreqEnvelope != NULL)
+    {
+      NoteVoicePar[nvoice].FMFreqEnvelope->relasekey();
+    }
+
+    if (NoteVoicePar[nvoice].FMAmpEnvelope != NULL)
+    {
+      NoteVoicePar[nvoice].FMAmpEnvelope->relasekey();
+    }
   }
+
   m_note_global_parameters.FreqEnvelope->relasekey();
   m_note_global_parameters.FilterEnvelope->relasekey();
   m_note_global_parameters.AmpEnvelope->relasekey();

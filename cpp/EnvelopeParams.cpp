@@ -31,13 +31,13 @@ EnvelopeParams::EnvelopeParams(
 {
   int i;
     
-  PA_dt = 10;
-  PD_dt = 10;
-  PR_dt = 10;
-  PA_val = 64;
-  PD_val = 64;
-  PS_val = 64;
-  PR_val = 64;
+  m_attack_duration = 10;
+  m_decay_duration = 10;
+  m_release_duration = 10;
+  m_attack_value = 64;
+  m_decay_value = 64;
+  m_sustain_value = 64;
+  m_release_value = 64;
     
   for (i = 0 ; i < MAX_ENVELOPE_POINTS ; i++)
   {
@@ -74,10 +74,10 @@ void EnvelopeParams::ADSRinit(char A_dt,char D_dt,char S_val,char R_dt)
 {
   m_mode = ZYN_ENVELOPE_MODE_ADSR;
 
-  PA_dt = A_dt;
-  PD_dt = D_dt;
-  PS_val = S_val;
-  PR_dt = R_dt;
+  m_attack_duration = A_dt;
+  m_decay_duration = D_dt;
+  m_sustain_value = S_val;
+  m_release_duration = R_dt;
 
   m_free_mode = FALSE;
 
@@ -90,10 +90,10 @@ void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt)
 {
   m_mode = ZYN_ENVELOPE_MODE_ADSR_DB;
 
-  PA_dt = A_dt;
-  PD_dt = D_dt;
-  PS_val = S_val;
-  PR_dt = R_dt;
+  m_attack_duration = A_dt;
+  m_decay_duration = D_dt;
+  m_sustain_value = S_val;
+  m_release_duration = R_dt;
 
   m_free_mode = FALSE;
 
@@ -106,10 +106,10 @@ void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt)
 {
   m_mode = ZYN_ENVELOPE_MODE_ASR;
 
-  PA_val = A_val;
-  PA_dt = A_dt;
-  PR_val = R_val;
-  PR_dt = R_dt;
+  m_attack_value = A_val;
+  m_attack_duration = A_dt;
+  m_release_value = R_val;
+  m_release_duration = R_dt;
 
   m_free_mode = FALSE;
 
@@ -122,12 +122,12 @@ void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,c
 {
   m_mode = ZYN_ENVELOPE_MODE_ADSR_FILTER;
 
-  PA_val = A_val;
-  PA_dt = A_dt;
-  PD_val = D_val;
-  PD_dt = D_dt;
-  PR_dt = R_dt;
-  PR_val = R_val;
+  m_attack_value = A_val;
+  m_attack_duration = A_dt;
+  m_decay_value = D_val;
+  m_decay_duration = D_dt;
+  m_release_duration = R_dt;
+  m_release_value = R_val;
 
   m_free_mode = FALSE;
 
@@ -140,10 +140,10 @@ void EnvelopeParams::ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt)
 {
   m_mode = ZYN_ENVELOPE_MODE_ASR_BW;
 
-  PA_val = A_val;
-  PA_dt = A_dt;
-  PR_val = R_val;
-  PR_dt = R_dt;
+  m_attack_value = A_val;
+  m_attack_duration = A_dt;
+  m_release_value = R_val;
+  m_release_duration = R_dt;
 
   m_free_mode = FALSE;
 
@@ -164,52 +164,52 @@ EnvelopeParams::converttofree()
     Penvpoints = 4;
     Penvsustain = 2;
     Penvval[0] = 0;
-    Penvdt[1] = PA_dt;
+    Penvdt[1] = m_attack_duration;
     Penvval[1] = 127;
-    Penvdt[2] = PD_dt;
-    Penvval[2] = PS_val;
-    Penvdt[3] = PR_dt;
+    Penvdt[2] = m_decay_duration;
+    Penvval[2] = m_sustain_value;
+    Penvdt[3] = m_release_duration;
     Penvval[3] = 0;    
     break;
   case ZYN_ENVELOPE_MODE_ADSR_DB:
     Penvpoints = 4;
     Penvsustain = 2;
     Penvval[0] = 0;
-    Penvdt[1] = PA_dt;
+    Penvdt[1] = m_attack_duration;
     Penvval[1] = 127;
-    Penvdt[2] = PD_dt;
-    Penvval[2] = PS_val;
-    Penvdt[3] = PR_dt;
+    Penvdt[2] = m_decay_duration;
+    Penvval[2] = m_sustain_value;
+    Penvdt[3] = m_release_duration;
     Penvval[3] = 0;    
     break;  
   case ZYN_ENVELOPE_MODE_ASR:
     Penvpoints = 3;
     Penvsustain = 1;
-    Penvval[0] = PA_val;
-    Penvdt[1] = PA_dt;
+    Penvval[0] = m_attack_value;
+    Penvdt[1] = m_attack_duration;
     Penvval[1] = 64;
-    Penvdt[2] = PR_dt;
-    Penvval[2] = PR_val;
+    Penvdt[2] = m_release_duration;
+    Penvval[2] = m_release_value;
     break;
   case ZYN_ENVELOPE_MODE_ADSR_FILTER:
     Penvpoints = 4;
     Penvsustain = 2;
-    Penvval[0] = PA_val;
-    Penvdt[1] = PA_dt;
-    Penvval[1] = PD_val;
-    Penvdt[2] = PD_dt;
+    Penvval[0] = m_attack_value;
+    Penvdt[1] = m_attack_duration;
+    Penvval[1] = m_decay_value;
+    Penvdt[2] = m_decay_duration;
     Penvval[2] = 64;
-    Penvdt[3] = PR_dt;
-    Penvval[3] = PR_val;
+    Penvdt[3] = m_release_duration;
+    Penvval[3] = m_release_value;
     break;
   case ZYN_ENVELOPE_MODE_ASR_BW:
     Penvpoints = 3;
     Penvsustain = 1;
-    Penvval[0] = PA_val;
-    Penvdt[1] = PA_dt;
+    Penvval[0] = m_attack_value;
+    Penvdt[1] = m_attack_duration;
     Penvval[1] = 64;
-    Penvdt[2] = PR_dt;
-    Penvval[2] = PR_val;
+    Penvdt[2] = m_release_duration;
+    Penvval[2] = m_release_value;
     break;
   }
 }
@@ -220,13 +220,14 @@ void EnvelopeParams::defaults()
   Pforcedrelease = Dforcedrelease;
   Plinearenvelope = Dlinearenvelope;
 
-  PA_dt = DA_dt;
-  PD_dt = DD_dt;
-  PR_dt = DR_dt;
-  PA_val = DA_val;
-  PD_val = DD_val;
-  PS_val = DS_val;
-  PR_val = DR_val;
+  m_attack_duration = m_attack_duration_default;
+  m_decay_duration = m_decay_duration_default;
+  m_release_duration = m_release_duration_default;
+
+  m_attack_value = m_attack_value_default;
+  m_decay_value = m_decay_value_default;
+  m_sustain_value = m_sustain_value_default;
+  m_release_value = m_release_value_default;
 
   m_free_mode = FALSE;
 
@@ -235,14 +236,16 @@ void EnvelopeParams::defaults()
 
 void EnvelopeParams::store2defaults()
 {
-  Denvstretch=Penvstretch;
-  Dforcedrelease=Pforcedrelease;
-  Dlinearenvelope=Plinearenvelope;
-  DA_dt=PA_dt;
-  DD_dt=PD_dt;
-  DR_dt=PR_dt;
-  DA_val=PA_val;
-  DD_val=PD_val;
-  DS_val=PS_val;
-  DR_val=PR_val;
+  Denvstretch = Penvstretch;
+  Dforcedrelease = Pforcedrelease;
+  Dlinearenvelope = Plinearenvelope;
+
+  m_attack_duration_default = m_attack_duration;
+  m_decay_duration_default = m_decay_duration;
+  m_release_duration_default = m_release_duration;
+
+  m_attack_value_default = m_attack_value;
+  m_decay_value_default = m_decay_value;
+  m_sustain_value_default = m_sustain_value;
+  m_release_value_default = m_release_value;
 }

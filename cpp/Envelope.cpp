@@ -23,33 +23,33 @@
 #include "Envelope.h"
 
 Envelope::Envelope(
-  EnvelopeParams * envpars,
+  EnvelopeParams * parameters_ptr,
   float basefreq)
 {
   int i;
   float buffer_duration;
   unsigned int mode;
 
-  envpoints = envpars->Penvpoints;
+  envpoints = parameters_ptr->Penvpoints;
 
-  if (envpoints>MAX_ENVELOPE_POINTS)
+  if (envpoints > MAX_ENVELOPE_POINTS)
   {
     envpoints = MAX_ENVELOPE_POINTS;
   }
 
-  envsustain = (envpars->Penvsustain==0) ? -1 : envpars->Penvsustain;
-  forcedrelase = envpars->Pforcedrelease;
-  envstretch = pow(440.0/basefreq, envpars->Penvstretch/64.0);
-  linearenvelope = envpars->Plinearenvelope;
+  envsustain = (parameters_ptr->Penvsustain == 0) ? -1 : parameters_ptr->Penvsustain;
+  forcedrelase = parameters_ptr->Pforcedrelease;
+  envstretch = pow(440.0 / basefreq, parameters_ptr->Penvstretch / 64.0);
+  linearenvelope = parameters_ptr->Plinearenvelope;
 
-  if (!envpars->m_free_mode)
+  if (!parameters_ptr->m_free_mode)
   {
-    envpars->converttofree();
+    parameters_ptr->converttofree();
   }
 
   buffer_duration = SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
 
-  mode = envpars->m_mode;
+  mode = parameters_ptr->m_mode;
 
   // for amplitude envelopes
   if (mode == ZYN_ENVELOPE_MODE_ADSR && linearenvelope == 0)
@@ -64,40 +64,45 @@ Envelope::Envelope(
 
   for (i = 0 ; i < MAX_ENVELOPE_POINTS ; i++)
   {
-    float tmp = envpars->getdt(i) / 1000.0 * envstretch;
+    float tmp = parameters_ptr->getdt(i) / 1000.0 * envstretch;
     if (tmp > buffer_duration)
     {
       envdt[i] = buffer_duration / tmp;
     }
     else
     {
-      envdt[i]=2.0;             //any value larger than 1
+      envdt[i] = 2.0;             // any value larger than 1
     }
 
     switch (mode)
     {
-    case 2:
-      envval[i]=(1.0-envpars->Penvval[i]/127.0)*MIN_ENVELOPE_DB;
+    case ZYN_ENVELOPE_MODE_ADSR_DB:
+      envval[i] = (1.0 - parameters_ptr->Penvval[i] / 127.0) * MIN_ENVELOPE_DB;
       break;
-    case 3:
-      envval[i]=(pow(2,6.0*fabs(envpars->Penvval[i]-64.0)/64.0)-1.0)*100.0;
-      if (envpars->Penvval[i]<64) envval[i]=-envval[i];
+    case ZYN_ENVELOPE_MODE_ASR:
+      envval[i] = (pow(2,6.0 * fabs(parameters_ptr->Penvval[i] - 64.0) / 64.0) - 1.0) * 100.0;
+      if (parameters_ptr->Penvval[i] < 64)
+      {
+        envval[i] = -envval[i];
+      }
       break;
-    case 4:
-      envval[i]=(envpars->Penvval[i]-64.0)/64.0*6.0;//6 octaves (filtru)
+    case ZYN_ENVELOPE_MODE_ADSR_FILTER:
+      envval[i] = (parameters_ptr->Penvval[i] - 64.0) / 64.0 * 6.0; // 6 octaves (filtru)
       break;
-    case 5:envval[i]=(envpars->Penvval[i]-64.0)/64.0*10;
+    case ZYN_ENVELOPE_MODE_ASR_BW:
+      envval[i] = (parameters_ptr->Penvval[i] - 64.0) / 64.0 * 10;
       break;
-    default:envval[i]=envpars->Penvval[i]/127.0;
-    };
-  };
+    default:
+      envval[i] = parameters_ptr->Penvval[i] / 127.0;
+    }
+  }
 
   envdt[0] = 1.0;
 
   currentpoint = 1; // the envelope starts from 1
   keyreleased = 0;
   t = 0.0;
-  envfinish = 0;
+  m_finished = FALSE;
   inct = envdt[1];
   envoutval = 0.0;
 }
@@ -133,7 +138,7 @@ Envelope::envout()
 {
   float out;
 
-  if (envfinish != 0)             // if the envelope is finished
+  if (m_finished)               // if the envelope is finished
   {
     envoutval = envval[envpoints - 1];
     return envoutval;
@@ -168,7 +173,7 @@ Envelope::envout()
       inct = envdt[currentpoint];
       if (currentpoint >= envpoints || envsustain < 0)
       {
-        envfinish = 1;
+        m_finished = TRUE;
       }
     }
 
@@ -190,7 +195,7 @@ Envelope::envout()
   {
     if (currentpoint >= envpoints - 1)
     {
-      envfinish = 1;
+      m_finished = TRUE;
     }
     else
     {
@@ -255,8 +260,8 @@ Envelope::envout_dB()
   return out;
 }
 
-int
+BOOL
 Envelope::finished()
 {
-  return envfinish;
+  return m_finished;
 }

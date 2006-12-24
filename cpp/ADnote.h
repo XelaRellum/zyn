@@ -56,9 +56,9 @@ public:
     BOOL portamento,
     int midinote);
 
-  int noteout(REALTYPE *outl,REALTYPE *outr); 
+  void noteout(REALTYPE *outl,REALTYPE *outr); 
   void relasekey();
-  int finished();
+  BOOL finished();
 
 private:
   void setfreq(int nvoice,REALTYPE freq);
