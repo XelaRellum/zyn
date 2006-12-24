@@ -45,7 +45,6 @@ PLUGIN_SOURCES_CXX += cpp/FormantFilter.cpp
 PLUGIN_SOURCES_CXX += cpp/Envelope.cpp
 PLUGIN_SOURCES_CXX += cpp/OscilGen.cpp
 PLUGIN_SOURCES_CXX += cpp/FFTwrapper.cpp
-PLUGIN_SOURCES_CXX += cpp/Distorsion.cpp
 PLUGIN_SOURCES_CXX += cpp/SVFilter.cpp
 PLUGIN_SOURCES_CXX += cpp/LFOParams.cpp
 PLUGIN_SOURCES_CXX += cpp/Resonance.cpp
