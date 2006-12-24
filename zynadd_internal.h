@@ -26,9 +26,9 @@
 
 #define LV2DYNPARAM_PARAMETER_STEREO                        0
 #define LV2DYNPARAM_PARAMETER_RANDOM_GROUPING               1
-#define LV2DYNPARAM_PARAMETER_MASTER_VOLUME                 2
+#define LV2DYNPARAM_PARAMETER_VOLUME                        2
 #define LV2DYNPARAM_PARAMETER_VELOCITY_SENSING              3
-#define LV2DYNPARAM_PARAMETER_PAN_RANDOMIZE                 4
+#define LV2DYNPARAM_PARAMETER_RANDOM_PANORAMA               4
 #define LV2DYNPARAM_PARAMETER_PANORAMA                      5
 #define LV2DYNPARAM_PARAMETER_PUNCH_STRENGTH                6
 #define LV2DYNPARAM_PARAMETER_PUNCH_TIME                    7
@@ -56,6 +56,14 @@
 
 #define LV2DYNPARAM_GROUPS_COUNT                           11
 
+struct zynadd_parameter
+{
+  struct zynadd * synth_ptr;
+  unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
+
+  lv2dynparam_plugin_parameter lv2parameter;
+};
+
 struct zynadd
 {
   uint32_t sample_rate;
@@ -72,7 +80,7 @@ struct zynadd
   lv2dynparam_plugin_instance dynparams;
 
   lv2dynparam_plugin_group groups[LV2DYNPARAM_GROUPS_COUNT];
-  lv2dynparam_plugin_parameter parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+  struct zynadd_parameter parameters[LV2DYNPARAM_PARAMETERS_COUNT];
 };
 
 BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr);

@@ -54,95 +54,39 @@ void
 zyn_addsynth_destroy(
   zyn_addsynth_handle handle);
 
+#define ZYNADD_PARAMETER_FLOAT_PANORAMA                   0
+#define ZYNADD_PARAMETER_FLOAT_VOLUME                     1
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING           2
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH             3
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_TIME                 4
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH              5
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING     6
+
+#define ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA             0
+#define ZYNADD_PARAMETER_BOOL_STEREO                      1
+#define ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING             2
+
 float
-zyn_addsynth_get_panorama(
-  zyn_addsynth_handle handle);
+zyn_addsynth_get_float_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int parameter);
 
 void
-zyn_addsynth_set_panorama(
+zyn_addsynth_set_float_parameter(
   zyn_addsynth_handle handle,
+  unsigned int parameter,
   float value);
 
 BOOL
-zyn_addsynth_is_pan_random(
-  zyn_addsynth_handle handle);
+zyn_addsynth_get_bool_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int parameter);
 
 void
-zyn_addsynth_set_pan_random(
+zyn_addsynth_set_bool_parameter(
   zyn_addsynth_handle handle,
-  BOOL random);
-
-float
-zyn_addsynth_get_volume(
-  zyn_addsynth_handle handle);
-
-void
-zyn_addsynth_set_volume(
-  zyn_addsynth_handle handle,
-  float value);
-
-float
-zyn_addsynth_get_velocity_sensing(
-  zyn_addsynth_handle handle);
-
-void
-zyn_addsynth_set_velocity_sensing(
-  zyn_addsynth_handle handle,
-  float value);
-
-float
-zyn_addsynth_get_punch_strength(
-  zyn_addsynth_handle handle);
-
-void
-zyn_addsynth_set_punch_strength(
-  zyn_addsynth_handle handle,
-  float value);
-
-float
-zyn_addsynth_get_punch_time(
-  zyn_addsynth_handle handle);
-
-void
-zyn_addsynth_set_punch_time(
-  zyn_addsynth_handle handle,
-  float value);
-
-float
-zyn_addsynth_get_punch_stretch(
-  zyn_addsynth_handle handle);
-
-void
-zyn_addsynth_set_punch_stretch(
-  zyn_addsynth_handle handle,
-  float value);
-
-float
-zyn_addsynth_get_punch_velocity_sensing(
-  zyn_addsynth_handle handle);
-
-void
-zyn_addsynth_set_punch_velocity_sensing(
-  zyn_addsynth_handle handle,
-  float value);
-
-BOOL
-zyn_addsynth_is_stereo(
-  zyn_addsynth_handle handle);
-
-void
-zyn_addsynth_set_stereo(
-  zyn_addsynth_handle handle,
-  BOOL stereo);
-
-BOOL
-zyn_addsynth_is_random_grouping(
-  zyn_addsynth_handle handle);
-
-void
-zyn_addsynth_set_random_grouping(
-  zyn_addsynth_handle handle,
-  BOOL random_grouping);
+  unsigned int parameter,
+  BOOL value);
 
 #if 0
 { /* Adjust editor indent */

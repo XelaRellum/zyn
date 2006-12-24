@@ -44,19 +44,9 @@ struct parameter_descriptor
 
   unsigned int type;            /* one of LV2DYNPARAM_PARAMETER_TYPE_XXX */
 
+  unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
+
   BOOL placeholder;
-
-  union
-  {
-    lv2dynparam_plugin_param_boolean_changed boolean;
-    lv2dynparam_plugin_param_float_changed fpoint;
-  } value_changed_callback;
-
-  union
-  {
-    BOOL (* boolean)(zyn_addsynth_handle handle);
-    float (* fpoint)(zyn_addsynth_handle handle);
-  } get_value;
 
   union
   {
@@ -75,88 +65,88 @@ struct parameter_descriptor
 struct group_descriptor g_map_groups[LV2DYNPARAM_GROUPS_COUNT];
 struct parameter_descriptor g_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
 
-#define zynadd_ptr ((struct zynadd *)context)
+BOOL
+zynadd_float_parameter_changed(
+  void * context,
+  float value);
 
-#define IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(ident)      \
-  BOOL                                                    \
-  zynadd_ ## ident ## _changed(                           \
-    void * context,                                       \
-    BOOL value)                                           \
-  {                                                       \
-    LOG_DEBUG("zynadd_" #ident "_changed() called.");     \
-    zyn_addsynth_set_ ## ident(zynadd_ptr->synth, value); \
-    return TRUE;                                          \
-  }
-
-#define IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(ident)                   \
-  BOOL                                                                  \
-  zynadd_ ## ident ## _changed(                                         \
-    void * context,                                                     \
-    float value)                                                        \
-  {                                                                     \
-    LOG_DEBUG("zynadd_" #ident "_changed() called. Value is %f", value); \
-    zyn_addsynth_set_ ## ident(zynadd_ptr->synth, value);               \
-    return TRUE;                                                        \
-  }
+#define parameter_ptr ((struct zynadd_parameter *)context)
 
 BOOL
-zynadd_pan_random_changed(
+zynadd_bool_parameter_changed(
   void * context,
   BOOL value)
 {
-  if ((zyn_addsynth_is_pan_random(zynadd_ptr->synth) && value) ||
-      (!zyn_addsynth_is_pan_random(zynadd_ptr->synth) && !value))
+  BOOL current_value;
+
+  switch (parameter_ptr->addsynth_parameter)
   {
-    /* value not changed */
-    return TRUE;
+  case ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA:
+    current_value = zyn_addsynth_get_bool_parameter(
+      parameter_ptr->synth_ptr->synth,
+      ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA);
+
+    if ((current_value && value) ||
+        (!current_value && !value))
+    {
+      /* value not changed */
+      return TRUE;
+    }
+
+    if (value)
+    {
+      /* enabling randomize -> remove panorama parameter */
+      if (!lv2dynparam_plugin_param_remove(
+            parameter_ptr->synth_ptr->dynparams,
+            parameter_ptr->synth_ptr->parameters[LV2DYNPARAM_PARAMETER_PANORAMA].lv2parameter))
+      {
+        return FALSE;
+      }
+    }
+    else
+    {
+      /* enabling randomize -> add panorama parameter */
+      if (!lv2dynparam_plugin_param_float_add(
+            parameter_ptr->synth_ptr->dynparams,
+            g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].parent == LV2DYNPARAM_GROUP_ROOT ?
+            NULL :
+            parameter_ptr->synth_ptr->groups[g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].parent],
+            g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].name,
+            zyn_addsynth_get_float_parameter(parameter_ptr->synth_ptr->synth, ZYNADD_PARAMETER_FLOAT_PANORAMA),
+            g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].min.fpoint,
+            g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].max.fpoint,
+            zynadd_float_parameter_changed,
+            parameter_ptr->synth_ptr->parameters + LV2DYNPARAM_PARAMETER_PANORAMA,
+            &parameter_ptr->synth_ptr->parameters[LV2DYNPARAM_PARAMETER_PANORAMA].lv2parameter))
+      {
+        return FALSE;
+      }
+    }
+    break;
   }
 
-  if (value)
-  {
-    /* enabling randomize -> remove panorama parameter */
-    if (!lv2dynparam_plugin_param_remove(
-          zynadd_ptr->dynparams,
-          zynadd_ptr->parameters[LV2DYNPARAM_PARAMETER_PANORAMA]))
-    {
-      return FALSE;
-    }
-  }
-  else
-  {
-    /* enabling randomize -> add panorama parameter */
-    if (!lv2dynparam_plugin_param_float_add(
-          zynadd_ptr->dynparams,
-          g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].parent == LV2DYNPARAM_GROUP_ROOT ?
-          NULL :
-          zynadd_ptr->groups[g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].parent],
-          g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].name,
-          g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].get_value.fpoint(zynadd_ptr->synth),
-          g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].min.fpoint,
-          g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].max.fpoint,
-          g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].value_changed_callback.fpoint,
-          zynadd_ptr,
-          zynadd_ptr->parameters + LV2DYNPARAM_PARAMETER_PANORAMA))
-    {
-      return FALSE;
-    }
-  }
-
-  zyn_addsynth_set_pan_random(zynadd_ptr->synth, value);
+  zyn_addsynth_set_bool_parameter(
+    parameter_ptr->synth_ptr->synth,
+    parameter_ptr->addsynth_parameter,
+    value);
 
   return TRUE;
 }
 
-IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(stereo)
-IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(panorama)
-IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(volume)
-IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(velocity_sensing)
-IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(punch_strength)
-IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(punch_time)
-IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(punch_stretch)
-IMPLEMENT_FLOAT_PARAM_CHANGED_CALLBACK(punch_velocity_sensing)
-IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(random_grouping)
+BOOL
+zynadd_float_parameter_changed(
+  void * context,
+  float value)
+{
+  zyn_addsynth_set_float_parameter(
+    parameter_ptr->synth_ptr->synth,
+    parameter_ptr->addsynth_parameter,
+    value);
 
-#undef zynadd_ptr
+  return TRUE;
+}
+
+#undef parameter_ptr
 
 #define LV2DYNPARAM_GROUP(group) LV2DYNPARAM_GROUP_ ## group
 #define LV2DYNPARAM_PARAMETER(parameter) LV2DYNPARAM_PARAMETER_ ## parameter
@@ -171,23 +161,21 @@ IMPLEMENT_BOOL_PARAM_CHANGED_CALLBACK(random_grouping)
   g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;             \
   g_map_groups[LV2DYNPARAM_GROUP(group)].type_uri = type
 
-#define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, parameter, name_value, ident, placeholder_value) \
+#define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, parameter, name_value, placeholder_value) \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].name = name_value; \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].placeholder = placeholder_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].value_changed_callback.boolean = zynadd_ ## ident ## _changed; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].get_value.boolean = zyn_addsynth_is_ ## ident;
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## parameter;
 
-#define LV2DYNPARAM_PARAMETER_INIT_FLOAT(parent_group, parameter, name_value, ident, min_value, max_value, placeholder_value) \
+#define LV2DYNPARAM_PARAMETER_INIT_FLOAT(parent_group, parameter, name_value, min_value, max_value, placeholder_value) \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].name = name_value; \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT; \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].placeholder = placeholder_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].value_changed_callback.fpoint = zynadd_ ## ident ## _changed; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].get_value.fpoint = zyn_addsynth_get_ ## ident; \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].min.fpoint = min_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].max.fpoint = max_value;
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].max.fpoint = max_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## parameter;
 
 void zynadd_map_initialise() __attribute__((constructor));
 void zynadd_map_initialise()
@@ -206,23 +194,23 @@ void zynadd_map_initialise()
 
   LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, AMPLITUDE, "Amplitude");
   {
-    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, STEREO, "Stereo", stereo, FALSE);
-    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, RANDOM_GROUPING, "Random Grouping", random_grouping, FALSE);
-    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, MASTER_VOLUME, "Master Volume", volume, 0, 100, FALSE);
-    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, VELOCITY_SENSING, "Velocity sensing", velocity_sensing, 0, 100, FALSE);
+    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, STEREO, "Stereo", FALSE);
+    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, RANDOM_GROUPING, "Random Grouping", FALSE);
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, VOLUME, "Master Volume", 0, 100, FALSE);
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, VELOCITY_SENSING, "Velocity sensing", 0, 100, FALSE);
 
     LV2DYNPARAM_GROUP_INIT_CUSTOM(AMPLITUDE, AMPLITUDE_PANORAMA, "Panorama", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
     {
-      LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE_PANORAMA, PAN_RANDOMIZE, "Randomize", pan_random, TRUE);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PANORAMA, PANORAMA, "Panorama", panorama, -1, 1, TRUE);
+      LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE_PANORAMA, RANDOM_PANORAMA, "Randomize", TRUE);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PANORAMA, PANORAMA, "Panorama", -1, 1, TRUE);
     }
 
     LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_PUNCH, "Punch");
     {
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRENGTH, "Strength", punch_strength, 0, 100, FALSE);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_TIME, "Time", punch_time, 0, 100, FALSE);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRETCH, "Stretch", punch_stretch, 0, 100, FALSE);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_VELOCITY_SENSING, "Velocity sensing", punch_velocity_sensing, 0, 100, FALSE);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRENGTH, "Strength", 0, 100, FALSE);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_TIME, "Time", 0, 100, FALSE);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRETCH, "Stretch", 0, 100, FALSE);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_VELOCITY_SENSING, "Velocity sensing", 0, 100, FALSE);
     }
 
     LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_ENVELOPE, "Envelope");
@@ -309,21 +297,27 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
   {
     LOG_DEBUG("Adding parameter \"%s\"", g_map_parameters[i].name);
 
+    zynadd_ptr->parameters[i].synth_ptr = zynadd_ptr;
+    zynadd_ptr->parameters[i].addsynth_parameter = g_map_parameters[i].addsynth_parameter;
+
     if (g_map_parameters[i].placeholder)
     {
       /* we handle these manually */
       switch (i)
       {
-      case LV2DYNPARAM_PARAMETER_PAN_RANDOMIZE:
-        tmp_bool = g_map_parameters[i].get_value.boolean(zynadd_ptr->synth);
+      case LV2DYNPARAM_PARAMETER_RANDOM_PANORAMA:
+        tmp_bool = zyn_addsynth_get_bool_parameter(
+          zynadd_ptr->synth,
+          ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA);
+
         if (!lv2dynparam_plugin_param_boolean_add(
               zynadd_ptr->dynparams,
               g_map_parameters[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_parameters[i].parent],
               g_map_parameters[i].name,
               tmp_bool,
-              g_map_parameters[i].value_changed_callback.boolean,
-              zynadd_ptr,
-              zynadd_ptr->parameters + i))
+              zynadd_bool_parameter_changed,
+              zynadd_ptr->parameters + i,
+              &zynadd_ptr->parameters[i].lv2parameter))
         {
           goto fail_clean_dynparams;
         }
@@ -334,12 +328,12 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
                 zynadd_ptr->dynparams,
                 g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_parameters[i].parent],
                 g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].name,
-                g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].get_value.fpoint(zynadd_ptr->synth),
+                zyn_addsynth_get_float_parameter(zynadd_ptr->synth, ZYNADD_PARAMETER_FLOAT_PANORAMA),
                 g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].min.fpoint,
                 g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].max.fpoint,
-                g_map_parameters[LV2DYNPARAM_PARAMETER_PANORAMA].value_changed_callback.fpoint,
-                zynadd_ptr,
-                zynadd_ptr->parameters + LV2DYNPARAM_PARAMETER_PANORAMA))
+                zynadd_float_parameter_changed,
+                zynadd_ptr->parameters + LV2DYNPARAM_PARAMETER_PANORAMA,
+                &zynadd_ptr->parameters[LV2DYNPARAM_PARAMETER_PANORAMA].lv2parameter))
           {
             goto fail_clean_dynparams;
           }
@@ -360,10 +354,10 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
             zynadd_ptr->dynparams,
             g_map_parameters[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_parameters[i].parent],
             g_map_parameters[i].name,
-            g_map_parameters[i].get_value.boolean(zynadd_ptr->synth),
-            g_map_parameters[i].value_changed_callback.boolean,
-            zynadd_ptr,
-            zynadd_ptr->parameters + i))
+            zyn_addsynth_get_bool_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[i].addsynth_parameter),
+            zynadd_bool_parameter_changed,
+            zynadd_ptr->parameters + i,
+            &zynadd_ptr->parameters[i].lv2parameter))
       {
         goto fail_clean_dynparams;
       }
@@ -374,12 +368,12 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
             zynadd_ptr->dynparams,
             g_map_parameters[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_parameters[i].parent],
             g_map_parameters[i].name,
-            g_map_parameters[i].get_value.fpoint(zynadd_ptr->synth),
+            zyn_addsynth_get_float_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[i].addsynth_parameter),
             g_map_parameters[i].min.fpoint,
             g_map_parameters[i].max.fpoint,
-            g_map_parameters[i].value_changed_callback.fpoint,
-            zynadd_ptr,
-            zynadd_ptr->parameters + i))
+            zynadd_float_parameter_changed,
+            zynadd_ptr->parameters + i,
+            &zynadd_ptr->parameters[i].lv2parameter))
       {
         goto fail_clean_dynparams;
       }

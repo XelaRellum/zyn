@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 
 #include "common.h"
 #include "addsynth.h"
@@ -239,151 +240,101 @@ unsigned char percent_to_0_127(float value)
 }
 
 float
-zyn_addsynth_get_panorama(
-  zyn_addsynth_handle handle)
+zyn_addsynth_get_float_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int parameter)
 {
-  return zyn_addsynth_ptr->panorama;
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_FLOAT_PANORAMA:
+    return zyn_addsynth_ptr->panorama;
+  case ZYNADD_PARAMETER_FLOAT_VOLUME:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PVolume);
+  case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PAmpVelocityScaleFunction);
+  case ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStrength);
+  case ZYNADD_PARAMETER_FLOAT_PUNCH_TIME:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchTime);
+  case ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStretch);
+  case ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchVelocitySensing);
+  default:
+    assert(0);
+  }
 }
 
 void
-zyn_addsynth_set_panorama(
+zyn_addsynth_set_float_parameter(
   zyn_addsynth_handle handle,
+  unsigned int parameter,
   float value)
 {
-  zyn_addsynth_ptr->panorama = value;
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_FLOAT_PANORAMA:
+    zyn_addsynth_ptr->panorama = value;
+    return;
+  case ZYNADD_PARAMETER_FLOAT_VOLUME:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.PVolume = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.PAmpVelocityScaleFunction = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStrength = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_PUNCH_TIME:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchTime = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStretch = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchVelocitySensing = percent_to_0_127(value);
+    return;
+  default:
+    assert(0);
+  }
 }
 
 BOOL
-zyn_addsynth_is_pan_random(
-  zyn_addsynth_handle handle)
+zyn_addsynth_get_bool_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int parameter)
 {
-  return zyn_addsynth_ptr->random_panorama;
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA:
+    return zyn_addsynth_ptr->random_panorama;
+  case ZYNADD_PARAMETER_BOOL_STEREO:
+    return zyn_addsynth_ptr->stereo;
+  case ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING:
+    return zyn_addsynth_ptr->random_grouping;
+  default:
+    assert(0);
+  }
 }
 
 void
-zyn_addsynth_set_pan_random(
+zyn_addsynth_set_bool_parameter(
   zyn_addsynth_handle handle,
-  BOOL random)
+  unsigned int parameter,
+  BOOL value)
 {
-  zyn_addsynth_ptr->random_panorama = random;
-}
-
-float
-zyn_addsynth_get_volume(
-  zyn_addsynth_handle handle)
-{
-  return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PVolume);
-}
-
-void
-zyn_addsynth_set_volume(
-  zyn_addsynth_handle handle,
-  float value)
-{
-  zyn_addsynth_ptr->params_ptr->GlobalPar.PVolume = percent_to_0_127(value);
-}
-
-float
-zyn_addsynth_get_velocity_sensing(
-  zyn_addsynth_handle handle)
-{
-  return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PAmpVelocityScaleFunction);
-}
-
-void
-zyn_addsynth_set_velocity_sensing(
-  zyn_addsynth_handle handle,
-  float velocity_sensing)
-{
-  zyn_addsynth_ptr->params_ptr->GlobalPar.PAmpVelocityScaleFunction = percent_to_0_127(velocity_sensing);
-}
-
-float
-zyn_addsynth_get_punch_strength(
-  zyn_addsynth_handle handle)
-{
-  return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStrength);
-}
-
-void
-zyn_addsynth_set_punch_strength(
-  zyn_addsynth_handle handle,
-  float value)
-{
-  zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStrength = percent_to_0_127(value);
-}
-
-float
-zyn_addsynth_get_punch_time(
-  zyn_addsynth_handle handle)
-{
-  return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchTime);
-}
-
-void
-zyn_addsynth_set_punch_time(
-  zyn_addsynth_handle handle,
-  float value)
-{
-  zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchTime = percent_to_0_127(value);
-}
-
-float
-zyn_addsynth_get_punch_stretch(
-  zyn_addsynth_handle handle)
-{
-  return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStretch);
-}
-
-void
-zyn_addsynth_set_punch_stretch(
-  zyn_addsynth_handle handle,
-  float value)
-{
-  zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStretch = percent_to_0_127(value);
-}
-
-float
-zyn_addsynth_get_punch_velocity_sensing(
-  zyn_addsynth_handle handle)
-{
-  return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchVelocitySensing);
-}
-
-void
-zyn_addsynth_set_punch_velocity_sensing(
-  zyn_addsynth_handle handle,
-  float value)
-{
-  zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchVelocitySensing = percent_to_0_127(value);
-}
-
-BOOL
-zyn_addsynth_is_stereo(
-  zyn_addsynth_handle handle)
-{
-  return zyn_addsynth_ptr->stereo;
-}
-
-void
-zyn_addsynth_set_stereo(
-  zyn_addsynth_handle handle,
-  BOOL stereo)
-{
-  zyn_addsynth_ptr->stereo = stereo;
-}
-
-BOOL
-zyn_addsynth_is_random_grouping(
-  zyn_addsynth_handle handle)
-{
-  return zyn_addsynth_ptr->random_grouping;
-}
-
-void
-zyn_addsynth_set_random_grouping(
-  zyn_addsynth_handle handle,
-  BOOL random_grouping)
-{
-  zyn_addsynth_ptr->random_grouping = random_grouping;
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA:
+    zyn_addsynth_ptr->random_panorama = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_STEREO:
+    zyn_addsynth_ptr->stereo = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING:
+    zyn_addsynth_ptr->random_grouping = value;
+    return;
+  default:
+    assert(0);
+  }
 }
