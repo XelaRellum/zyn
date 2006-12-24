@@ -77,7 +77,7 @@ zyn: addnote_cpp.o main.o util.o
 
 # Remove all generated files
 clean:
-	-rm -rf $(PLUGIN_NAME).lv2 zynadd.so zynadd_gtk *.dep *.o zyn zynadd.peg
+	-rm -rf $(PLUGIN_NAME).lv2 zynadd.so zynadd_gtk *.d *.o zyn zynadd.peg
 
 rebuild: clean zyn
 
@@ -95,7 +95,7 @@ zynadd.so: $(PLUGIN_OBJECTS)
 	@echo "Checking for undefined zyn symbols"
 	@nm $@ |grep ' U zyn' ; RESULT=$$? ; if test $${RESULT} -eq 0; then rm zynadd.so; fi ; test ! $${RESULT} -eq 0
 
-DEPFILES = $(ALL_SOURCES_CXX:.cpp=.dep) $(ALL_SOURCES_C:.c=.dep)
+DEPFILES = $(ALL_SOURCES_CXX:.cpp=.d) $(ALL_SOURCES_C:.c=.d)
 
 # All header dependencies need to be generated and included
 -include  $(DEPFILES)
@@ -103,11 +103,11 @@ DEPFILES = $(ALL_SOURCES_CXX:.cpp=.dep) $(ALL_SOURCES_C:.c=.dep)
 $(DEPFILES): zynadd.peg
 
 # This is how to generate the dependency files
-%.dep: %.cpp
+%.d: %.cpp
 	@echo "Generating dependency for $< to $@ ..."
 	@$(GENDEP_CXX)
 
-%.dep: %.c
+%.d: %.c
 	@echo "Generating dependency for $< to $@ ..."
 	@$(GENDEP_C)
 
