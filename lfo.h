@@ -24,9 +24,6 @@
 #ifndef LFO_H
 #define LFO_H
 
-#include "globals.h"
-#include "LFOParams.h"
-
 class LFO
 {
 public:

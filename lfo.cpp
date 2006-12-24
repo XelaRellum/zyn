@@ -25,8 +25,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "LFO.h"
-
+#include "globals.h"
+#include "lfo_parameters.h"
+#include "lfo.h"
 
 LFO::LFO(
   LFOParams *lfopars,

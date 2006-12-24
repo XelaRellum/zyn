@@ -22,7 +22,12 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "FormantFilter.h"
+
+#include "globals.h"
+#include "filter_base.h"
+#include "analog_filter.h"
+#include "filter_parameters.h"
+#include "formant_filter.h"
 
 FormantFilter::FormantFilter(FilterParams *pars){
     numformants=pars->Pnumformants;

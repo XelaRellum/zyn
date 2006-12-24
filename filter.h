@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
  
-  LFOParams.C - Parameters for LFO
+  Filter.h - Filters, uses analog,formant,etc. filters
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -20,49 +20,24 @@
 
 */
 
-#include <math.h>
-#include <stdio.h>
-#include "globals.h"
-#include "LFOParams.h"
+#ifndef FILTER_H
+#define FILTER_H
 
-int LFOParams::time;
+class Filter{
+public:
+  Filter(FilterParams *pars);
+  ~Filter();  
+  void filterout(REALTYPE *smp);
+  void setfreq(REALTYPE frequency);
+  void setfreq_and_q(REALTYPE frequency,REALTYPE q_);
+  void setq(REALTYPE q_);
 
-LFOParams::LFOParams(
-  char Pfreq_,
-  char Pintensity_,
-  char Pstartphase_,
-  char PLFOtype_,
-  char Prandomness_,
-  char Pdelay_,
-  char Pcontinous_,
-  char fel_)
-{
-  Dfreq=Pfreq_;
-  Dintensity=Pintensity_;
-  Dstartphase=Pstartphase_;
-  DLFOtype=PLFOtype_;
-  Drandomness=Prandomness_;
-  Ddelay=Pdelay_;
-  Dcontinous=Pcontinous_;
-  fel=fel_;
-  time=0;
-    
-  defaults();
+  REALTYPE getrealfreq(REALTYPE freqpitch);
+private:
+  Filter_ *filter;
+  unsigned char category;
 };
 
-LFOParams::~LFOParams()
-{
-};
 
-void LFOParams::defaults()
-{
-  Pfreq = Dfreq / 127.0;
-  Pintensity = Dintensity;
-  Pstartphase = Dstartphase;
-  PLFOtype = DLFOtype;
-  Prandomness = Drandomness;
-  Pdelay = Ddelay;
-  Pcontinous = Dcontinous;
-  Pfreqrand = 0;
-  Pstretch = 64;
-};
+#endif
+

@@ -23,8 +23,6 @@
 #ifndef SV_FILTER_H
 #define SV_FILTER_H
 
-#include "globals.h"
-#include "Filter_.h"
 class SVFilter:public Filter_{
  public:
     SVFilter(unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages);
@@ -62,6 +60,4 @@ class SVFilter:public Filter_{
     int needsinterpolation,firsttime;
 };
 
-
 #endif
-

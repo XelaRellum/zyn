@@ -24,9 +24,9 @@
 #include <math.h>
 
 #include "globals.h"
-#include "Resonance.h"
-#include "FFTwrapper.h"
-#include "OscilGen.h"
+#include "resonance.h"
+#include "fft_wrapper.h"
+#include "oscillator.h"
 
 void waveshapesmps(int n,REALTYPE *smps,unsigned char type,unsigned char drive)
 {

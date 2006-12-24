@@ -23,11 +23,13 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "Filter.h"
-//#include "Filter_.h"
-//#include "AnalogFilter.h"
-#include "FormantFilter.h"
-#include "SVFilter.h"
+#include "globals.h"
+#include "filter_base.h"
+#include "filter_parameters.h"
+#include "filter.h"
+#include "analog_filter.h"
+#include "formant_filter.h"
+#include "sv_filter.h"
 
 Filter::Filter(FilterParams *pars){
   unsigned char Ftype=pars->Ptype;

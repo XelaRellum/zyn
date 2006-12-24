@@ -23,7 +23,7 @@
 #include <math.h>
 
 #include "globals.h"
-#include "FilterParams.h"
+#include "filter_parameters.h"
 
 FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  char Pq_)
 {

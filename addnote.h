@@ -23,13 +23,6 @@
 #ifndef AD_NOTE_H
 #define AD_NOTE_H
 
-#include "globals.h"
-#include "Envelope.h"
-#include "LFO.h"
-#include "Filter.h"
-#include "ADnoteParameters.h"
-#include "Controller.h"
-
 //Globals
 
 //FM amplitude tune

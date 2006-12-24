@@ -23,10 +23,6 @@
 #ifndef ENVELOPE_H
 #define ENVELOPE_H
 
-#include <math.h>
-#include "globals.h"
-#include "EnvelopeParams.h"
-
 class Envelope
 {
 public:

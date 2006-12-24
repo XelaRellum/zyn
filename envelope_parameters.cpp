@@ -23,7 +23,7 @@
 #include <math.h>               // pow()
 
 #include "globals.h"
-#include "EnvelopeParams.h"
+#include "envelope_parameters.h"
 
 EnvelopeParams::EnvelopeParams(
   unsigned char Penvstretch_,

@@ -20,7 +20,11 @@
 
 */
 
-#include "Envelope.h"
+#include <math.h>
+
+#include "globals.h"
+#include "envelope_parameters.h"
+#include "envelope.h"
 
 Envelope::Envelope(
   EnvelopeParams * parameters_ptr,

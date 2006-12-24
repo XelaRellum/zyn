@@ -21,7 +21,8 @@
 */
 
 #include <math.h>
-#include "FFTwrapper.h"
+
+#include "fft_wrapper.h"
 
 FFTwrapper::FFTwrapper(int fftsize_){
     fftsize=fftsize_;

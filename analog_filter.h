@@ -23,9 +23,6 @@
 #ifndef ANALOG_FILTER_H
 #define ANALOG_FILTER_H
 
-#include "globals.h"
-#include "Filter_.h"
-
 class AnalogFilter:public Filter_
 {
 public:

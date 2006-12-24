@@ -19,14 +19,24 @@
  *****************************************************************************/
 
 #include <stdlib.h>
+#include <math.h>
 
 #include "common.h"
 #include "addsynth.h"
 #include "globals.h"
-#include "Resonance.h"
-#include "FFTwrapper.h"
-#include "OscilGen.h"
-#include "ADnote.h"
+#include "resonance.h"
+#include "fft_wrapper.h"
+#include "oscillator.h"
+#include "envelope_parameters.h"
+#include "envelope.h"
+#include "lfo_parameters.h"
+#include "lfo.h"
+#include "filter_parameters.h"
+#include "filter_base.h"
+#include "filter.h"
+#include "addnote_parameters.h"
+#include "Controller.h"
+#include "addnote.h"
 #include "util.h"
 
 #define ZYN_DEFAULT_POLYPHONY 60

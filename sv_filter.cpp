@@ -22,7 +22,10 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "SVFilter.h"
+
+#include "globals.h"
+#include "filter_base.h"
+#include "sv_filter.h"
 
 SVFilter::SVFilter(unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages){
     stages=Fstages;

@@ -22,7 +22,10 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "AnalogFilter.h"
+
+#include "globals.h"
+#include "filter_base.h"
+#include "analog_filter.h"
 
 AnalogFilter::AnalogFilter(unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages){
     stages=Fstages;

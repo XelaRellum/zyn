@@ -34,20 +34,20 @@ BUNDLE_FILES = manifest.ttl zynadd.ttl zynadd.so
 # These are the source files for the plugin
 PLUGIN_SOURCES_CXX = addsynth.cpp
 
-PLUGIN_SOURCES_CXX += ADnote.cpp
-PLUGIN_SOURCES_CXX += LFO.cpp
-PLUGIN_SOURCES_CXX += FilterParams.cpp
-PLUGIN_SOURCES_CXX += ADnoteParameters.cpp
-PLUGIN_SOURCES_CXX += EnvelopeParams.cpp
-PLUGIN_SOURCES_CXX += Filter.cpp
-PLUGIN_SOURCES_CXX += AnalogFilter.cpp
-PLUGIN_SOURCES_CXX += FormantFilter.cpp
-PLUGIN_SOURCES_CXX += Envelope.cpp
-PLUGIN_SOURCES_CXX += OscilGen.cpp
-PLUGIN_SOURCES_CXX += FFTwrapper.cpp
-PLUGIN_SOURCES_CXX += SVFilter.cpp
-PLUGIN_SOURCES_CXX += LFOParams.cpp
-PLUGIN_SOURCES_CXX += Resonance.cpp
+PLUGIN_SOURCES_CXX += addnote.cpp
+PLUGIN_SOURCES_CXX += lfo.cpp
+PLUGIN_SOURCES_CXX += filter_parameters.cpp
+PLUGIN_SOURCES_CXX += addnote_parameters.cpp
+PLUGIN_SOURCES_CXX += envelope_parameters.cpp
+PLUGIN_SOURCES_CXX += filter.cpp
+PLUGIN_SOURCES_CXX += analog_filter.cpp
+PLUGIN_SOURCES_CXX += formant_filter.cpp
+PLUGIN_SOURCES_CXX += envelope.cpp
+PLUGIN_SOURCES_CXX += oscillator.cpp
+PLUGIN_SOURCES_CXX += fft_wrapper.cpp
+PLUGIN_SOURCES_CXX += sv_filter.cpp
+PLUGIN_SOURCES_CXX += lfo_parameters.cpp
+PLUGIN_SOURCES_CXX += resonance.cpp
 PLUGIN_SOURCES_CXX += Controller.cpp
 
 PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c dynparam.c dynparam_group.c dynparam_parameter.c zynadd_dynparam.c log.c

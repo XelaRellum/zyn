@@ -23,7 +23,7 @@
 #include <stdlib.h>
 
 #include "globals.h"
-#include "Resonance.h"
+#include "resonance.h"
 
 Resonance::Resonance()
 {
