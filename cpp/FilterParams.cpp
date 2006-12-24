@@ -21,12 +21,12 @@
 */
 
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+
+#include "globals.h"
 #include "FilterParams.h"
 
-FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  char Pq_):Presets(){
-  setpresettype("Pfilter");
+FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  char Pq_)
+{
   Dtype=Ptype_;
   Dfreq=Pfreq_;
   Dq=Pq_;

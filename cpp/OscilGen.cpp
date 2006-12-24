@@ -22,8 +22,10 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <stdio.h>
 
+#include "globals.h"
+#include "Resonance.h"
+#include "FFTwrapper.h"
 #include "OscilGen.h"
 #include "Distorsion.h"
 
@@ -31,8 +33,8 @@ REALTYPE *OscilGen::tmpsmps;//this array stores some termporary data and it has 
 FFTFREQS OscilGen::outoscilFFTfreqs;
 
 
-OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_):Presets(){
-  setpresettype("Poscilgen");
+OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_)
+{
   fft=fft_;
   res=res_;
   newFFTFREQS(&oscilFFTfreqs,OSCIL_SIZE/2);

@@ -21,19 +21,18 @@
 
 #include <math.h>
 #include <stdlib.h>
+
+#include "globals.h"
 #include "Resonance.h"
 
+Resonance::Resonance()
+{
+  defaults();
+}
 
-#include <stdio.h>
-
-Resonance::Resonance():Presets(){
-    setpresettype("Presonance");
-    defaults();
-};
-
-Resonance::~Resonance(){
-};
-
+Resonance::~Resonance()
+{
+}
 
 void Resonance::defaults(){
     Penabled=0;
@@ -44,7 +43,7 @@ void Resonance::defaults(){
     ctlcenter=1.0;
     ctlbw=1.0;
     for (int i=0;i<N_RES_POINTS;i++) Prespoints[i]=64;
-};
+}
 
 /*
  * Set a point of resonance function with a value

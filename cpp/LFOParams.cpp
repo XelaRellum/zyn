@@ -27,39 +27,42 @@
 
 int LFOParams::time;
 
-LFOParams::LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous_,char fel_):Presets(){
-    switch(fel_) {
-	case 0:setpresettype("Plfofrequency");
-	    break;
-	case 1:setpresettype("Plfoamplitude");
-	    break;
-	case 2:setpresettype("Plfofilter");
-	    break;
-    };
-    Dfreq=Pfreq_;
-    Dintensity=Pintensity_;
-    Dstartphase=Pstartphase_;
-    DLFOtype=PLFOtype_;
-    Drandomness=Prandomness_;
-    Ddelay=Pdelay_;
-    Dcontinous=Pcontinous_;
-    fel=fel_;
-    time=0;
+LFOParams::LFOParams(
+  char Pfreq_,
+  char Pintensity_,
+  char Pstartphase_,
+  char PLFOtype_,
+  char Prandomness_,
+  char Pdelay_,
+  char Pcontinous_,
+  char fel_)
+{
+  Dfreq=Pfreq_;
+  Dintensity=Pintensity_;
+  Dstartphase=Pstartphase_;
+  DLFOtype=PLFOtype_;
+  Drandomness=Prandomness_;
+  Ddelay=Pdelay_;
+  Dcontinous=Pcontinous_;
+  fel=fel_;
+  time=0;
     
-    defaults();
+  defaults();
 };
 
-LFOParams::~LFOParams(){
+LFOParams::~LFOParams()
+{
 };
 
-void LFOParams::defaults(){
-    Pfreq=Dfreq/127.0;
-    Pintensity=Dintensity;
-    Pstartphase=Dstartphase;
-    PLFOtype=DLFOtype;
-    Prandomness=Drandomness;
-    Pdelay=Ddelay;
-    Pcontinous=Dcontinous;
-    Pfreqrand=0;
-    Pstretch=64;
+void LFOParams::defaults()
+{
+  Pfreq = Dfreq / 127.0;
+  Pintensity = Dintensity;
+  Pstartphase = Dstartphase;
+  PLFOtype = DLFOtype;
+  Prandomness = Drandomness;
+  Pdelay = Ddelay;
+  Pcontinous = Dcontinous;
+  Pfreqrand = 0;
+  Pstretch = 64;
 };

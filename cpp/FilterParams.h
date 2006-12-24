@@ -23,11 +23,8 @@
 #ifndef FILTER_PARAMS_H
 #define FILTER_PARAMS_H
 
-#include "globals.h"
-//#include "../Misc/XMLwrapper.h"
-#include "Presets.h"
-
-class FilterParams:public Presets{
+class FilterParams
+{
 public:
   FilterParams(unsigned char Ptype_,unsigned char Pfreq,unsigned char Pq_);
   ~FilterParams();

@@ -22,14 +22,10 @@
 #ifndef RESONANCE_H
 #define RESONANCE_H
 
-#include "globals.h"
-//#include "Util.h"
-//#include "../Misc/XMLwrapper.h"
-#include "Presets.h"
-
 #define N_RES_POINTS 256
 
-class Resonance:public Presets{
+class Resonance
+{
 public:
   Resonance();
   ~Resonance();

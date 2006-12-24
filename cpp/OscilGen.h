@@ -23,13 +23,8 @@
 #ifndef OSCIL_GEN_H
 #define OSCIL_GEN_H
 
-#include "globals.h"
-//#include "../Misc/XMLwrapper.h"
-#include "Resonance.h"
-#include "FFTwrapper.h"  
-#include "Presets.h"
-
-class OscilGen:public Presets{
+class OscilGen
+{
 public:
   OscilGen(FFTwrapper *fft_,Resonance *res_);
   ~OscilGen();

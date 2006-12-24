@@ -42,7 +42,6 @@ PLUGIN_SOURCES_CXX += cpp/EnvelopeParams.cpp
 PLUGIN_SOURCES_CXX += cpp/Filter.cpp
 PLUGIN_SOURCES_CXX += cpp/AnalogFilter.cpp
 PLUGIN_SOURCES_CXX += cpp/FormantFilter.cpp
-PLUGIN_SOURCES_CXX += cpp/Presets.cpp
 PLUGIN_SOURCES_CXX += cpp/Envelope.cpp
 PLUGIN_SOURCES_CXX += cpp/OscilGen.cpp
 PLUGIN_SOURCES_CXX += cpp/FFTwrapper.cpp

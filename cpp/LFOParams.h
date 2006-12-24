@@ -23,10 +23,8 @@
 #ifndef LFO_PARAMS_H
 #define LFO_PARAMS_H
 
-//#include "../Misc/XMLwrapper.h"
-#include "Presets.h"
-
-class LFOParams:public Presets{
+class LFOParams
+{
 public:
   LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous,char fel_);      
   ~LFOParams();

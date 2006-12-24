@@ -23,18 +23,6 @@
 #ifndef AD_NOTE_PARAMETERS_H
 #define AD_NOTE_PARAMETERS_H
 
-
-#include "globals.h"
-#include "EnvelopeParams.h"
-#include "LFOParams.h"
-#include "FilterParams.h"
-#include "OscilGen.h"
-#include "Resonance.h"
-//#include "Util.h"
-//#include "XMLwrapper.h"
-#include "FFTwrapper.h"
-#include "Presets.h"
-
 enum FMTYPE{NONE,MORPH,RING_MOD,PHASE_MOD,FREQ_MOD,PITCH_MOD};
     
 /*****************************************************************/
@@ -258,7 +246,8 @@ struct ADnoteVoiceParam{
   EnvelopeParams *FMAmpEnvelope;
 }; 
 
-class ADnoteParameters:public Presets{
+class ADnoteParameters
+{
 public:
   ADnoteParameters(FFTwrapper *fft_);
   ~ADnoteParameters();
@@ -267,8 +256,6 @@ public:
   ADnoteVoiceParam VoicePar[NUM_VOICES];
 
   void defaults();
-//  void add2XML(XMLwrapper *xml);
-//  void getfromXML(XMLwrapper *xml);
 
   REALTYPE getBandwidthDetuneMultiplier();
 private:
@@ -277,9 +264,6 @@ private:
   void EnableVoice(int nvoice);   
   void KillVoice(int nvoice);   
   FFTwrapper *fft;  
-
-//  void add2XMLsection(XMLwrapper *xml,int n);
-//  void getfromXMLsection(XMLwrapper *xml,int n);
 };
 
 #endif

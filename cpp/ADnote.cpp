@@ -25,6 +25,10 @@
 #include <stdio.h>
 
 #include "globals.h"
+#include "Resonance.h"
+#include "FFTwrapper.h"
+#include "OscilGen.h"
+#include "Resonance.h"
 #include "ADnote.h"
 
 ADnote::ADnote(

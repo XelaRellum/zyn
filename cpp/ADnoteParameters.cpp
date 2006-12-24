@@ -20,14 +20,20 @@
 
 */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 
+#include "globals.h"
+#include "Resonance.h"
+#include "FFTwrapper.h"
+#include "OscilGen.h"
+#include "EnvelopeParams.h"
+#include "FilterParams.h"
+#include "LFOParams.h"
 #include "ADnoteParameters.h"
 
-ADnoteParameters::ADnoteParameters(FFTwrapper *fft_):Presets(){
-  setpresettype("Padsyth");
+ADnoteParameters::ADnoteParameters(
+  FFTwrapper *fft_)
+{
   fft=fft_;
 
   GlobalPar.FreqEnvelope=new EnvelopeParams(0,0);
