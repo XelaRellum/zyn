@@ -22,11 +22,11 @@
 
 #include "common.h"
 #include "addsynth.h"
-#include "cpp/globals.h"
-#include "cpp/Resonance.h"
-#include "cpp/FFTwrapper.h"
-#include "cpp/OscilGen.h"
-#include "cpp/ADnote.h"
+#include "globals.h"
+#include "Resonance.h"
+#include "FFTwrapper.h"
+#include "OscilGen.h"
+#include "ADnote.h"
 #include "util.h"
 
 #define ZYN_DEFAULT_POLYPHONY 60

@@ -25,8 +25,8 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "../common.h"
-#include "../util.h"
+#include "common.h"
+#include "util.h"
 
 /*
  * The size of ADnote Oscillator

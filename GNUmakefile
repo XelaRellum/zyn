@@ -34,21 +34,21 @@ BUNDLE_FILES = manifest.ttl zynadd.ttl zynadd.so
 # These are the source files for the plugin
 PLUGIN_SOURCES_CXX = addsynth.cpp
 
-PLUGIN_SOURCES_CXX += cpp/ADnote.cpp
-PLUGIN_SOURCES_CXX += cpp/LFO.cpp
-PLUGIN_SOURCES_CXX += cpp/FilterParams.cpp
-PLUGIN_SOURCES_CXX += cpp/ADnoteParameters.cpp
-PLUGIN_SOURCES_CXX += cpp/EnvelopeParams.cpp
-PLUGIN_SOURCES_CXX += cpp/Filter.cpp
-PLUGIN_SOURCES_CXX += cpp/AnalogFilter.cpp
-PLUGIN_SOURCES_CXX += cpp/FormantFilter.cpp
-PLUGIN_SOURCES_CXX += cpp/Envelope.cpp
-PLUGIN_SOURCES_CXX += cpp/OscilGen.cpp
-PLUGIN_SOURCES_CXX += cpp/FFTwrapper.cpp
-PLUGIN_SOURCES_CXX += cpp/SVFilter.cpp
-PLUGIN_SOURCES_CXX += cpp/LFOParams.cpp
-PLUGIN_SOURCES_CXX += cpp/Resonance.cpp
-PLUGIN_SOURCES_CXX += cpp/Controller.cpp
+PLUGIN_SOURCES_CXX += ADnote.cpp
+PLUGIN_SOURCES_CXX += LFO.cpp
+PLUGIN_SOURCES_CXX += FilterParams.cpp
+PLUGIN_SOURCES_CXX += ADnoteParameters.cpp
+PLUGIN_SOURCES_CXX += EnvelopeParams.cpp
+PLUGIN_SOURCES_CXX += Filter.cpp
+PLUGIN_SOURCES_CXX += AnalogFilter.cpp
+PLUGIN_SOURCES_CXX += FormantFilter.cpp
+PLUGIN_SOURCES_CXX += Envelope.cpp
+PLUGIN_SOURCES_CXX += OscilGen.cpp
+PLUGIN_SOURCES_CXX += FFTwrapper.cpp
+PLUGIN_SOURCES_CXX += SVFilter.cpp
+PLUGIN_SOURCES_CXX += LFOParams.cpp
+PLUGIN_SOURCES_CXX += Resonance.cpp
+PLUGIN_SOURCES_CXX += Controller.cpp
 
 PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c dynparam.c dynparam_group.c dynparam_parameter.c zynadd_dynparam.c log.c
 PLUGIN_HEADERS = lv2plugin.hpp lv2.h lv2-miditype.h lv2-midifunctions.h zynadd.peg
@@ -77,7 +77,7 @@ zyn: addnote_cpp.o main.o util.o
 
 # Remove all generated files
 clean:
-	-rm -rf $(PLUGIN_NAME).lv2 zynadd.so zynadd_gtk *.dep *.o zyn zynadd.peg cpp/*.dep cpp/*.o
+	-rm -rf $(PLUGIN_NAME).lv2 zynadd.so zynadd_gtk *.dep *.o zyn zynadd.peg
 
 rebuild: clean zyn
 
