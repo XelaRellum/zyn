@@ -26,7 +26,7 @@
 #include "envelope_parameters.h"
 
 EnvelopeParams::EnvelopeParams(
-  unsigned char Penvstretch_,
+  unsigned char stretch,
   BOOL forced_release)
 {
   int i;
@@ -49,10 +49,10 @@ EnvelopeParams::EnvelopeParams(
   Penvsustain = 1;
   Penvpoints = 1;
   m_mode = ZYN_ENVELOPE_MODE_ADSR;
-  Penvstretch = Penvstretch_;
+  m_stretch = stretch;
   m_forced_release = forced_release;        
   m_free_mode = TRUE;
-  Plinearenvelope = 0;
+  m_linear = FALSE;
     
   store2defaults();
 }
@@ -63,8 +63,7 @@ EnvelopeParams::~EnvelopeParams()
 
 REALTYPE EnvelopeParams::getdt(char i)
 {
-  REALTYPE result=(pow(2.0,Penvdt[i]/127.0*12.0)-1.0)*10.0;//miliseconds
-  return(result);
+  return (pow(2.0 , Penvdt[i] / 127.0 * 12.0) - 1.0) * 10.0; // miliseconds
 }
 
 /*
@@ -216,9 +215,9 @@ EnvelopeParams::converttofree()
 
 void EnvelopeParams::defaults()
 {
-  Penvstretch = Denvstretch;
+  m_stretch = m_stretch_default;
   m_forced_release = m_forced_release_default;
-  Plinearenvelope = Dlinearenvelope;
+  m_linear = m_linear_default;
 
   m_attack_duration = m_attack_duration_default;
   m_decay_duration = m_decay_duration_default;
@@ -236,9 +235,9 @@ void EnvelopeParams::defaults()
 
 void EnvelopeParams::store2defaults()
 {
-  Denvstretch = Penvstretch;
+  m_stretch_default = m_stretch;
   m_forced_release_default = m_forced_release;
-  Dlinearenvelope = Plinearenvelope;
+  m_linear_default = m_linear;
 
   m_attack_duration_default = m_attack_duration;
   m_decay_duration_default = m_decay_duration;

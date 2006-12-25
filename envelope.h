@@ -41,8 +41,8 @@ private:
   int envsustain;               // "-1" means disabled
   float envdt[MAX_ENVELOPE_POINTS]; // millisecons
   float envval[MAX_ENVELOPE_POINTS]; // [0.0 .. 1.0]
-  float envstretch;
-  int linearenvelope;
+  float m_stretch;
+  BOOL m_linear;
 
   int currentpoint;             // current envelope point (starts from 1)
   BOOL m_forced_release;

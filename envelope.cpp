@@ -43,8 +43,8 @@ Envelope::Envelope(
 
   envsustain = (parameters_ptr->Penvsustain == 0) ? -1 : parameters_ptr->Penvsustain;
   m_forced_release = parameters_ptr->m_forced_release;
-  envstretch = pow(440.0 / basefreq, parameters_ptr->Penvstretch / 64.0);
-  linearenvelope = parameters_ptr->Plinearenvelope;
+  m_stretch = pow(440.0 / basefreq, parameters_ptr->m_stretch / 64.0);
+  m_linear = parameters_ptr->m_linear;
 
   if (!parameters_ptr->m_free_mode)
   {
@@ -56,19 +56,19 @@ Envelope::Envelope(
   mode = parameters_ptr->m_mode;
 
   // for amplitude envelopes
-  if (mode == ZYN_ENVELOPE_MODE_ADSR && linearenvelope == 0)
+  if (mode == ZYN_ENVELOPE_MODE_ADSR && !m_linear)
   {
     mode = ZYN_ENVELOPE_MODE_ADSR_DB; // change to log envelope
   }
 
-  if (mode == ZYN_ENVELOPE_MODE_ADSR_DB && linearenvelope != 0)
+  if (mode == ZYN_ENVELOPE_MODE_ADSR_DB && m_linear)
   {
     mode = ZYN_ENVELOPE_MODE_ADSR; // change to linear
   }
 
   for (i = 0 ; i < MAX_ENVELOPE_POINTS ; i++)
   {
-    float tmp = parameters_ptr->getdt(i) / 1000.0 * envstretch;
+    float tmp = parameters_ptr->getdt(i) / 1000.0 * m_stretch;
     if (tmp > buffer_duration)
     {
       envdt[i] = buffer_duration / tmp;
@@ -167,7 +167,7 @@ Envelope::envout()
       out = envoutval + (envval[tmp] - envoutval) * t;
     }
 
-    t += envdt[tmp] * envstretch;
+    t += envdt[tmp] * m_stretch;
 
     if (t >= 1.0)
     {
@@ -184,7 +184,7 @@ Envelope::envout()
     return out;
   }
 
-  if (inct>=1.0)
+  if (inct >= 1.0)
   {
     out = envval[currentpoint];
   }
@@ -224,7 +224,7 @@ Envelope::envout_dB()
 {
   float out;
 
-  if (linearenvelope != 0)
+  if (m_linear)
   {
     return envout();
   }

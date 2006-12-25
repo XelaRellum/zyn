@@ -35,7 +35,7 @@
 class EnvelopeParams
 {
 public:
-  EnvelopeParams(unsigned char Penvstretch_, BOOL forced_release);
+  EnvelopeParams(unsigned char stretch, BOOL forced_release);
   ~EnvelopeParams();
 
   void ADSRinit(char A_dt,char D_dt,char S_val,char R_dt);
@@ -60,11 +60,14 @@ private:
   unsigned char Penvdt[MAX_ENVELOPE_POINTS];
   unsigned char Penvval[MAX_ENVELOPE_POINTS];
 
-  unsigned char Penvstretch;    // 64 = normal stretch (piano-like), 0 = no stretch
+  // 0 = no stretch
+  // 64 = normal stretch (piano-like)
+  // 127 = 200% = envelope is stretched about 4 times/octave
+  unsigned char m_stretch;
 
   BOOL m_forced_release;
 
-  unsigned char Plinearenvelope; //if the amplitude envelope is linear
+  BOOL m_linear; // if the amplitude envelope is linear
 
   unsigned char m_attack_duration;
   unsigned char m_decay_duration;
@@ -79,11 +82,11 @@ private:
 
   /* Default parameters */
 
-  unsigned char Denvstretch;
+  unsigned char m_stretch_default;
 
   BOOL m_forced_release_default;
 
-  unsigned char Dlinearenvelope;
+  unsigned char m_linear_default;
 
   unsigned char m_attack_duration_default;
   unsigned char m_decay_duration_default;
