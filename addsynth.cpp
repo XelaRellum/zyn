@@ -260,6 +260,16 @@ zyn_addsynth_get_float_parameter(
     return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchStretch);
   case ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING:
     return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchVelocitySensing);
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_ATTACK:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_attack_duration);
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_DECAY:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_decay_duration);
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_SUSTAIN:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_sustain_value);
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_RELEASE:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_release_duration);
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_STRETCH:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_stretch) * 2;
   default:
     assert(0);
   }
@@ -294,6 +304,21 @@ zyn_addsynth_set_float_parameter(
   case ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING:
     zyn_addsynth_ptr->params_ptr->GlobalPar.PPunchVelocitySensing = percent_to_0_127(value);
     return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_ATTACK:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_attack_duration = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_DECAY:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_decay_duration = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_SUSTAIN:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_sustain_value = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_RELEASE:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_release_duration = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_ENV_STRETCH:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_stretch = percent_to_0_127(value/2);
+    return;
   default:
     assert(0);
   }
@@ -312,6 +337,10 @@ zyn_addsynth_get_bool_parameter(
     return zyn_addsynth_ptr->stereo;
   case ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING:
     return zyn_addsynth_ptr->random_grouping;
+  case ZYNADD_PARAMETER_BOOL_AMP_ENV_FORCED_RELEASE:
+    return zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_forced_release;
+  case ZYNADD_PARAMETER_BOOL_AMP_ENV_LINEAR:
+    return zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_linear;
   default:
     assert(0);
   }
@@ -333,6 +362,12 @@ zyn_addsynth_set_bool_parameter(
     return;
   case ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING:
     zyn_addsynth_ptr->random_grouping = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_AMP_ENV_FORCED_RELEASE:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_forced_release = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_AMP_ENV_LINEAR:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_linear = value;
     return;
   default:
     assert(0);

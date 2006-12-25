@@ -54,17 +54,24 @@ void
 zyn_addsynth_destroy(
   zyn_addsynth_handle handle);
 
-#define ZYNADD_PARAMETER_FLOAT_PANORAMA                   0
-#define ZYNADD_PARAMETER_FLOAT_VOLUME                     1
-#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING           2
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH             3
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_TIME                 4
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH              5
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING     6
+#define ZYNADD_PARAMETER_FLOAT_PANORAMA                   0 /* -1 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_VOLUME                     1 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING           2 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH             3 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_TIME                 4 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH              5 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING     6 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_ATTACK             7 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_DECAY              8 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_SUSTAIN            9 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_RELEASE           10 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_STRETCH           11 /* 0 .. 200 */
 
 #define ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA             0
 #define ZYNADD_PARAMETER_BOOL_STEREO                      1
 #define ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING             2
+#define ZYNADD_PARAMETER_BOOL_AMP_ENV_FORCED_RELEASE      3
+#define ZYNADD_PARAMETER_BOOL_AMP_ENV_LINEAR              4
 
 float
 zyn_addsynth_get_float_parameter(

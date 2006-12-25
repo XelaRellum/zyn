@@ -49,8 +49,6 @@ public:
 
   REALTYPE getdt(char i);
 
-  friend class Envelope;
-private:
   void store2defaults();
 
   BOOL m_free_mode;             // free or ADSR/ASR mode
