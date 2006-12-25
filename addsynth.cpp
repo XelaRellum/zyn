@@ -39,33 +39,10 @@
 #include "Controller.h"
 #include "addnote.h"
 #include "util.h"
+#include "addsynth_internal.h"
+#include "log.h"
 
 #define ZYN_DEFAULT_POLYPHONY 60
-
-struct note_channel
-{
-  int midinote;               // MIDI note, -1 when note "channel" is not playing
-  ADnote * note_ptr;
-};
-
-struct zyn_addsynth
-{
-  unsigned int polyphony;
-  struct note_channel * notes_array;
-  ADnoteParameters * params_ptr;
-  FFTwrapper * fft_ptr;
-  Controller * ctl_ptr;
-  unsigned char velsns;         // velocity sensing (amplitude velocity scale)
-  zyn_sample_type oldfreq;      // this is used for portamento
-
-  BOOL random_panorama;         // whether panorama is random for each note
-  float panorama;               // -1.0 for left, 0.0 for center, 1.0 for right
-
-  BOOL stereo;                  // stereo or mono
-
-  // How the Harmonic Amplitude is applied to voices that use the same oscillator
-  BOOL random_grouping;
-};
 
 BOOL
 zyn_addsynth_create(
@@ -94,9 +71,21 @@ zyn_addsynth_create(
 
   zyn_addsynth_ptr->random_grouping = FALSE;
 
+  zyn_addsynth_ptr->amplitude_lfo_frequency = 80.0 / 127.0;
+  zyn_addsynth_ptr->amplitude_lfo_depth = 0;
+  zyn_addsynth_ptr->amplitude_lfo_random_start_phase = FALSE;
+  zyn_addsynth_ptr->amplitude_lfo_start_phase = 0.5;
+  zyn_addsynth_ptr->amplitude_lfo_depth_randomness_enabled = FALSE;
+  zyn_addsynth_ptr->amplitude_lfo_depth_randomness = 0.5;
+  zyn_addsynth_ptr->amplitude_lfo_frequency_randomness_enabled = FALSE;
+  zyn_addsynth_ptr->amplitude_lfo_frequency_randomness = 0.5;
+  zyn_addsynth_ptr->amplitude_lfo_delay = 0;
+  zyn_addsynth_ptr->amplitude_lfo_stretch = 0;
+  zyn_addsynth_ptr->amplitude_lfo_shape = ZYN_LFO_SHAPE_TYPE_SINE;
+
   for (note_index = 0 ; note_index < ZYN_DEFAULT_POLYPHONY ; note_index++)
   {
-    zyn_addsynth_ptr->notes_array[note_index].note_ptr = new ADnote(zyn_addsynth_ptr->params_ptr, zyn_addsynth_ptr->ctl_ptr);
+    zyn_addsynth_ptr->notes_array[note_index].note_ptr = new ADnote(zyn_addsynth_ptr, zyn_addsynth_ptr->params_ptr, zyn_addsynth_ptr->ctl_ptr);
     zyn_addsynth_ptr->notes_array[note_index].midinote = -1;
   }
 
@@ -270,7 +259,22 @@ zyn_addsynth_get_float_parameter(
     return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_release_duration);
   case ZYNADD_PARAMETER_FLOAT_AMP_ENV_STRETCH:
     return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_stretch) * 2;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY:
+    return zyn_addsynth_ptr->amplitude_lfo_frequency;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH:
+    return zyn_addsynth_ptr->amplitude_lfo_depth * 100;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_START_PHASE:
+    return zyn_addsynth_ptr->amplitude_lfo_start_phase;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DELAY:
+    return zyn_addsynth_ptr->amplitude_lfo_delay;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_STRETCH:
+    return zyn_addsynth_ptr->amplitude_lfo_stretch;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH_RANDOMNESS:
+    return zyn_addsynth_ptr->amplitude_lfo_depth_randomness * 100;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY_RANDOMNESS:
+    return zyn_addsynth_ptr->amplitude_lfo_frequency_randomness * 100;
   default:
+    LOG_ERROR("Unknown parameter %u", parameter);
     assert(0);
   }
 }
@@ -319,6 +323,27 @@ zyn_addsynth_set_float_parameter(
   case ZYNADD_PARAMETER_FLOAT_AMP_ENV_STRETCH:
     zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_stretch = percent_to_0_127(value/2);
     return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY:
+    zyn_addsynth_ptr->amplitude_lfo_frequency;
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH:
+    zyn_addsynth_ptr->amplitude_lfo_depth = value / 100;
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_START_PHASE:
+    zyn_addsynth_ptr->amplitude_lfo_start_phase = value;
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DELAY:
+    zyn_addsynth_ptr->amplitude_lfo_delay = value;
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_STRETCH:
+    zyn_addsynth_ptr->amplitude_lfo_stretch = value;
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH_RANDOMNESS:
+    zyn_addsynth_ptr->amplitude_lfo_depth_randomness = value / 100;
+    return;
+  case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY_RANDOMNESS:
+    zyn_addsynth_ptr->amplitude_lfo_frequency_randomness = value / 100;
+    return;
   default:
     assert(0);
   }
@@ -341,6 +366,12 @@ zyn_addsynth_get_bool_parameter(
     return zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_forced_release;
   case ZYNADD_PARAMETER_BOOL_AMP_ENV_LINEAR:
     return zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_linear;
+  case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_START_PHASE:
+    return zyn_addsynth_ptr->amplitude_lfo_random_start_phase;
+  case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_DEPTH:
+    return zyn_addsynth_ptr->amplitude_lfo_depth_randomness_enabled;
+  case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_FREQUENCY:
+    return zyn_addsynth_ptr->amplitude_lfo_frequency_randomness_enabled;
   default:
     assert(0);
   }
@@ -368,6 +399,15 @@ zyn_addsynth_set_bool_parameter(
     return;
   case ZYNADD_PARAMETER_BOOL_AMP_ENV_LINEAR:
     zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_linear = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_START_PHASE:
+    zyn_addsynth_ptr->amplitude_lfo_random_start_phase = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_DEPTH:
+    zyn_addsynth_ptr->amplitude_lfo_depth_randomness_enabled = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_FREQUENCY:
+    zyn_addsynth_ptr->amplitude_lfo_frequency_randomness_enabled = value;
     return;
   default:
     assert(0);

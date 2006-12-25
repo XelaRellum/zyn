@@ -35,6 +35,7 @@ class ADnote
 {
 public:
   ADnote(
+    struct zyn_addsynth * synth_ptr,
     ADnoteParameters * partparams,
     Controller * ctl);
 
@@ -255,6 +256,10 @@ private:
     
   //how the fine detunes are made bigger or smaller
   REALTYPE m_bandwidth_detune_multiplier;
+
+  LFO m_ampllitude_lfo;
+
+  struct zyn_addsynth * m_synth_ptr;
 };
 
 #endif

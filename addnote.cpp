@@ -39,8 +39,10 @@
 #include "filter.h"
 #include "envelope.h"
 #include "addnote.h"
+#include "addsynth_internal.h"
 
 ADnote::ADnote(
+  struct zyn_addsynth * synth_ptr,
   ADnoteParameters * partparams,
   Controller * ctl)
 {
@@ -61,6 +63,8 @@ ADnote::ADnote(
   m_bandwidth_detune_multiplier = partparams->getBandwidthDetuneMultiplier();
 
   m_note_enabled = FALSE;
+
+  m_synth_ptr = synth_ptr;
 }
 
 void
@@ -73,6 +77,7 @@ ADnote::note_on(
   int midinote)
 {
   int voice_index;
+  int i;
 
   m_portamento = portamento;
   m_midinote = midinote;
@@ -175,7 +180,7 @@ ADnote::note_on(
       m_partparams->VoicePar[voice_index].Presonance);
 
     //I store the first elments to the last position for speedups
-    for (int i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) NoteVoicePar[voice_index].OscilSmp[OSCIL_SIZE+i]=NoteVoicePar[voice_index].OscilSmp[i];
+    for (i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) NoteVoicePar[voice_index].OscilSmp[OSCIL_SIZE+i]=NoteVoicePar[voice_index].OscilSmp[i];
 
     oscposhi[voice_index]+=(int)((m_partparams->VoicePar[voice_index].Poscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
     oscposhi[voice_index]%=OSCIL_SIZE;
@@ -230,98 +235,27 @@ ADnote::note_on(
     NoteVoicePar[voice_index].DelayTicks=(int)((exp(m_partparams->VoicePar[voice_index].PDelay/127.0*log(50.0))-1.0)/SOUND_BUFFER_SIZE/10.0*SAMPLE_RATE);
   }
 
-  initparameters(random_grouping);
-}
-
-/*
- * Kill a voice of ADnote
- */
-void ADnote::KillVoice(int nvoice){
-
-  delete [] (NoteVoicePar[nvoice].OscilSmp);
-
-  if (NoteVoicePar[nvoice].FreqEnvelope!=NULL) delete(NoteVoicePar[nvoice].FreqEnvelope);
-  NoteVoicePar[nvoice].FreqEnvelope=NULL;
-
-  if (NoteVoicePar[nvoice].FreqLfo!=NULL) delete(NoteVoicePar[nvoice].FreqLfo);
-  NoteVoicePar[nvoice].FreqLfo=NULL;
-
-  if (NoteVoicePar[nvoice].AmpEnvelope!=NULL) delete (NoteVoicePar[nvoice].AmpEnvelope);
-  NoteVoicePar[nvoice].AmpEnvelope=NULL;
-
-  if (NoteVoicePar[nvoice].AmpLfo!=NULL) delete (NoteVoicePar[nvoice].AmpLfo);
-  NoteVoicePar[nvoice].AmpLfo=NULL;
-
-  if (NoteVoicePar[nvoice].VoiceFilter!=NULL) delete (NoteVoicePar[nvoice].VoiceFilter);
-  NoteVoicePar[nvoice].VoiceFilter=NULL;
-
-  if (NoteVoicePar[nvoice].FilterEnvelope!=NULL) delete (NoteVoicePar[nvoice].FilterEnvelope);
-  NoteVoicePar[nvoice].FilterEnvelope=NULL;
-
-  if (NoteVoicePar[nvoice].FilterLfo!=NULL) delete (NoteVoicePar[nvoice].FilterLfo);
-  NoteVoicePar[nvoice].FilterLfo=NULL;
-
-  if (NoteVoicePar[nvoice].FMFreqEnvelope!=NULL) delete (NoteVoicePar[nvoice].FMFreqEnvelope);
-  NoteVoicePar[nvoice].FMFreqEnvelope=NULL;
-
-  if (NoteVoicePar[nvoice].FMAmpEnvelope!=NULL) delete (NoteVoicePar[nvoice].FMAmpEnvelope);
-  NoteVoicePar[nvoice].FMAmpEnvelope=NULL;
-
-  if ((NoteVoicePar[nvoice].FMEnabled!=NONE)&&(NoteVoicePar[nvoice].FMVoice<0)) delete NoteVoicePar[nvoice].FMSmp;
-
-  if (NoteVoicePar[nvoice].VoiceOut!=NULL)
-    for (int i=0;i<SOUND_BUFFER_SIZE;i++) NoteVoicePar[nvoice].VoiceOut[i]=0.0;//do not delete, yet: perhaps is used by another voice
-
-  NoteVoicePar[nvoice].enabled = FALSE;
-}
-
-/*
- * Kill the note
- */
-void ADnote::KillNote(){
-  int nvoice;
-  for (nvoice=0;nvoice<NUM_VOICES;nvoice++){
-    if (NoteVoicePar[nvoice].enabled) KillVoice(nvoice);
-
-    //delete VoiceOut
-    if (NoteVoicePar[nvoice].VoiceOut!=NULL) delete(NoteVoicePar[nvoice].VoiceOut);
-    NoteVoicePar[nvoice].VoiceOut=NULL;
-  }
-
-  delete (m_note_global_parameters.FreqEnvelope);
-  delete (m_note_global_parameters.FreqLfo);
-  delete (m_note_global_parameters.AmpEnvelope);
-  delete (m_note_global_parameters.AmpLfo);
-  delete (m_note_global_parameters.GlobalFilterL);
-  if (m_stereo) delete (m_note_global_parameters.GlobalFilterR);
-  delete (m_note_global_parameters.FilterEnvelope);
-  delete (m_note_global_parameters.FilterLfo);
-
-  m_note_enabled = FALSE;
-}
-
-ADnote::~ADnote(){
-  if (m_note_enabled) KillNote();
-  delete [] m_tmpwave;
-  delete [] m_bypassl;
-  delete [] m_bypassr;
-}
-
-/*
- * Init the parameters
- */
-void
-ADnote::initparameters(
-  BOOL random_grouping)
-{
-  int nvoice,i,tmp[NUM_VOICES];
+  int nvoice,tmp[NUM_VOICES];
 
   // Global Parameters
   m_note_global_parameters.FreqEnvelope=new Envelope(m_partparams->GlobalPar.FreqEnvelope,m_basefreq);
   m_note_global_parameters.FreqLfo=new LFO(m_partparams->GlobalPar.FreqLfo,m_basefreq);
 
   m_note_global_parameters.AmpEnvelope=new Envelope(m_partparams->GlobalPar.AmpEnvelope,m_basefreq);
-  m_note_global_parameters.AmpLfo=new LFO(m_partparams->GlobalPar.AmpLfo,m_basefreq);
+
+  m_ampllitude_lfo.init(
+    m_basefreq,
+    m_synth_ptr->amplitude_lfo_frequency,
+    m_synth_ptr->amplitude_lfo_depth,
+    m_synth_ptr->amplitude_lfo_random_start_phase ? zyn_random() : m_synth_ptr->amplitude_lfo_start_phase,
+    m_synth_ptr->amplitude_lfo_delay,
+    m_synth_ptr->amplitude_lfo_stretch,
+    m_synth_ptr->amplitude_lfo_depth_randomness_enabled,
+    m_synth_ptr->amplitude_lfo_depth_randomness,
+    m_synth_ptr->amplitude_lfo_frequency_randomness_enabled,
+    m_synth_ptr->amplitude_lfo_frequency_randomness,
+    ZYN_LFO_TYPE_AMPLITUDE,
+    m_synth_ptr->amplitude_lfo_shape);
 
   m_note_global_parameters.Volume=4.0*pow(0.1,3.0*(1.0-m_partparams->GlobalPar.PVolume/96.0))//-60 dB .. 0 dB
     *VelF(m_velocity,m_partparams->GlobalPar.PAmpVelocityScaleFunction);//velocity sensing
@@ -441,7 +375,79 @@ ADnote::initparameters(
   }
 }
 
+/*
+ * Kill a voice of ADnote
+ */
+void ADnote::KillVoice(int nvoice){
 
+  delete [] (NoteVoicePar[nvoice].OscilSmp);
+
+  if (NoteVoicePar[nvoice].FreqEnvelope!=NULL) delete(NoteVoicePar[nvoice].FreqEnvelope);
+  NoteVoicePar[nvoice].FreqEnvelope=NULL;
+
+  if (NoteVoicePar[nvoice].FreqLfo!=NULL) delete(NoteVoicePar[nvoice].FreqLfo);
+  NoteVoicePar[nvoice].FreqLfo=NULL;
+
+  if (NoteVoicePar[nvoice].AmpEnvelope!=NULL) delete (NoteVoicePar[nvoice].AmpEnvelope);
+  NoteVoicePar[nvoice].AmpEnvelope=NULL;
+
+  if (NoteVoicePar[nvoice].AmpLfo!=NULL) delete (NoteVoicePar[nvoice].AmpLfo);
+  NoteVoicePar[nvoice].AmpLfo=NULL;
+
+  if (NoteVoicePar[nvoice].VoiceFilter!=NULL) delete (NoteVoicePar[nvoice].VoiceFilter);
+  NoteVoicePar[nvoice].VoiceFilter=NULL;
+
+  if (NoteVoicePar[nvoice].FilterEnvelope!=NULL) delete (NoteVoicePar[nvoice].FilterEnvelope);
+  NoteVoicePar[nvoice].FilterEnvelope=NULL;
+
+  if (NoteVoicePar[nvoice].FilterLfo!=NULL) delete (NoteVoicePar[nvoice].FilterLfo);
+  NoteVoicePar[nvoice].FilterLfo=NULL;
+
+  if (NoteVoicePar[nvoice].FMFreqEnvelope!=NULL) delete (NoteVoicePar[nvoice].FMFreqEnvelope);
+  NoteVoicePar[nvoice].FMFreqEnvelope=NULL;
+
+  if (NoteVoicePar[nvoice].FMAmpEnvelope!=NULL) delete (NoteVoicePar[nvoice].FMAmpEnvelope);
+  NoteVoicePar[nvoice].FMAmpEnvelope=NULL;
+
+  if ((NoteVoicePar[nvoice].FMEnabled!=NONE)&&(NoteVoicePar[nvoice].FMVoice<0)) delete NoteVoicePar[nvoice].FMSmp;
+
+  if (NoteVoicePar[nvoice].VoiceOut!=NULL)
+    for (int i=0;i<SOUND_BUFFER_SIZE;i++) NoteVoicePar[nvoice].VoiceOut[i]=0.0;//do not delete, yet: perhaps is used by another voice
+
+  NoteVoicePar[nvoice].enabled = FALSE;
+}
+
+/*
+ * Kill the note
+ */
+void ADnote::KillNote(){
+  int nvoice;
+  for (nvoice=0;nvoice<NUM_VOICES;nvoice++){
+    if (NoteVoicePar[nvoice].enabled) KillVoice(nvoice);
+
+    //delete VoiceOut
+    if (NoteVoicePar[nvoice].VoiceOut!=NULL) delete(NoteVoicePar[nvoice].VoiceOut);
+    NoteVoicePar[nvoice].VoiceOut=NULL;
+  }
+
+  delete (m_note_global_parameters.FreqEnvelope);
+  delete (m_note_global_parameters.FreqLfo);
+  delete (m_note_global_parameters.AmpEnvelope);
+  delete (m_note_global_parameters.AmpLfo);
+  delete (m_note_global_parameters.GlobalFilterL);
+  if (m_stereo) delete (m_note_global_parameters.GlobalFilterR);
+  delete (m_note_global_parameters.FilterEnvelope);
+  delete (m_note_global_parameters.FilterLfo);
+
+  m_note_enabled = FALSE;
+}
+
+ADnote::~ADnote(){
+  if (m_note_enabled) KillNote();
+  delete [] m_tmpwave;
+  delete [] m_bypassl;
+  delete [] m_bypassr;
+}
 
 /*
  * Computes the frequency of an oscillator

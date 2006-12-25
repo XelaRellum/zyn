@@ -21,7 +21,21 @@
 #ifndef LOG_H__7097F6FE_4FEE_4962_9542_60375961F567__INCLUDED
 #define LOG_H__7097F6FE_4FEE_4962_9542_60375961F567__INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#if 0
+} /* Adjust editor indent */
+#endif
+
 void zyn_log(int level, const char * format, ...);
+
+#if 0
+{ /* Adjust editor indent */
+#endif
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #define LOG_LEVEL_DEBUG      0
 #define LOG_LEVEL_INFO       1

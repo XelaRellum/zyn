@@ -24,53 +24,42 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 
 #include "globals.h"
 #include "lfo_parameters.h"
 #include "lfo.h"
 
-LFO::LFO(
-  LFOParams *lfopars,
-  float basefreq)
+void
+LFO::init(
+  float base_frequency,         // note
+  float frequency,              // lfo
+  float depth,
+  float start_phase,
+  float delay,
+  float stretch,
+  BOOL depth_randomness_enabled,
+  float depth_randomness,
+  BOOL frequency_randomness_enabled,
+  float frequency_randomness,
+  unsigned int type,            // one of ZYN_LFO_TYPE_XXX
+  unsigned int shape)           // one of ZYN_LFO_SHAPE_TYPE_XXX
 {
   float lfostretch;
   float lfofreq;
   float tmp;
 
-  if (lfopars->Pstretch == 0)
-  {
-    lfopars->Pstretch = 1;
-  }
-
   // max 2x/octave
-  lfostretch = pow(
-    basefreq / 440.0,
-    (lfopars->Pstretch - 64.0) / 63.0);
+  lfostretch = pow(base_frequency / 440.0, stretch);
 
-  lfofreq = pow(2, lfopars->Pfreq * 10.0);
+  lfofreq = pow(2, frequency * 10.0);
   lfofreq -= 1.0;
   lfofreq /= 12.0;
   lfofreq *= lfostretch;
 
   m_incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
 
-  if (lfopars->Pcontinous==0)
-  {
-    if (lfopars->Pstartphase == 0)
-    {
-      m_x = zyn_random();
-    }
-    else
-    {
-      m_x = fmod((lfopars->Pstartphase - 64.0) / 127.0 + 1.0, 1.0);
-    }
-  }
-  else
-  {
-    tmp = fmod(lfopars->time * m_incx, 1.0);
-
-    m_x = fmod((lfopars->Pstartphase - 64.0) / 127.0 + 1.0 + tmp, 1.0);
-  }
+  m_x = start_phase;
 
   // Limit the Frequency(or else...)
   if (m_incx > 0.49999999)
@@ -78,45 +67,96 @@ LFO::LFO(
     m_incx = 0.499999999;
   }
 
-  m_lfornd = lfopars->Prandomness / 127.0;
+  m_depth_randomness_enabled = depth_randomness_enabled;
 
-  if (m_lfornd < 0.0)
+  if (depth_randomness_enabled)
   {
-    m_lfornd = 0.0;
+    if (depth_randomness < 0.0)
+    {
+      assert(0);                  // this should be checked by caller
+      m_depth_randomness = 0.0;
+    }
+    else if (depth_randomness > 1.0)
+    {
+      assert(0);                  // this should be checked by caller
+      m_depth_randomness = 1.0;
+    }
+    else
+    {
+      m_depth_randomness = depth_randomness;
+    }
+
+    m_amp1 = (1 - m_depth_randomness) + m_depth_randomness * zyn_random();
+    m_amp2 = (1 - m_depth_randomness) + m_depth_randomness * zyn_random();
   }
-  else if (m_lfornd > 1.0)
+  else
   {
-    m_lfornd = 1.0;
+    m_amp1 = 1;
+    m_amp2 = 1;
   }
 
-//    lfofreqrnd = pow(lfopars->Pfreqrand/127.0, 2.0) * 2.0 * 4.0;
-  m_lfofreqrnd = pow(lfopars->Pfreqrand/127.0, 2.0) * 4.0;
+  m_frequency_randomness_enabled = frequency_randomness_enabled;
 
-  switch (lfopars->fel)
+  if (frequency_randomness_enabled)
   {
-  case 1:
-    m_lfointensity = lfopars->Pintensity / 127.0;
+//    m_frequency_randomness = pow(frequency_randomness, 2.0) * 2.0 * 4.0;
+    m_frequency_randomness = pow(frequency_randomness, 2.0) * 4.0;
+  }
+
+  switch (type)
+  {
+  case ZYN_LFO_TYPE_AMPLITUDE:
+    m_lfointensity = depth;
     break;
 
-  case 2:                       // in octave
-    m_lfointensity = lfopars->Pintensity / 127.0 * 4.0;
+  case ZYN_LFO_TYPE_FILTER:     // in octave
+    m_lfointensity = depth * 4.0;
     break;
 
-  default:                      // in centi
-    m_lfointensity = pow(2, lfopars->Pintensity / 127.0 * 11.0) - 1.0;
+  case ZYN_LFO_TYPE_FREQUENCY:  // in centi
+    m_lfointensity = pow(2, depth * 11.0) - 1.0;
     m_x -= 0.25;                // chance the starting phase
+    break;
+
+  default:
+    assert(0);
   }
 
-  m_amp1 = (1 - m_lfornd) + m_lfornd * zyn_random();
-  m_amp2 = (1 - m_lfornd) + m_lfornd * zyn_random();
-  m_lfotype = lfopars->PLFOtype;
-  m_lfodelay = lfopars->Pdelay / 127.0 * 4.0; // 0..4 sec
+  m_shape = shape;
+  m_delay = delay;
   m_incrnd = m_nextincrnd = 1.0;
-  m_freqrndenabled = lfopars->Pfreqrand != 0;
 
   // twice because I want incrnd & nextincrnd to be random
   computenextincrnd();
   computenextincrnd();
+}
+
+LFO::LFO(
+  LFOParams *lfopars,
+  float basefreq)
+{
+  if (lfopars->Pstretch == 0)
+  {
+    lfopars->Pstretch = 1;
+  }
+
+  init(
+    basefreq,
+    lfopars->Pfreq,
+    lfopars->Pintensity / 127.0,
+    (lfopars->Pstartphase - 64.0) / 127.0 + 1.0,
+    lfopars->Pdelay / 127.0 * 4.0,
+    (lfopars->Pstretch - 64.0) / 63.0,
+    lfopars->Prandomness != 0,
+    lfopars->Prandomness / 127.0,
+    lfopars->Pfreqrand != 0,
+    lfopars->Pfreqrand / 127.0,
+    lfopars->fel,
+    lfopars->PLFOtype);
+}
+
+LFO::LFO()
+{
 }
 
 LFO::~LFO()
@@ -132,9 +172,11 @@ LFO::lfoout()
   float out;
   float tmp;
 
-  switch (m_lfotype)
+  switch (m_shape)
   {
-  case 1:                       // LFO_TRIANGLE
+  case ZYN_LFO_SHAPE_TYPE_SINE:
+    out = cos(m_x * 2.0 * PI);
+  case ZYN_LFO_SHAPE_TYPE_TRIANGLE:
     if ((m_x >= 0.0) && (m_x < 0.25))
     {
       out = 4.0 * m_x;
@@ -150,7 +192,7 @@ LFO::lfoout()
 
     break;
 
-  case 2:                       // LFO_SQUARE
+  case ZYN_LFO_SHAPE_TYPE_SQUARE:
     if (m_x < 0.5)
     {
       out =- 1;
@@ -162,27 +204,28 @@ LFO::lfoout()
 
     break;
 
-  case 3:                       // LFO_RAMPUP
+  case ZYN_LFO_SHAPE_TYPE_RAMP_UP:
     out = (m_x - 0.5) * 2.0;
     break;
 
-  case 4:                       // LFO_RAMPDOWN
+  case ZYN_LFO_SHAPE_TYPE_RAMP_DOWN:
     out = (0.5 - m_x) * 2.0;
     break;
 
-  case 5:                       // LFO_EXP_DOWN 1
+  case ZYN_LFO_SHAPE_TYPE_EXP_DOWN_1:
     out = pow(0.05, m_x) * 2.0 - 1.0;
     break;
 
-  case 6:                       // LFO_EXP_DOWN 2
+  case ZYN_LFO_SHAPE_TYPE_EXP_DOWN_2:
     out = pow(0.001, m_x) * 2.0 - 1.0;
     break;
 
-  default:                      // LFO_SINE
-    out = cos(m_x * 2.0 * PI);
+  default:
+    assert(0);
   };
 
-  if ((m_lfotype == 0) || (m_lfotype == 1))
+  if ((m_shape == ZYN_LFO_SHAPE_TYPE_SINE) ||
+      (m_shape == ZYN_LFO_SHAPE_TYPE_TRIANGLE))
   {
     out *= m_lfointensity * (m_amp1 + m_x * (m_amp2 - m_amp1));
   }
@@ -191,9 +234,9 @@ LFO::lfoout()
     out *= m_lfointensity * m_amp2;
   }
 
-  if (m_lfodelay < 0.00001)
+  if (m_delay < 0.00001)
   {
-    if (m_freqrndenabled == 0)
+    if (m_frequency_randomness_enabled == 0)
     {
       m_x += m_incx;
     }
@@ -216,18 +259,26 @@ LFO::lfoout()
     {
       m_x = fmod(m_x, 1.0);
       m_amp1 = m_amp2;
-      m_amp2 = (1 - m_lfornd) + m_lfornd * zyn_random();
+
+      if (m_depth_randomness_enabled)
+      {
+        m_amp2 = (1 - m_depth_randomness) + m_depth_randomness * zyn_random();
+      }
+      else
+      {
+        m_amp2 = 1;
+      }
 
       computenextincrnd();
     }
   }
   else
   {
-    m_lfodelay -= (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
+    m_delay -= (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
   }
 
   return out;
-};
+}
 
 /*
  * LFO out (for amplitude)
@@ -249,19 +300,17 @@ LFO::amplfoout()
   }
 
   return out;
-};
-
+}
 
 void
 LFO::computenextincrnd()
 {
-  if (m_freqrndenabled == 0)
+  if (!m_frequency_randomness_enabled)
   {
     return;
   }
 
   m_incrnd = m_nextincrnd;
 
-  m_nextincrnd = pow(0.5, m_lfofreqrnd) + zyn_random() * (pow(2.0, m_lfofreqrnd) - 1.0);
-};
-
+  m_nextincrnd = pow(0.5, m_frequency_randomness) + zyn_random() * (pow(2.0, m_frequency_randomness) - 1.0);
+}

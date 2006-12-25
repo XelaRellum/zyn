@@ -24,9 +24,39 @@
 #ifndef LFO_H
 #define LFO_H
 
+#define ZYN_LFO_TYPE_FREQUENCY     0
+#define ZYN_LFO_TYPE_AMPLITUDE     1
+#define ZYN_LFO_TYPE_FILTER        2
+
+#define ZYN_LFO_SHAPE_TYPE_SINE        0
+#define ZYN_LFO_SHAPE_TYPE_TRIANGLE    1
+#define ZYN_LFO_SHAPE_TYPE_SQUARE      2
+#define ZYN_LFO_SHAPE_TYPE_RAMP_UP     3
+#define ZYN_LFO_SHAPE_TYPE_RAMP_DOWN   4
+#define ZYN_LFO_SHAPE_TYPE_EXP_DOWN_1  5
+#define ZYN_LFO_SHAPE_TYPE_EXP_DOWN_2  6
+
 class LFO
 {
 public:
+  LFO::LFO();
+
+  void
+  LFO::init(
+    float base_frequency,       // note
+    float frequency,            // lfo, 0 .. 1
+    float depth,                // 0 .. 1
+    float start_phase,          // 0 .. 1
+    float delay,                // 0 .. 4, seconds
+    float stretch,              // -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch)
+    BOOL depth_randomness_enabled,
+    float depth_randomness,     // 0 .. 1
+    BOOL frequency_randomness_enabled,
+    float frequency_randomness, // 0 .. 1
+    unsigned int type,          // one of ZYN_LFO_TYPE_XXX
+    unsigned int shape);        // one of ZYN_LFO_SHAPE_TYPE_XXX
+
+  // legacy
   LFO(LFOParams *lfopars, float basefreq);
 
   ~LFO();
@@ -50,14 +80,14 @@ private:
 
   float m_lfointensity;
 
-  float m_lfornd;
-  float m_lfofreqrnd;
+  BOOL m_depth_randomness_enabled;
+  float m_depth_randomness;
+  BOOL m_frequency_randomness_enabled;
+  float m_frequency_randomness;
 
-  float m_lfodelay;
+  float m_delay;
 
-  char m_lfotype;
-
-  int m_freqrndenabled;
+  char m_shape;
 };
 
 #endif

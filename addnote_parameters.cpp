@@ -42,7 +42,6 @@ ADnoteParameters::ADnoteParameters(
     
   GlobalPar.AmpEnvelope=new EnvelopeParams(64,1);
   GlobalPar.AmpEnvelope->ADSRinit_dB(0,40,127,25);
-  GlobalPar.AmpLfo=new LFOParams(80,0,64,0,0,0,0,1);
 
   GlobalPar.GlobalFilter=new FilterParams(2,94,40);
   GlobalPar.FilterEnvelope=new EnvelopeParams(0,1);
@@ -70,7 +69,6 @@ void ADnoteParameters::defaults(){
   GlobalPar.PVolume=90;
   GlobalPar.PAmpVelocityScaleFunction=64;
   GlobalPar.AmpEnvelope->defaults();
-  GlobalPar.AmpLfo->defaults();
   GlobalPar.PPunchStrength=0;
   GlobalPar.PPunchTime=60;
   GlobalPar.PPunchStretch=64;
@@ -216,7 +214,6 @@ ADnoteParameters::~ADnoteParameters(){
   delete(GlobalPar.FreqEnvelope);
   delete(GlobalPar.FreqLfo);
   delete(GlobalPar.AmpEnvelope);
-  delete(GlobalPar.AmpLfo);
   delete(GlobalPar.GlobalFilter);
   delete(GlobalPar.FilterEnvelope);
   delete(GlobalPar.FilterLfo);

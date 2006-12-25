@@ -63,8 +63,6 @@ struct ADnoteGlobalParam{
 
   EnvelopeParams *AmpEnvelope;
    
-  LFOParams *AmpLfo;   
-
   // 0-127
   unsigned char PPunchStrength;
 
