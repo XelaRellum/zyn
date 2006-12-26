@@ -261,7 +261,7 @@ ADnote::note_on(
     *VelF(m_velocity,m_partparams->GlobalPar.PAmpVelocityScaleFunction);//velocity sensing
 
   m_note_global_parameters.AmpEnvelope->envout_dB();//discard the first envelope output
-  globalnewamplitude=m_note_global_parameters.Volume*m_note_global_parameters.AmpEnvelope->envout_dB()*m_note_global_parameters.AmpLfo->amplfoout();
+  globalnewamplitude=m_note_global_parameters.Volume*m_note_global_parameters.AmpEnvelope->envout_dB() * m_ampllitude_lfo.amplfoout();
 
   m_note_global_parameters.GlobalFilterL=new Filter(m_partparams->GlobalPar.GlobalFilter);
   if (m_stereo) m_note_global_parameters.GlobalFilterR=new Filter(m_partparams->GlobalPar.GlobalFilter);
@@ -433,7 +433,6 @@ void ADnote::KillNote(){
   delete (m_note_global_parameters.FreqEnvelope);
   delete (m_note_global_parameters.FreqLfo);
   delete (m_note_global_parameters.AmpEnvelope);
-  delete (m_note_global_parameters.AmpLfo);
   delete (m_note_global_parameters.GlobalFilterL);
   if (m_stereo) delete (m_note_global_parameters.GlobalFilterR);
   delete (m_note_global_parameters.FilterEnvelope);
@@ -549,7 +548,7 @@ ADnote::computecurrentparameters()
   globalnewamplitude =
     m_note_global_parameters.Volume *
     m_note_global_parameters.AmpEnvelope->envout_dB() *
-    m_note_global_parameters.AmpLfo->amplfoout();
+    m_ampllitude_lfo.amplfoout();
 
   globalfilterpitch =
     m_note_global_parameters.FilterEnvelope->envout() +
