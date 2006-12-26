@@ -19,7 +19,7 @@ LIBRARIES = -lfftw3
 
 CC = gcc -c -Wall -Werror
 CXX = g++ -c
-CFLAGS = -g -fPIC -DPIC
+CFLAGS = -g -fPIC -DPIC -Wall
 
 # The lv2peg program - edit if it's not in your path
 LV2PEG = lv2peg
