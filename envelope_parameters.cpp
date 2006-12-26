@@ -61,7 +61,7 @@ EnvelopeParams::~EnvelopeParams()
 {
 }
 
-REALTYPE EnvelopeParams::getdt(char i)
+REALTYPE EnvelopeParams::getdt(unsigned char i)
 {
   return (pow(2.0 , Penvdt[i] / 127.0 * 12.0) - 1.0) * 10.0; // miliseconds
 }

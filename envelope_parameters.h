@@ -47,7 +47,7 @@ public:
 
   void defaults();
 
-  REALTYPE getdt(char i);
+  REALTYPE getdt(unsigned char i);
 
   void store2defaults();
 

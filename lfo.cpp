@@ -47,7 +47,6 @@ LFO::init(
 {
   float lfostretch;
   float lfofreq;
-  float tmp;
 
   // max 2x/octave
   lfostretch = pow(base_frequency / 440.0, stretch);
