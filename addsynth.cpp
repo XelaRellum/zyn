@@ -199,7 +199,7 @@ zyn_addsynth_note_off(
 
   for (note_index = 0 ; note_index < zyn_addsynth_ptr->polyphony ; note_index++)
   {
-    if (zyn_addsynth_ptr->notes_array[note_index].midinote == note)
+    if (zyn_addsynth_ptr->notes_array[note_index].midinote == (char)note)
     {
       zyn_addsynth_ptr->notes_array[note_index].note_ptr->relasekey();
     }
@@ -324,7 +324,7 @@ zyn_addsynth_set_float_parameter(
     zyn_addsynth_ptr->params_ptr->GlobalPar.AmpEnvelope->m_stretch = percent_to_0_127(value/2);
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY:
-    zyn_addsynth_ptr->amplitude_lfo_frequency;
+    zyn_addsynth_ptr->amplitude_lfo_frequency = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH:
     zyn_addsynth_ptr->amplitude_lfo_depth = value / 100;
