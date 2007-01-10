@@ -88,8 +88,6 @@ struct ADnoteGlobalParam{
     
   EnvelopeParams *FilterEnvelope;
     
-  LFOParams *FilterLfo;
-  
   // RESONANCE
   Resonance *Reson;
 };  

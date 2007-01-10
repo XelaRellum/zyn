@@ -46,7 +46,6 @@ ADnoteParameters::ADnoteParameters(
   GlobalPar.GlobalFilter=new FilterParams(2,94,40);
   GlobalPar.FilterEnvelope=new EnvelopeParams(0,1);
   GlobalPar.FilterEnvelope->ADSRinit_filter(64,40,64,70,60,64);
-  GlobalPar.FilterLfo=new LFOParams(80,0,64,0,0,0,0,2);
   GlobalPar.Reson=new Resonance();
 
   for (int nvoice=0;nvoice<NUM_VOICES;nvoice++) EnableVoice(nvoice);
@@ -79,7 +78,6 @@ void ADnoteParameters::defaults(){
   GlobalPar.PFilterVelocityScaleFunction=64;
   GlobalPar.GlobalFilter->defaults();
   GlobalPar.FilterEnvelope->defaults();
-  GlobalPar.FilterLfo->defaults();
   GlobalPar.Reson->defaults();
 
 
@@ -216,7 +214,6 @@ ADnoteParameters::~ADnoteParameters(){
   delete(GlobalPar.AmpEnvelope);
   delete(GlobalPar.GlobalFilter);
   delete(GlobalPar.FilterEnvelope);
-  delete(GlobalPar.FilterLfo);
   delete(GlobalPar.Reson);
 
   for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){

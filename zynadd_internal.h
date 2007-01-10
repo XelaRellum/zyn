@@ -56,7 +56,17 @@
 #define LV2DYNPARAM_PARAMETER_AMP_LFO_DEPTH_RANDOMNESS              24
 #define LV2DYNPARAM_PARAMETER_AMP_LFO_RANDOM_FREQUENCY              25
 #define LV2DYNPARAM_PARAMETER_AMP_LFO_FREQUENCY_RANDOMNESS          26
-#define LV2DYNPARAM_PARAMETERS_COUNT                                27
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_FREQUENCY                  27
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_DEPTH                      28
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_RANDOM_START_PHASE         29
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_START_PHASE                30
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_DELAY                      31
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_STRETCH                    32
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_RANDOM_DEPTH               33
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_DEPTH_RANDOMNESS           34
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_RANDOM_FREQUENCY           35
+#define LV2DYNPARAM_PARAMETER_FILTER_LFO_FREQUENCY_RANDOMNESS       36
+#define LV2DYNPARAM_PARAMETERS_COUNT                                37
 
 #define LV2DYNPARAM_GROUP_INVALID                                   -2
 #define LV2DYNPARAM_GROUP_ROOT                                      -1
@@ -75,11 +85,14 @@
 
 #define LV2DYNPARAM_GROUP_FILTER_ENVELOPE                           10
 #define LV2DYNPARAM_GROUP_FILTER_LFO                                11
+#define LV2DYNPARAM_GROUP_FILTER_LFO_START_PHASE                    12
+#define LV2DYNPARAM_GROUP_FILTER_LFO_DEPTH_RANDOMNESS               13
+#define LV2DYNPARAM_GROUP_FILTER_LFO_FREQUENCY_RANDOMNESS           14
+ 
+#define LV2DYNPARAM_GROUP_FREQUENCY_ENVELOPE                        15
+#define LV2DYNPARAM_GROUP_FREQUENCY_LFO                             16
 
-#define LV2DYNPARAM_GROUP_FREQUENCY_ENVELOPE                        12
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO                             13
-
-#define LV2DYNPARAM_GROUPS_COUNT                                    12
+#define LV2DYNPARAM_GROUPS_COUNT                                    17
 
 struct zynadd_parameter
 {

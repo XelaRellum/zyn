@@ -243,7 +243,7 @@ ADnote::note_on(
 
   m_note_global_parameters.AmpEnvelope=new Envelope(m_partparams->GlobalPar.AmpEnvelope,m_basefreq);
 
-  m_ampllitude_lfo.init(
+  m_amplitude_lfo.init(
     m_basefreq,
     m_synth_ptr->amplitude_lfo_frequency,
     m_synth_ptr->amplitude_lfo_depth,
@@ -261,13 +261,27 @@ ADnote::note_on(
     *VelF(m_velocity,m_partparams->GlobalPar.PAmpVelocityScaleFunction);//velocity sensing
 
   m_note_global_parameters.AmpEnvelope->envout_dB();//discard the first envelope output
-  globalnewamplitude=m_note_global_parameters.Volume*m_note_global_parameters.AmpEnvelope->envout_dB() * m_ampllitude_lfo.amplfoout();
+  globalnewamplitude=m_note_global_parameters.Volume*m_note_global_parameters.AmpEnvelope->envout_dB() * m_amplitude_lfo.amplfoout();
 
   m_note_global_parameters.GlobalFilterL=new Filter(m_partparams->GlobalPar.GlobalFilter);
   if (m_stereo) m_note_global_parameters.GlobalFilterR=new Filter(m_partparams->GlobalPar.GlobalFilter);
 
   m_note_global_parameters.FilterEnvelope=new Envelope(m_partparams->GlobalPar.FilterEnvelope,m_basefreq);
-  m_note_global_parameters.FilterLfo=new LFO(m_partparams->GlobalPar.FilterLfo,m_basefreq);
+
+  m_filter_lfo.init(
+    m_basefreq,
+    m_synth_ptr->filter_lfo_frequency,
+    m_synth_ptr->filter_lfo_depth,
+    m_synth_ptr->filter_lfo_random_start_phase ? zyn_random() : m_synth_ptr->filter_lfo_start_phase,
+    m_synth_ptr->filter_lfo_delay,
+    m_synth_ptr->filter_lfo_stretch,
+    m_synth_ptr->filter_lfo_depth_randomness_enabled,
+    m_synth_ptr->filter_lfo_depth_randomness,
+    m_synth_ptr->filter_lfo_frequency_randomness_enabled,
+    m_synth_ptr->filter_lfo_frequency_randomness,
+    ZYN_LFO_TYPE_FILTER,
+    m_synth_ptr->filter_lfo_shape);
+
   m_note_global_parameters.FilterQ=m_partparams->GlobalPar.GlobalFilter->getq();
   m_note_global_parameters.FilterFreqTracking=m_partparams->GlobalPar.GlobalFilter->getfreqtracking(m_basefreq);
 
@@ -436,7 +450,6 @@ void ADnote::KillNote(){
   delete (m_note_global_parameters.GlobalFilterL);
   if (m_stereo) delete (m_note_global_parameters.GlobalFilterR);
   delete (m_note_global_parameters.FilterEnvelope);
-  delete (m_note_global_parameters.FilterLfo);
 
   m_note_enabled = FALSE;
 }
@@ -548,11 +561,11 @@ ADnote::computecurrentparameters()
   globalnewamplitude =
     m_note_global_parameters.Volume *
     m_note_global_parameters.AmpEnvelope->envout_dB() *
-    m_ampllitude_lfo.amplfoout();
+    m_amplitude_lfo.amplfoout();
 
   globalfilterpitch =
     m_note_global_parameters.FilterEnvelope->envout() +
-    m_note_global_parameters.FilterLfo->lfoout() +
+    m_filter_lfo.lfoout() +
     m_note_global_parameters.FilterCenterPitch;
 
   temp_filter_frequency =

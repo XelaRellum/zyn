@@ -128,8 +128,6 @@ private:
     REALTYPE FilterFreqTracking;
     
     Envelope *FilterEnvelope;
-    
-    LFO *FilterLfo;
   } m_note_global_parameters;  
 
   /***********************************************************/
@@ -257,7 +255,8 @@ private:
   //how the fine detunes are made bigger or smaller
   REALTYPE m_bandwidth_detune_multiplier;
 
-  LFO m_ampllitude_lfo;
+  LFO m_amplitude_lfo;
+  LFO m_filter_lfo;
 
   struct zyn_addsynth * m_synth_ptr;
 };

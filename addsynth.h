@@ -54,36 +54,47 @@ void
 zyn_addsynth_destroy(
   zyn_addsynth_handle handle);
 
-#define ZYNADD_PARAMETER_FLOAT_PANORAMA                          0 /* -1 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_VOLUME                            1 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING                  2 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH                    3 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_TIME                        4 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH                     5 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING            6 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PANORAMA                             0 /* -1 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_VOLUME                               1 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING                     2 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH                       3 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_TIME                           4 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH                        5 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING               6 /* 0 .. 100 */
 
-#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_ATTACK                    7 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_DECAY                     8 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_SUSTAIN                   9 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_RELEASE                  10 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_STRETCH                  11 /* 0 .. 200 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_ATTACK                       7 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_DECAY                        8 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_SUSTAIN                      9 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_RELEASE                     10 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_ENV_STRETCH                     11 /* 0 .. 200 */
 
-#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY                12 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH                    13 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_START_PHASE              14 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_DELAY                    15 /* 0 .. 4?, seconds */
-#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_STRETCH                  16 /* -1 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH_RANDOMNESS         17 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY_RANDOMNESS     18 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY                   12 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH                       13 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_START_PHASE                 14 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_DELAY                       15 /* 0 .. 4?, seconds */
+#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_STRETCH                     16 /* -1 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH_RANDOMNESS            17 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY_RANDOMNESS        18 /* 0 .. 100 */
 
-#define ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA             0
-#define ZYNADD_PARAMETER_BOOL_STEREO                      1
-#define ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING             2
-#define ZYNADD_PARAMETER_BOOL_AMP_ENV_FORCED_RELEASE      3
-#define ZYNADD_PARAMETER_BOOL_AMP_ENV_LINEAR              4
-#define ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_START_PHASE  5
-#define ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_DEPTH        6
-#define ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_FREQUENCY    7
+#define ZYNADD_PARAMETER_FLOAT_FILTER_LFO_FREQUENCY                19 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DEPTH                    20 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_FILTER_LFO_START_PHASE              21 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DELAY                    22 /* 0 .. 4?, seconds */
+#define ZYNADD_PARAMETER_FLOAT_FILTER_LFO_STRETCH                  23 /* -1 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DEPTH_RANDOMNESS         24 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_FILTER_LFO_FREQUENCY_RANDOMNESS     25 /* 0 .. 100 */
+
+#define ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA                       0
+#define ZYNADD_PARAMETER_BOOL_STEREO                                1
+#define ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING                       2
+#define ZYNADD_PARAMETER_BOOL_AMP_ENV_FORCED_RELEASE                3
+#define ZYNADD_PARAMETER_BOOL_AMP_ENV_LINEAR                        4
+#define ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_START_PHASE            5
+#define ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_DEPTH                  6
+#define ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_FREQUENCY              7
+#define ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_START_PHASE         8
+#define ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_DEPTH               9
+#define ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_FREQUENCY          10
 
 float
 zyn_addsynth_get_float_parameter(
