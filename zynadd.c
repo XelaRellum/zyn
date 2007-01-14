@@ -25,14 +25,14 @@
 #include <math.h>
 
 #include "common.h"
-#include "lv2.h"
+#include "lv2dynparam/lv2.h"
 #include "lv2-miditype.h"
 #include "lv2-midifunctions.h"
 #include "zynadd.peg"
 #include "zynadd.h"
 #include "addsynth.h"
-#include "dynparam.h"
-#include "lv2dynparam.h"
+#include "lv2dynparam/lv2dynparam.h"
+#include "lv2dynparam/plugin.h"
 #include "zynadd_internal.h"
 //#define LOG_LEVEL LOG_LEVEL_DEBUG
 #include "log.h"
@@ -238,7 +238,7 @@ zynadd_extension_data(
 {
   if (strcmp(URI, LV2DYNPARAM_URI) == 0)
   {
-    return g_lv2dynparam_plugin_extension_data;
+    return get_lv2dynparam_plugin_extension_data();
   }
 
   return NULL;

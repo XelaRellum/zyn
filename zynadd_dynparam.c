@@ -21,11 +21,11 @@
 #include <assert.h>
 
 #include "common.h"
-#include "lv2.h"
+#include "lv2dynparam/lv2.h"
 #include "addsynth.h"
-#include "dynparam.h"
+#include "lv2dynparam/lv2dynparam.h"
+#include "lv2dynparam/plugin.h"
 #include "zynadd_internal.h"
-#include "lv2dynparam.h"
 
 #define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"

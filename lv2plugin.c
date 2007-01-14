@@ -26,7 +26,7 @@
 static LV2_Descriptor g_lv2_plugins[] =
 {
   {
-    .URI = "http://nedko.arnaudov.name/zynadd/0",
+    .URI = "http://home.gna.org/zyn/zynadd/0",
     .instantiate = zynadd_instantiate,
     .connect_port = zynadd_connect_port,
     .run = zynadd_run,

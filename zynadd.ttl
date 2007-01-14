@@ -4,12 +4,12 @@
 @prefix ll: <http://ll-plugins.nongnu.org/lv2/namespace#>.
 @prefix llext: <http://ll-plugins.nongnu.org/lv2/ext/>.
 
-<http://nedko.arnaudov.name/zynadd/0>
+<http://home.gna.org/zyn/zynadd/0>
   a lv2:Plugin;
   doap:name "zynadd";
   doap:licence <http://usefulinc.com/doap/licenses/gpl>;
 #  ll:standaloneGui <zynadd_gtk>;
-  lv2:optionalHostFeature <http://nedko.arnaudov.name/soft/zyn/lv2dynparam.h>;
+  lv2:optionalHostFeature <http://home.gna.org/lv2dynparam/>;
   ll:pegName "peg";  
 
   lv2:port [

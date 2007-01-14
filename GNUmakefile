@@ -15,11 +15,11 @@
 
 PLUGIN_NAME = zynadd
 VERSION = 0
-LIBRARIES = -lfftw3
+LIBRARIES = -DPIC -Wall $(strip $(shell pkg-config --libs fftw3 lv2dynparamplugin-1))
 
 CC = gcc -c -Wall -Werror
 CXX = g++ -c
-CFLAGS = -g -fPIC -DPIC -Wall
+CFLAGS := -g -fPIC -DPIC -Wall $(strip $(shell pkg-config --cflags fftw3 lv2dynparamplugin-1))
 
 # The lv2peg program - edit if it's not in your path
 LV2PEG = lv2peg
@@ -50,7 +50,7 @@ PLUGIN_SOURCES_CXX += lfo_parameters.cpp
 PLUGIN_SOURCES_CXX += resonance.cpp
 PLUGIN_SOURCES_CXX += Controller.cpp
 
-PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c dynparam.c dynparam_group.c dynparam_parameter.c zynadd_dynparam.c log.c
+PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c zynadd_dynparam.c log.c
 PLUGIN_HEADERS = lv2plugin.hpp lv2.h lv2-miditype.h lv2-midifunctions.h zynadd.peg
 
 # Derived variables - do not edit
@@ -91,7 +91,7 @@ $(PLUGIN_NAME).lv2: $(BUNDLE_FILES)
 # The plugin module
 zynadd.so: $(PLUGIN_OBJECTS)
 	@echo "Creating LV2 shared library $@ ..."
-	@g++ -shared -fPIC $(LDFLAGS) $(PLUGIN_OBJECTS) $(LIBRARIES) -o $@
+	g++ -shared -fPIC $(LDFLAGS) $(PLUGIN_OBJECTS) $(LIBRARIES) -o $@
 	@echo "Checking for undefined zyn symbols"
 	@nm $@ |grep ' U zyn' ; RESULT=$$? ; if test $${RESULT} -eq 0; then rm zynadd.so; fi ; test ! $${RESULT} -eq 0
 
