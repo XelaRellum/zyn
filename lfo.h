@@ -28,14 +28,6 @@
 #define ZYN_LFO_TYPE_AMPLITUDE     1
 #define ZYN_LFO_TYPE_FILTER        2
 
-#define ZYN_LFO_SHAPE_TYPE_SINE        0
-#define ZYN_LFO_SHAPE_TYPE_TRIANGLE    1
-#define ZYN_LFO_SHAPE_TYPE_SQUARE      2
-#define ZYN_LFO_SHAPE_TYPE_RAMP_UP     3
-#define ZYN_LFO_SHAPE_TYPE_RAMP_DOWN   4
-#define ZYN_LFO_SHAPE_TYPE_EXP_DOWN_1  5
-#define ZYN_LFO_SHAPE_TYPE_EXP_DOWN_2  6
-
 class LFO
 {
 public:

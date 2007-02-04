@@ -96,6 +96,8 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_DEPTH               9
 #define ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_FREQUENCY          10
 
+#define ZYNADD_PARAMETER_SHAPE_AMP_LFO                              0
+
 float
 zyn_addsynth_get_float_parameter(
   zyn_addsynth_handle handle,
@@ -117,6 +119,17 @@ zyn_addsynth_set_bool_parameter(
   zyn_addsynth_handle handle,
   unsigned int parameter,
   BOOL value);
+
+unsigned int
+zyn_addsynth_get_shape_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int parameter);
+
+void
+zyn_addsynth_set_shape_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int parameter,
+  unsigned int value);
 
 #if 0
 { /* Adjust editor indent */

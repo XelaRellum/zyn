@@ -18,10 +18,13 @@
  *
  *****************************************************************************/
 
+//#include <stdio.h>
+
 #include "common.h"
 #include "lv2.h"
 #include "lv2plugin.h"
 #include "zynadd.h"
+#include "lv2dynparam/plugin.h"
 
 static LV2_Descriptor g_lv2_plugins[] =
 {
@@ -39,13 +42,14 @@ static LV2_Descriptor g_lv2_plugins[] =
 };
 
 static int g_lv2_plugins_count;
+static BOOL g_lv2dynparam_inited;
 
 void lv2_initialise() __attribute__((constructor));
 void lv2_initialise()
 {
   const LV2_Descriptor * descr_ptr;
 
-/*   printf("initialise() called.\n"); */
+//  printf("lv2_initialise() called.\n");
 
   descr_ptr = g_lv2_plugins;
 
@@ -54,10 +58,17 @@ void lv2_initialise()
     g_lv2_plugins_count++;
     descr_ptr++;
   }
+
+  g_lv2dynparam_inited = lv2dynparam_plugin_init(100000, 10, 100);
 }
 
 const LV2_Descriptor* lv2_descriptor(uint32_t index)
 {
+  if (!g_lv2dynparam_inited)
+  {
+    return NULL;
+  }
+
 /*   printf("lv2_descriptor(%u) called.\n", (unsigned int)index); */
 
   if (index >= g_lv2_plugins_count)

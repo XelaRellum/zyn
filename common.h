@@ -54,6 +54,15 @@ struct FFTFREQS
 #define TRUE 1
 #define FALSE 0
 
+#define ZYN_LFO_SHAPE_TYPE_SINE        0
+#define ZYN_LFO_SHAPE_TYPE_TRIANGLE    1
+#define ZYN_LFO_SHAPE_TYPE_SQUARE      2
+#define ZYN_LFO_SHAPE_TYPE_RAMP_UP     3
+#define ZYN_LFO_SHAPE_TYPE_RAMP_DOWN   4
+#define ZYN_LFO_SHAPE_TYPE_EXP_DOWN_1  5
+#define ZYN_LFO_SHAPE_TYPE_EXP_DOWN_2  6
+#define ZYN_LFO_SHAPES_COUNT           7
+
 #ifdef __cplusplus
 extern "C" {
 #endif

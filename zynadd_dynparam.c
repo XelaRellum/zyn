@@ -65,6 +65,7 @@ struct parameter_descriptor
 /* this defines the tree hierarchy */
 struct group_descriptor g_map_groups[LV2DYNPARAM_GROUPS_COUNT];
 struct parameter_descriptor g_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+const char * g_shape_names[ZYN_LFO_SHAPES_COUNT];
 
 BOOL
 zynadd_bool_parameter_changed(
@@ -75,6 +76,12 @@ BOOL
 zynadd_float_parameter_changed(
   void * context,
   float value);
+
+BOOL
+zynadd_shape_parameter_changed(
+  void * context,
+  const char * value,
+  unsigned int value_index);
 
 BOOL
 zynadd_appear_parameter(
@@ -124,6 +131,23 @@ zynadd_appear_parameter(
           g_map_parameters[parameter_index].min.fpoint,
           g_map_parameters[parameter_index].max.fpoint,
           zynadd_float_parameter_changed,
+          zynadd_ptr->parameters + parameter_index,
+          &zynadd_ptr->parameters[parameter_index].lv2parameter))
+    {
+      return FALSE;
+    }
+
+    return TRUE;
+
+  case LV2DYNPARAM_PARAMETER_TYPE_SHAPE:
+    if (!lv2dynparam_plugin_param_enum_add(
+          zynadd_ptr->dynparams,
+          parent_group,
+          g_map_parameters[parameter_index].name,
+          g_shape_names,
+          ZYN_LFO_SHAPES_COUNT,
+          zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[parameter_index].addsynth_parameter),
+          zynadd_shape_parameter_changed,
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
@@ -201,10 +225,25 @@ zynadd_float_parameter_changed(
   return TRUE;
 }
 
+BOOL
+zynadd_shape_parameter_changed(
+  void * context,
+  const char * value,
+  unsigned int value_index)
+{
+  zyn_addsynth_set_shape_parameter(
+    parameter_ptr->synth_ptr->synth,
+    parameter_ptr->addsynth_parameter,
+    value_index);
+
+  return TRUE;
+}
+
 #undef parameter_ptr
 
 #define LV2DYNPARAM_GROUP(group) LV2DYNPARAM_GROUP_ ## group
 #define LV2DYNPARAM_PARAMETER(parameter) LV2DYNPARAM_PARAMETER_ ## parameter
+#define LV2DYNPARAM_PARAMETER_SHAPE(parameter) LV2DYNPARAM_PARAMETER_ ## parameter ## _SHAPE
 
 #define LV2DYNPARAM_GROUP_INIT_GENERIC(parent_group, group, name_value) \
   g_map_groups[LV2DYNPARAM_GROUP(group)].parent = LV2DYNPARAM_GROUP(parent_group); \
@@ -253,10 +292,29 @@ zynadd_float_parameter_changed(
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].max.fpoint = max_value; \
   g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## parameter;
 
+#define LV2DYNPARAM_PARAMETER_INIT_SHAPE(parent_group, parameter, name_value, scope_value) \
+  LOG_DEBUG("Registering %u (\"%s\") shape -> %u",                      \
+            LV2DYNPARAM_PARAMETER_SHAPE(parameter),                     \
+            name_value,                                                 \
+            ZYNADD_PARAMETER_SHAPE_ ## parameter);                      \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].name = name_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_SHAPE; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].addsynth_parameter = ZYNADD_PARAMETER_SHAPE_ ## parameter;
+
 void zynadd_map_initialise() __attribute__((constructor));
 void zynadd_map_initialise()
 {
   int i;
+
+  g_shape_names[ZYN_LFO_SHAPE_TYPE_SINE] = "Sine";
+  g_shape_names[ZYN_LFO_SHAPE_TYPE_TRIANGLE] = "Triangle";
+  g_shape_names[ZYN_LFO_SHAPE_TYPE_SQUARE] = "Square";
+  g_shape_names[ZYN_LFO_SHAPE_TYPE_RAMP_UP] = "Ramp Up";
+  g_shape_names[ZYN_LFO_SHAPE_TYPE_RAMP_DOWN] = "Ramp Down";
+  g_shape_names[ZYN_LFO_SHAPE_TYPE_EXP_DOWN_1] = "E1Down";
+  g_shape_names[ZYN_LFO_SHAPE_TYPE_EXP_DOWN_2] = "E2Down";
 
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
@@ -302,6 +360,7 @@ void zynadd_map_initialise()
 
     LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_LFO, "LFO");
     {
+      LV2DYNPARAM_PARAMETER_INIT_SHAPE(AMPLITUDE_LFO, AMP_LFO, "Shape", ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO, AMP_LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO, AMP_LFO_DEPTH, "Depth", 0, 100, ALWAYS);
 
@@ -473,6 +532,7 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
 
     if (!zynadd_appear_parameter(zynadd_ptr, i))
     {
+      LOG_ERROR("zynadd_appear_parameter() failed.");
       goto fail_clean_dynparams;
     }
   }

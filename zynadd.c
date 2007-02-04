@@ -92,6 +92,7 @@ zynadd_instantiate(
 
   if (!zynadd_dynparam_init(zynadd_ptr))
   {
+    LOG_ERROR("zynadd_dynparam_init() failed.");
     goto fail_destroy_synth;
   }
 

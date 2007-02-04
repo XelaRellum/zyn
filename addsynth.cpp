@@ -475,3 +475,19 @@ zyn_addsynth_set_bool_parameter(
     assert(0);
   }
 }
+
+unsigned int
+zyn_addsynth_get_shape_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int parameter)
+{
+  return 0;
+}
+
+void
+zyn_addsynth_set_shape_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int parameter,
+  unsigned int value)
+{
+}
