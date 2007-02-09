@@ -285,6 +285,22 @@ zyn_addsynth_get_float_parameter(
     return zyn_addsynth_ptr->amplitude_lfo_depth_randomness * 100;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY_RANDOMNESS:
     return zyn_addsynth_ptr->amplitude_lfo_frequency_randomness * 100;
+
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_ATTACK_VALUE:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_attack_value);
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_ATTACK_DURATION:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_attack_duration);
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_DECAY_VALUE:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_decay_value);
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_DECAY_DURATION:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_decay_duration);
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_RELEASE_VALUE:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_release_value);
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_RELEASE_DURATION:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_release_duration);
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_STRETCH:
+    return percent_from_0_127(zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_stretch) * 2;
+
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_FREQUENCY:
     return zyn_addsynth_ptr->filter_lfo_frequency;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DEPTH:
@@ -370,6 +386,29 @@ zyn_addsynth_set_float_parameter(
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY_RANDOMNESS:
     zyn_addsynth_ptr->amplitude_lfo_frequency_randomness = value / 100;
     return;
+
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_ATTACK_VALUE:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_attack_value = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_ATTACK_DURATION:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_attack_duration = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_DECAY_VALUE:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_decay_value = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_DECAY_DURATION:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_decay_duration = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_RELEASE_VALUE:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_release_value = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_RELEASE_DURATION:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_release_duration = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_STRETCH:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_stretch = percent_to_0_127(value/2);
+    return;
+
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_FREQUENCY:
     zyn_addsynth_ptr->filter_lfo_frequency = value;
     return;
@@ -419,6 +458,8 @@ zyn_addsynth_get_bool_parameter(
     return zyn_addsynth_ptr->amplitude_lfo_depth_randomness_enabled;
   case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_FREQUENCY:
     return zyn_addsynth_ptr->amplitude_lfo_frequency_randomness_enabled;
+  case ZYNADD_PARAMETER_BOOL_FILTER_ENV_FORCED_RELEASE:
+    return zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_forced_release;
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_START_PHASE:
     return zyn_addsynth_ptr->filter_lfo_random_start_phase;
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_DEPTH:
@@ -461,6 +502,9 @@ zyn_addsynth_set_bool_parameter(
     return;
   case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_FREQUENCY:
     zyn_addsynth_ptr->amplitude_lfo_frequency_randomness_enabled = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_FILTER_ENV_FORCED_RELEASE:
+    zyn_addsynth_ptr->params_ptr->GlobalPar.FilterEnvelope->m_forced_release = value;
     return;
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_START_PHASE:
     zyn_addsynth_ptr->filter_lfo_random_start_phase = value;
