@@ -525,7 +525,13 @@ zyn_addsynth_get_shape_parameter(
   zyn_addsynth_handle handle,
   unsigned int parameter)
 {
-  return 0;
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_SHAPE_AMP_LFO:
+    return zyn_addsynth_ptr->amplitude_lfo_shape;
+  default:
+    assert(0);
+  }
 }
 
 void
@@ -534,4 +540,11 @@ zyn_addsynth_set_shape_parameter(
   unsigned int parameter,
   unsigned int value)
 {
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_SHAPE_AMP_LFO:
+    zyn_addsynth_ptr->amplitude_lfo_shape = value;
+  default:
+    assert(0);
+  }
 }
