@@ -31,10 +31,10 @@
 class LFO
 {
 public:
-  LFO::LFO();
+  LFO();
 
   void
-  LFO::init(
+  init(
     float base_frequency,       // note
     float frequency,            // lfo, 0 .. 1
     float depth,                // 0 .. 1
