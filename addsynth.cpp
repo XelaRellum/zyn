@@ -544,6 +544,7 @@ zyn_addsynth_set_shape_parameter(
   {
   case ZYNADD_PARAMETER_SHAPE_AMP_LFO:
     zyn_addsynth_ptr->amplitude_lfo_shape = value;
+    break;
   default:
     assert(0);
   }
