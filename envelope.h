@@ -26,8 +26,10 @@
 class Envelope
 {
 public:
-  Envelope(EnvelopeParams * envpars, float basefreq);
+  Envelope();
   ~Envelope();
+
+  void init(EnvelopeParams * envpars, float basefreq);
 
   void relasekey();
 

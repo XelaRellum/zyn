@@ -38,7 +38,6 @@ ADnoteParameters::ADnoteParameters(
 
   GlobalPar.FreqEnvelope=new EnvelopeParams(0,0);
   GlobalPar.FreqEnvelope->ASRinit(64,50,64,60);
-  GlobalPar.FreqLfo=new LFOParams(70,0,64,0,0,0,0,0);
     
   GlobalPar.AmpEnvelope=new EnvelopeParams(64,1);
   GlobalPar.AmpEnvelope->ADSRinit_dB(0,40,127,25);
@@ -51,7 +50,7 @@ ADnoteParameters::ADnoteParameters(
   for (int nvoice=0;nvoice<NUM_VOICES;nvoice++) EnableVoice(nvoice);
     
   defaults();
-};
+}
 
 void ADnoteParameters::defaults(){
   //Default Parameters
@@ -61,7 +60,6 @@ void ADnoteParameters::defaults(){
   GlobalPar.PCoarseDetune=0;
   GlobalPar.PDetuneType=1;
   GlobalPar.FreqEnvelope->defaults();
-  GlobalPar.FreqLfo->defaults();
   GlobalPar.PBandwidth=64;
     
   /* Amplitude Global Parameters */
@@ -85,7 +83,7 @@ void ADnoteParameters::defaults(){
     defaults(nvoice);
   };
   VoicePar[0].Enabled=1;
-};
+}
 
 /*
  * Defaults a voice
@@ -146,9 +144,7 @@ void ADnoteParameters::defaults(int n){
 
   VoicePar[nvoice].FMFreqEnvelope->defaults();
   VoicePar[nvoice].FMAmpEnvelope->defaults();
-};
-
-
+}
 
 /*
  * Init the voice parameters
@@ -174,7 +170,7 @@ void ADnoteParameters::EnableVoice(int nvoice){
   VoicePar[nvoice].FMFreqEnvelope->ASRinit(20,90,40,80);
   VoicePar[nvoice].FMAmpEnvelope=new EnvelopeParams(64,1);
   VoicePar[nvoice].FMAmpEnvelope->ADSRinit(80,90,127,100);
-};
+}
 
 /*
  * Get the Multiplier of the fine detunes of the voices
@@ -184,8 +180,7 @@ REALTYPE ADnoteParameters::getBandwidthDetuneMultiplier(){
   bw=pow(2.0,bw*pow(fabs(bw),0.2)*5.0);
     
   return(bw);
-};
-
+}
 
 /*
  * Kill the voice
@@ -206,11 +201,10 @@ void ADnoteParameters::KillVoice(int nvoice){
 
   delete (VoicePar[nvoice].FMFreqEnvelope);
   delete (VoicePar[nvoice].FMAmpEnvelope);
-};
+}
 
 ADnoteParameters::~ADnoteParameters(){
   delete(GlobalPar.FreqEnvelope);
-  delete(GlobalPar.FreqLfo);
   delete(GlobalPar.AmpEnvelope);
   delete(GlobalPar.GlobalFilter);
   delete(GlobalPar.FilterEnvelope);
@@ -218,5 +212,5 @@ ADnoteParameters::~ADnoteParameters(){
 
   for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
     KillVoice(nvoice);
-  };
-};
+  }
+}

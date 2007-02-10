@@ -23,21 +23,24 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-class Filter{
+class Filter
+{
 public:
-  Filter(FilterParams *pars);
+  Filter();
   ~Filter();  
-  void filterout(REALTYPE *smp);
-  void setfreq(REALTYPE frequency);
-  void setfreq_and_q(REALTYPE frequency,REALTYPE q_);
-  void setq(REALTYPE q_);
 
-  REALTYPE getrealfreq(REALTYPE freqpitch);
+  void init(FilterParams *pars);
+
+  void filterout(float *smp);
+  void setfreq(float frequency);
+  void setfreq_and_q(float frequency, float q_);
+  void setq(float q_);
+
+  float getrealfreq(float freqpitch);
+
 private:
   Filter_ *filter;
   unsigned char category;
 };
 
-
 #endif
-

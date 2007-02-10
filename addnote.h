@@ -88,48 +88,6 @@ private:
   BOOL m_note_enabled;
   Controller * m_ctl;
 
-  /*****************************************************************/
-  /*                    GLOBAL PARAMETERS                          */
-  /*****************************************************************/
-
-  struct ADnoteGlobal
-  {
-    /******************************************
-     *     FREQUENCY GLOBAL PARAMETERS        *
-     ******************************************/
-    REALTYPE Detune;//cents
-
-    Envelope *FreqEnvelope;
-    LFO *FreqLfo;
-
-    /********************************************
-     *     AMPLITUDE GLOBAL PARAMETERS          *
-     ********************************************/
-    REALTYPE Volume;// [ 0 .. 1 ]
-
-    REALTYPE Panning;// [ 0 .. 1 ]
-
-    Envelope *AmpEnvelope;
-    LFO *AmpLfo;   
-  
-    struct
-    {
-      BOOL enabled;
-      REALTYPE initialvalue,dt,t;
-    } punch;
-
-    /******************************************
-     *        FILTER GLOBAL PARAMETERS        *
-     ******************************************/
-    Filter *GlobalFilterL,*GlobalFilterR;
-
-    REALTYPE FilterCenterPitch;//octaves
-    REALTYPE FilterQ;
-    REALTYPE FilterFreqTracking;
-    
-    Envelope *FilterEnvelope;
-  } m_note_global_parameters;  
-
   /***********************************************************/
   /*                    VOICE PARAMETERS                     */
   /***********************************************************/
@@ -158,9 +116,8 @@ private:
     // cents = basefreq*VoiceDetune
     REALTYPE Detune,FineDetune;
     
-    Envelope *FreqEnvelope;
-    LFO *FreqLfo;
-    
+    Envelope m_frequency_envelope;
+    LFO m_frequency_lfo;
 
     /***************************
      *   AMPLITUDE PARAMETERS   *
@@ -170,21 +127,20 @@ private:
     REALTYPE Panning;
     REALTYPE Volume;// [-1.0 .. 1.0]
 
-    Envelope *AmpEnvelope;
-    LFO *AmpLfo;
+    Envelope m_amplitude_envelope;
+    LFO m_amplitude_lfo;
 
     /*************************
      *   FILTER PARAMETERS    *
      *************************/
     
-    Filter *VoiceFilter;
+    Filter m_voice_filter;
     
     REALTYPE FilterCenterPitch;/* Filter center Pitch*/
     REALTYPE FilterFreqTracking;
 
-    Envelope *FilterEnvelope;
-    LFO *FilterLfo;
-
+    Envelope m_filter_envelope;
+    LFO m_filter_lfo;
 
     /****************************
      *   MODULLATOR PARAMETERS   *
@@ -203,10 +159,9 @@ private:
     REALTYPE FMVolume;
     REALTYPE FMDetune; //in cents
     
-    Envelope *FMFreqEnvelope;
-    Envelope *FMAmpEnvelope;
-  } NoteVoicePar[NUM_VOICES]; 
-
+    Envelope m_fm_frequency_envelope;
+    Envelope m_fm_amplitude_envelope;
+  } m_voices[NUM_VOICES]; 
 
   /********************************************************/
   /*    INTERNAL VALUES OF THE NOTE AND OF THE VOICES     */
@@ -257,12 +212,31 @@ private:
 
   LFO m_amplitude_lfo;
   LFO m_filter_lfo;
+  LFO m_frequency_lfo;
+
+  Filter m_filter_left;
+  Filter m_filter_right;
+
+  float m_filter_center_pitch;  // octaves
+  float m_filter_q_factor;
+  float m_filter_frequency_tracking;
+    
+  Envelope m_amplitude_envelope;
+  Envelope m_filter_envelope;
+  Envelope m_frequency_envelope;
+
+  float m_detune;               // cents
 
   struct zyn_addsynth * m_synth_ptr;
+
+  float m_volume;               // [ 0 .. 1 ]
+
+  float m_panning;              // [ 0 .. 1 ]
+
+  BOOL m_punch_enabled;
+  float m_punch_initial_value;
+  float m_punch_duration;
+  float m_punch_t;
 };
 
 #endif
-
-
-
-

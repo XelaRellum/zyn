@@ -70,6 +70,19 @@ struct zyn_addsynth
   float filter_lfo_delay; // 0.0 .. 4.0, seconds
   float filter_lfo_stretch; // -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch)
   unsigned int filter_lfo_shape;
+
+  // Frequency LFO parameters
+  float frequency_lfo_frequency; // 0.0 .. 1.0
+  float frequency_lfo_depth;    // 0.0 .. 1.0
+  BOOL frequency_lfo_random_start_phase;
+  float frequency_lfo_start_phase; // 0.0 .. 1.0
+  BOOL frequency_lfo_depth_randomness_enabled;
+  float frequency_lfo_depth_randomness; // 0.0 .. 1.0
+  BOOL frequency_lfo_frequency_randomness_enabled;
+  float frequency_lfo_frequency_randomness; // 0.0 .. 1.0
+  float frequency_lfo_delay; // 0.0 .. 4.0, seconds
+  float frequency_lfo_stretch; // -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch)
+  unsigned int frequency_lfo_shape;
 };
 
 #endif /* #ifndef ADDSYNTH_INTERNAL_H__9870368A_F1C9_4F0D_ADC1_B07ECFF2F9C7__INCLUDED */

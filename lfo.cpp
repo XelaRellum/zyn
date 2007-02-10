@@ -30,6 +30,14 @@
 #include "lfo_parameters.h"
 #include "lfo.h"
 
+LFO::LFO()
+{
+}
+
+LFO::~LFO()
+{
+}
+
 void
 LFO::init(
   float base_frequency,         // note
@@ -130,7 +138,8 @@ LFO::init(
   computenextincrnd();
 }
 
-LFO::LFO(
+void
+LFO::init(
   LFOParams *lfopars,
   float basefreq)
 {
@@ -152,14 +161,6 @@ LFO::LFO(
     lfopars->Pfreqrand / 127.0,
     lfopars->fel,
     lfopars->PLFOtype);
-}
-
-LFO::LFO()
-{
-}
-
-LFO::~LFO()
-{
 }
 
 /*

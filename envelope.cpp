@@ -26,7 +26,8 @@
 #include "envelope_parameters.h"
 #include "envelope.h"
 
-Envelope::Envelope(
+void
+Envelope::init(
   EnvelopeParams * parameters_ptr,
   float basefreq)
 {
@@ -109,6 +110,10 @@ Envelope::Envelope(
   m_finished = FALSE;
   inct = envdt[1];
   envoutval = 0.0;
+}
+
+Envelope::Envelope()
+{
 }
 
 Envelope::~Envelope()

@@ -49,8 +49,6 @@ struct ADnoteGlobalParam{
 
   EnvelopeParams *FreqEnvelope; //Frequency Envelope
     
-  LFOParams *FreqLfo;//Frequency LFO
-
   /********************************************
    *     AMPLITUDE GLOBAL PARAMETERS          *
    ********************************************/

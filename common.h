@@ -63,6 +63,10 @@ struct FFTFREQS
 #define ZYN_LFO_SHAPE_TYPE_EXP_DOWN_2  6
 #define ZYN_LFO_SHAPES_COUNT           7
 
+#define ZYN_FILTER_TYPE_ANALOG         0
+#define ZYN_FILTER_TYPE_FORMANT        1
+#define ZYN_FILTER_TYPE_STATE_VARIABLE 2
+
 #ifdef __cplusplus
 extern "C" {
 #endif

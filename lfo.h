@@ -49,7 +49,7 @@ public:
     unsigned int shape);        // one of ZYN_LFO_SHAPE_TYPE_XXX
 
   // legacy
-  LFO(LFOParams *lfopars, float basefreq);
+  void init(LFOParams *lfopars, float basefreq);
 
   ~LFO();
 
