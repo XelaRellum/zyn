@@ -37,7 +37,6 @@ PLUGIN_SOURCES_CXX = addsynth.cpp
 PLUGIN_SOURCES_CXX += addnote.cpp
 PLUGIN_SOURCES_CXX += lfo.cpp
 PLUGIN_SOURCES_CXX += filter_parameters.cpp
-PLUGIN_SOURCES_CXX += addnote_parameters.cpp
 PLUGIN_SOURCES_CXX += envelope_parameters.cpp
 PLUGIN_SOURCES_CXX += filter.cpp
 PLUGIN_SOURCES_CXX += analog_filter.cpp

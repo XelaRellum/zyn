@@ -36,7 +36,6 @@ class ADnote
 public:
   ADnote(
     struct zyn_addsynth * synth_ptr,
-    ADnoteParameters * partparams,
     Controller * ctl);
 
   ~ADnote();
@@ -79,7 +78,6 @@ private:
 
 
   // GLOBALS
-  ADnoteParameters * m_partparams;
   BOOL m_stereo;                // if the note is stereo (allows note Panning)
   int m_midinote;
   REALTYPE m_velocity;
