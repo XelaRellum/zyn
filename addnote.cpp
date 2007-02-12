@@ -260,33 +260,15 @@ ADnote::note_on(
 
   m_frequency_lfo.init(
     m_basefreq,
-    m_synth_ptr->frequency_lfo_frequency,
-    m_synth_ptr->frequency_lfo_depth,
-    m_synth_ptr->frequency_lfo_random_start_phase ? zyn_random() : m_synth_ptr->frequency_lfo_start_phase,
-    m_synth_ptr->frequency_lfo_delay,
-    m_synth_ptr->frequency_lfo_stretch,
-    m_synth_ptr->frequency_lfo_depth_randomness_enabled,
-    m_synth_ptr->frequency_lfo_depth_randomness,
-    m_synth_ptr->frequency_lfo_frequency_randomness_enabled,
-    m_synth_ptr->frequency_lfo_frequency_randomness,
-    ZYN_LFO_TYPE_FREQUENCY,
-    m_synth_ptr->frequency_lfo_shape);
+    &m_synth_ptr->frequency_lfo_params,
+    ZYN_LFO_TYPE_FREQUENCY);
 
   m_amplitude_envelope.init(m_synth_ptr->GlobalPar.AmpEnvelope,m_basefreq);
 
   m_amplitude_lfo.init(
     m_basefreq,
-    m_synth_ptr->amplitude_lfo_frequency,
-    m_synth_ptr->amplitude_lfo_depth,
-    m_synth_ptr->amplitude_lfo_random_start_phase ? zyn_random() : m_synth_ptr->amplitude_lfo_start_phase,
-    m_synth_ptr->amplitude_lfo_delay,
-    m_synth_ptr->amplitude_lfo_stretch,
-    m_synth_ptr->amplitude_lfo_depth_randomness_enabled,
-    m_synth_ptr->amplitude_lfo_depth_randomness,
-    m_synth_ptr->amplitude_lfo_frequency_randomness_enabled,
-    m_synth_ptr->amplitude_lfo_frequency_randomness,
-    ZYN_LFO_TYPE_AMPLITUDE,
-    m_synth_ptr->amplitude_lfo_shape);
+    &m_synth_ptr->amplitude_lfo_params,
+    ZYN_LFO_TYPE_AMPLITUDE);
 
   m_volume = 4.0*pow(0.1,3.0*(1.0-m_synth_ptr->GlobalPar.PVolume/96.0))//-60 dB .. 0 dB
     *VelF(m_velocity,m_synth_ptr->GlobalPar.PAmpVelocityScaleFunction);//velocity sensing
@@ -305,17 +287,8 @@ ADnote::note_on(
 
   m_filter_lfo.init(
     m_basefreq,
-    m_synth_ptr->filter_lfo_frequency,
-    m_synth_ptr->filter_lfo_depth,
-    m_synth_ptr->filter_lfo_random_start_phase ? zyn_random() : m_synth_ptr->filter_lfo_start_phase,
-    m_synth_ptr->filter_lfo_delay,
-    m_synth_ptr->filter_lfo_stretch,
-    m_synth_ptr->filter_lfo_depth_randomness_enabled,
-    m_synth_ptr->filter_lfo_depth_randomness,
-    m_synth_ptr->filter_lfo_frequency_randomness_enabled,
-    m_synth_ptr->filter_lfo_frequency_randomness,
-    ZYN_LFO_TYPE_FILTER,
-    m_synth_ptr->filter_lfo_shape);
+    &m_synth_ptr->filter_lfo_params,
+    ZYN_LFO_TYPE_FILTER);
 
   m_filter_q_factor = m_synth_ptr->GlobalPar.GlobalFilter->getq();
   m_filter_frequency_tracking = m_synth_ptr->GlobalPar.GlobalFilter->getfreqtracking(m_basefreq);
@@ -353,7 +326,11 @@ ADnote::note_on(
 
     if (m_synth_ptr->VoicePar[nvoice].PAmpLfoEnabled != 0)
     {
-      m_voices[nvoice].m_amplitude_lfo.init(m_synth_ptr->VoicePar[nvoice].AmpLfo, m_basefreq);
+      m_voices[nvoice].m_amplitude_lfo.init(
+        m_basefreq,
+        &m_synth_ptr->VoicePar[nvoice].amplitude_lfo_params,
+        ZYN_LFO_TYPE_AMPLITUDE);
+
       newamplitude[nvoice] *= m_voices[nvoice].m_amplitude_lfo.amplfoout();
     }
 
@@ -365,7 +342,10 @@ ADnote::note_on(
 
     if (m_synth_ptr->VoicePar[nvoice].PFreqLfoEnabled != 0)
     {
-      m_voices[nvoice].m_frequency_lfo.init(m_synth_ptr->VoicePar[nvoice].FreqLfo,m_basefreq);
+      m_voices[nvoice].m_frequency_lfo.init(
+        m_basefreq,
+        &m_synth_ptr->VoicePar[nvoice].frequency_lfo_params,
+        ZYN_LFO_TYPE_FREQUENCY);
     }
 
     /* Voice Filter Parameters Init */
@@ -381,7 +361,10 @@ ADnote::note_on(
 
     if (m_synth_ptr->VoicePar[nvoice].PFilterLfoEnabled != 0)
     {
-      m_voices[nvoice].m_filter_lfo.init(m_synth_ptr->VoicePar[nvoice].FilterLfo,m_basefreq);
+      m_voices[nvoice].m_filter_lfo.init(
+        m_basefreq,
+        &m_synth_ptr->VoicePar[nvoice].filter_lfo_params,
+        ZYN_LFO_TYPE_FILTER);
     }
 
     m_voices[nvoice].FilterFreqTracking=m_synth_ptr->VoicePar[nvoice].VoiceFilter->getfreqtracking(m_basefreq);

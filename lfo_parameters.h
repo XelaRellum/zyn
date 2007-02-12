@@ -1,62 +1,39 @@
-/*
-  ZynAddSubFX - a software synthesizer
- 
-  LFOParams.h - Parameters for LFO
-  Copyright (C) 2002-2005 Nasca Octavian Paul
-  Author: Nasca Octavian Paul
+/* -*- Mode: C ; c-basic-offset: 2 -*- */
+/*****************************************************************************
+ *
+ *   Copyright (C) 2007 Nedko Arnaudov <nedko@arnaudov.name>
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; version 2 of the License
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ *****************************************************************************/
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
-  as published by the Free Software Foundation.
+#ifndef LFO_PARAMETERS_H__79449D30_40FF_47EB_959A_F83B68A925FC__INCLUDED
+#define LFO_PARAMETERS_H__79449D30_40FF_47EB_959A_F83B68A925FC__INCLUDED
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License (version 2) for more details.
-
-  You should have received a copy of the GNU General Public License (version 2)
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-
-*/
-
-#ifndef LFO_PARAMS_H
-#define LFO_PARAMS_H
-
-class LFOParams
+struct zyn_lfo_parameters
 {
-public:
-  LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous,char fel_);      
-  ~LFOParams();
-      
-//  void add2XML(XMLwrapper *xml);
-  void defaults();
-//  void getfromXML(XMLwrapper *xml);
-      
-  /* Parametrii MIDI */
-  REALTYPE Pfreq;       // frequency
-  unsigned char Pintensity; // intensity
-  unsigned char Pstartphase;// start phase (0=random)
-  unsigned char PLFOtype;   // LFO type (sin,triangle,square,ramp,...)
-  unsigned char Prandomness;// randomness (0=off)
-  unsigned char Pfreqrand;  // frequency randomness (0=off)
-  unsigned char Pdelay;     // delay (0=off)
-  unsigned char Pcontinous; // 1 if LFO is continous
-  unsigned char Pstretch; // how the LFO is "stretched" according the note frequency (64=no stretch)
-
-  int fel;//what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
-  static int time;//is used by Pcontinous parameter
-private:
-  /* Default parameters */
-  unsigned char Dfreq;      
-  unsigned char Dintensity; 
-  unsigned char Dstartphase;
-  unsigned char DLFOtype;   
-  unsigned char Drandomness;
-  unsigned char Ddelay;     
-  unsigned char Dcontinous;       
-
+  float frequency;              /* 0.0 .. 1.0 */
+  float depth;                  /* 0.0 .. 1.0 */
+  BOOL random_start_phase;
+  float start_phase;            /* 0.0 .. 1.0 */
+  BOOL depth_randomness_enabled;
+  float depth_randomness;       /* 0.0 .. 1.0 */
+  BOOL frequency_randomness_enabled;
+  float frequency_randomness;   /* 0.0 .. 1.0 */
+  float delay;                  /* 0.0 .. 4.0, seconds */
+  float stretch;                /* -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch) */
+  unsigned int shape;           /* one of ZYN_LFO_SHAPE_TYPE_XXX */
 };
 
-
-#endif
+#endif /* #ifndef LFO_PARAMETERS_H__79449D30_40FF_47EB_959A_F83B68A925FC__INCLUDED */

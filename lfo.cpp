@@ -40,33 +40,24 @@ LFO::~LFO()
 
 void
 LFO::init(
-  float base_frequency,         // note
-  float frequency,              // lfo
-  float depth,
-  float start_phase,
-  float delay,
-  float stretch,
-  BOOL depth_randomness_enabled,
-  float depth_randomness,
-  BOOL frequency_randomness_enabled,
-  float frequency_randomness,
-  unsigned int type,            // one of ZYN_LFO_TYPE_XXX
-  unsigned int shape)           // one of ZYN_LFO_SHAPE_TYPE_XXX
+  float base_frequency,       // note
+  const struct zyn_lfo_parameters * parameters_ptr,
+  unsigned int type)
 {
   float lfostretch;
   float lfofreq;
 
   // max 2x/octave
-  lfostretch = pow(base_frequency / 440.0, stretch);
+  lfostretch = pow(base_frequency / 440.0, parameters_ptr->stretch);
 
-  lfofreq = pow(2, frequency * 10.0);
+  lfofreq = pow(2, parameters_ptr->frequency * 10.0);
   lfofreq -= 1.0;
   lfofreq /= 12.0;
   lfofreq *= lfostretch;
 
   m_incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
 
-  m_x = start_phase;
+  m_x = parameters_ptr->random_start_phase ? zyn_random() : parameters_ptr->start_phase;
 
   // Limit the Frequency(or else...)
   if (m_incx > 0.49999999)
@@ -74,23 +65,23 @@ LFO::init(
     m_incx = 0.499999999;
   }
 
-  m_depth_randomness_enabled = depth_randomness_enabled;
+  m_depth_randomness_enabled = parameters_ptr->depth_randomness_enabled;
 
-  if (depth_randomness_enabled)
+  if (m_depth_randomness_enabled)
   {
-    if (depth_randomness < 0.0)
+    if (parameters_ptr->depth_randomness < 0.0)
     {
       assert(0);                  // this should be checked by caller
       m_depth_randomness = 0.0;
     }
-    else if (depth_randomness > 1.0)
+    else if (parameters_ptr->depth_randomness > 1.0)
     {
       assert(0);                  // this should be checked by caller
       m_depth_randomness = 1.0;
     }
     else
     {
-      m_depth_randomness = depth_randomness;
+      m_depth_randomness = parameters_ptr->depth_randomness;
     }
 
     m_amp1 = (1 - m_depth_randomness) + m_depth_randomness * zyn_random();
@@ -102,26 +93,26 @@ LFO::init(
     m_amp2 = 1;
   }
 
-  m_frequency_randomness_enabled = frequency_randomness_enabled;
+  m_frequency_randomness_enabled = parameters_ptr->frequency_randomness_enabled;
 
-  if (frequency_randomness_enabled)
+  if (m_frequency_randomness_enabled)
   {
-//    m_frequency_randomness = pow(frequency_randomness, 2.0) * 2.0 * 4.0;
-    m_frequency_randomness = pow(frequency_randomness, 2.0) * 4.0;
+//    m_frequency_randomness = pow(parameters_ptr->frequency_randomness, 2.0) * 2.0 * 4.0;
+    m_frequency_randomness = pow(parameters_ptr->frequency_randomness, 2.0) * 4.0;
   }
 
   switch (type)
   {
   case ZYN_LFO_TYPE_AMPLITUDE:
-    m_lfointensity = depth;
+    m_lfointensity = parameters_ptr->depth;
     break;
 
   case ZYN_LFO_TYPE_FILTER:     // in octave
-    m_lfointensity = depth * 4.0;
+    m_lfointensity = parameters_ptr->depth * 4.0;
     break;
 
   case ZYN_LFO_TYPE_FREQUENCY:  // in centi
-    m_lfointensity = pow(2, depth * 11.0) - 1.0;
+    m_lfointensity = pow(2, parameters_ptr->depth * 11.0) - 1.0;
     m_x -= 0.25;                // chance the starting phase
     break;
 
@@ -129,38 +120,13 @@ LFO::init(
     assert(0);
   }
 
-  m_shape = shape;
-  m_delay = delay;
+  m_shape = parameters_ptr->shape;
+  m_delay = parameters_ptr->delay;
   m_incrnd = m_nextincrnd = 1.0;
 
   // twice because I want incrnd & nextincrnd to be random
   computenextincrnd();
   computenextincrnd();
-}
-
-void
-LFO::init(
-  LFOParams *lfopars,
-  float basefreq)
-{
-  if (lfopars->Pstretch == 0)
-  {
-    lfopars->Pstretch = 1;
-  }
-
-  init(
-    basefreq,
-    lfopars->Pfreq,
-    lfopars->Pintensity / 127.0,
-    (lfopars->Pstartphase - 64.0) / 127.0 + 1.0,
-    lfopars->Pdelay / 127.0 * 4.0,
-    (lfopars->Pstretch - 64.0) / 63.0,
-    lfopars->Prandomness != 0,
-    lfopars->Prandomness / 127.0,
-    lfopars->Pfreqrand != 0,
-    lfopars->Pfreqrand / 127.0,
-    lfopars->fel,
-    lfopars->PLFOtype);
 }
 
 /*

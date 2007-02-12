@@ -36,20 +36,8 @@ public:
   void
   init(
     float base_frequency,       // note
-    float frequency,            // lfo, 0 .. 1
-    float depth,                // 0 .. 1
-    float start_phase,          // 0 .. 1
-    float delay,                // 0 .. 4, seconds
-    float stretch,              // -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch)
-    BOOL depth_randomness_enabled,
-    float depth_randomness,     // 0 .. 1
-    BOOL frequency_randomness_enabled,
-    float frequency_randomness, // 0 .. 1
-    unsigned int type,          // one of ZYN_LFO_TYPE_XXX
-    unsigned int shape);        // one of ZYN_LFO_SHAPE_TYPE_XXX
-
-  // legacy
-  void init(LFOParams *lfopars, float basefreq);
+    const struct zyn_lfo_parameters * parameters_ptr,
+    unsigned int type);         // one of ZYN_LFO_TYPE_XXX
 
   ~LFO();
 

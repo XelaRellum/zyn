@@ -147,8 +147,7 @@ struct ADnoteVoiceParam
 
   /* Frequency LFO */
   unsigned char PFreqLfoEnabled;
-  LFOParams *FreqLfo;
-
+  struct zyn_lfo_parameters frequency_lfo_params;
 
   /***************************
    *   AMPLITUDE PARAMETERS   *
@@ -176,9 +175,7 @@ struct ADnoteVoiceParam
 
   /* Amplitude LFO */
   unsigned char PAmpLfoEnabled;
-  LFOParams *AmpLfo;
-
-
+  struct zyn_lfo_parameters amplitude_lfo_params;
 
   /*************************
    *   FILTER PARAMETERS    *
@@ -194,7 +191,7 @@ struct ADnoteVoiceParam
 
   /* LFO Envelope */
   unsigned char PFilterLfoEnabled;
-  LFOParams *FilterLfo;
+  struct zyn_lfo_parameters filter_lfo_params;
 
   /****************************
    *   MODULLATOR PARAMETERS   *
@@ -259,43 +256,13 @@ struct zyn_addsynth
   BOOL random_grouping;
 
   // Amplitude LFO parameters
-  float amplitude_lfo_frequency; // 0.0 .. 1.0
-  float amplitude_lfo_depth;    // 0.0 .. 1.0
-  BOOL amplitude_lfo_random_start_phase;
-  float amplitude_lfo_start_phase; // 0.0 .. 1.0
-  BOOL amplitude_lfo_depth_randomness_enabled;
-  float amplitude_lfo_depth_randomness; // 0.0 .. 1.0
-  BOOL amplitude_lfo_frequency_randomness_enabled;
-  float amplitude_lfo_frequency_randomness; // 0.0 .. 1.0
-  float amplitude_lfo_delay; // 0.0 .. 4.0, seconds
-  float amplitude_lfo_stretch; // -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch)
-  unsigned int amplitude_lfo_shape;
+  struct zyn_lfo_parameters amplitude_lfo_params;
 
   // Filter LFO parameters
-  float filter_lfo_frequency; // 0.0 .. 1.0
-  float filter_lfo_depth;    // 0.0 .. 1.0
-  BOOL filter_lfo_random_start_phase;
-  float filter_lfo_start_phase; // 0.0 .. 1.0
-  BOOL filter_lfo_depth_randomness_enabled;
-  float filter_lfo_depth_randomness; // 0.0 .. 1.0
-  BOOL filter_lfo_frequency_randomness_enabled;
-  float filter_lfo_frequency_randomness; // 0.0 .. 1.0
-  float filter_lfo_delay; // 0.0 .. 4.0, seconds
-  float filter_lfo_stretch; // -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch)
-  unsigned int filter_lfo_shape;
+  struct zyn_lfo_parameters filter_lfo_params;
 
   // Frequency LFO parameters
-  float frequency_lfo_frequency; // 0.0 .. 1.0
-  float frequency_lfo_depth;    // 0.0 .. 1.0
-  BOOL frequency_lfo_random_start_phase;
-  float frequency_lfo_start_phase; // 0.0 .. 1.0
-  BOOL frequency_lfo_depth_randomness_enabled;
-  float frequency_lfo_depth_randomness; // 0.0 .. 1.0
-  BOOL frequency_lfo_frequency_randomness_enabled;
-  float frequency_lfo_frequency_randomness; // 0.0 .. 1.0
-  float frequency_lfo_delay; // 0.0 .. 4.0, seconds
-  float frequency_lfo_stretch; // -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch)
-  unsigned int frequency_lfo_shape;
+  struct zyn_lfo_parameters frequency_lfo_params;
 
   ADnoteGlobalParam GlobalPar;
 

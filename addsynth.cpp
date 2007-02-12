@@ -80,16 +80,49 @@ zyn_addsynth_create(
 
     zyn_addsynth_ptr->VoicePar[voice_index].AmpEnvelope=new EnvelopeParams(64,1);
     zyn_addsynth_ptr->VoicePar[voice_index].AmpEnvelope->ADSRinit_dB(0,100,127,100); 
-    zyn_addsynth_ptr->VoicePar[voice_index].AmpLfo=new LFOParams(90,32,64,0,0,30,0,1);
+
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.frequency = 90.0 / 127.0;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.depth = 32.0 / 127.0;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.random_start_phase = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.start_phase = 0.5;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.depth_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.depth = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.frequency_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.frequency_randomness = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.delay = 30.0 / 127.0 * 4.0;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.stretch = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
     zyn_addsynth_ptr->VoicePar[voice_index].FreqEnvelope=new EnvelopeParams(0,0);
     zyn_addsynth_ptr->VoicePar[voice_index].FreqEnvelope->ASRinit(30,40,64,60);
-    zyn_addsynth_ptr->VoicePar[voice_index].FreqLfo=new LFOParams(50,40,0,0,0,0,0,0);
+
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.frequency = 50.0 / 127.0;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.depth = 40.0 / 127.0;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.random_start_phase = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.start_phase = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.depth_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.depth = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.frequency_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.frequency_randomness = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.delay = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.stretch = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
     zyn_addsynth_ptr->VoicePar[voice_index].VoiceFilter=new FilterParams(2,50,60);
     zyn_addsynth_ptr->VoicePar[voice_index].FilterEnvelope=new EnvelopeParams(0,0);
     zyn_addsynth_ptr->VoicePar[voice_index].FilterEnvelope->ADSRinit_filter(90,70,40,70,10,40);
-    zyn_addsynth_ptr->VoicePar[voice_index].FilterLfo=new LFOParams(50,20,64,0,0,0,0,2);
+
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.frequency = 50.0 / 127.0;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.depth = 20.0 / 127.0;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.random_start_phase = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.start_phase = 0.5;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.depth_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.depth = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.frequency_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.frequency_randomness = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.delay = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.stretch = 0;
+    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
     zyn_addsynth_ptr->VoicePar[voice_index].FMFreqEnvelope=new EnvelopeParams(0,0);
     zyn_addsynth_ptr->VoicePar[voice_index].FMFreqEnvelope->ASRinit(20,90,40,80);
@@ -167,14 +200,11 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->VoicePar[voice_index].FMSmp->defaults();
 
     zyn_addsynth_ptr->VoicePar[voice_index].AmpEnvelope->defaults();
-    zyn_addsynth_ptr->VoicePar[voice_index].AmpLfo->defaults();
 
     zyn_addsynth_ptr->VoicePar[voice_index].FreqEnvelope->defaults();
-    zyn_addsynth_ptr->VoicePar[voice_index].FreqLfo->defaults();
 
     zyn_addsynth_ptr->VoicePar[voice_index].VoiceFilter->defaults();
     zyn_addsynth_ptr->VoicePar[voice_index].FilterEnvelope->defaults();
-    zyn_addsynth_ptr->VoicePar[voice_index].FilterLfo->defaults();
 
     zyn_addsynth_ptr->VoicePar[voice_index].FMFreqEnvelope->defaults();
     zyn_addsynth_ptr->VoicePar[voice_index].FMAmpEnvelope->defaults();
@@ -194,41 +224,41 @@ zyn_addsynth_create(
 
   zyn_addsynth_ptr->random_grouping = FALSE;
 
-  zyn_addsynth_ptr->amplitude_lfo_frequency = 80.0 / 127.0;
-  zyn_addsynth_ptr->amplitude_lfo_depth = 0;
-  zyn_addsynth_ptr->amplitude_lfo_random_start_phase = FALSE;
-  zyn_addsynth_ptr->amplitude_lfo_start_phase = 0.5;
-  zyn_addsynth_ptr->amplitude_lfo_depth_randomness_enabled = FALSE;
-  zyn_addsynth_ptr->amplitude_lfo_depth_randomness = 0.5;
-  zyn_addsynth_ptr->amplitude_lfo_frequency_randomness_enabled = FALSE;
-  zyn_addsynth_ptr->amplitude_lfo_frequency_randomness = 0.5;
-  zyn_addsynth_ptr->amplitude_lfo_delay = 0;
-  zyn_addsynth_ptr->amplitude_lfo_stretch = 0;
-  zyn_addsynth_ptr->amplitude_lfo_shape = ZYN_LFO_SHAPE_TYPE_SINE;
+  zyn_addsynth_ptr->amplitude_lfo_params.frequency = 80.0 / 127.0;
+  zyn_addsynth_ptr->amplitude_lfo_params.depth = 0;
+  zyn_addsynth_ptr->amplitude_lfo_params.random_start_phase = FALSE;
+  zyn_addsynth_ptr->amplitude_lfo_params.start_phase = 0.5;
+  zyn_addsynth_ptr->amplitude_lfo_params.depth_randomness_enabled = FALSE;
+  zyn_addsynth_ptr->amplitude_lfo_params.depth_randomness = 0.5;
+  zyn_addsynth_ptr->amplitude_lfo_params.frequency_randomness_enabled = FALSE;
+  zyn_addsynth_ptr->amplitude_lfo_params.frequency_randomness = 0.5;
+  zyn_addsynth_ptr->amplitude_lfo_params.delay = 0;
+  zyn_addsynth_ptr->amplitude_lfo_params.stretch = 0;
+  zyn_addsynth_ptr->amplitude_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
-  zyn_addsynth_ptr->filter_lfo_frequency = 80.0 / 127.0;
-  zyn_addsynth_ptr->filter_lfo_depth = 0;
-  zyn_addsynth_ptr->filter_lfo_random_start_phase = FALSE;
-  zyn_addsynth_ptr->filter_lfo_start_phase = 0.5;
-  zyn_addsynth_ptr->filter_lfo_depth_randomness_enabled = FALSE;
-  zyn_addsynth_ptr->filter_lfo_depth_randomness = 0.5;
-  zyn_addsynth_ptr->filter_lfo_frequency_randomness_enabled = FALSE;
-  zyn_addsynth_ptr->filter_lfo_frequency_randomness = 0.5;
-  zyn_addsynth_ptr->filter_lfo_delay = 0;
-  zyn_addsynth_ptr->filter_lfo_stretch = 0;
-  zyn_addsynth_ptr->filter_lfo_shape = ZYN_LFO_SHAPE_TYPE_SINE;
+  zyn_addsynth_ptr->filter_lfo_params.frequency = 80.0 / 127.0;
+  zyn_addsynth_ptr->filter_lfo_params.depth = 0;
+  zyn_addsynth_ptr->filter_lfo_params.random_start_phase = FALSE;
+  zyn_addsynth_ptr->filter_lfo_params.start_phase = 0.5;
+  zyn_addsynth_ptr->filter_lfo_params.depth_randomness_enabled = FALSE;
+  zyn_addsynth_ptr->filter_lfo_params.depth_randomness = 0.5;
+  zyn_addsynth_ptr->filter_lfo_params.frequency_randomness_enabled = FALSE;
+  zyn_addsynth_ptr->filter_lfo_params.frequency_randomness = 0.5;
+  zyn_addsynth_ptr->filter_lfo_params.delay = 0;
+  zyn_addsynth_ptr->filter_lfo_params.stretch = 0;
+  zyn_addsynth_ptr->filter_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
-  zyn_addsynth_ptr->frequency_lfo_frequency = 70.0 / 127.0;
-  zyn_addsynth_ptr->frequency_lfo_depth = 0;
-  zyn_addsynth_ptr->frequency_lfo_random_start_phase = FALSE;
-  zyn_addsynth_ptr->frequency_lfo_start_phase = 0.5;
-  zyn_addsynth_ptr->frequency_lfo_depth_randomness_enabled = FALSE;
-  zyn_addsynth_ptr->frequency_lfo_depth_randomness = 0.5;
-  zyn_addsynth_ptr->frequency_lfo_frequency_randomness_enabled = FALSE;
-  zyn_addsynth_ptr->frequency_lfo_frequency_randomness = 0.5;
-  zyn_addsynth_ptr->frequency_lfo_delay = 0;
-  zyn_addsynth_ptr->frequency_lfo_stretch = 0;
-  zyn_addsynth_ptr->frequency_lfo_shape = ZYN_LFO_SHAPE_TYPE_SINE;
+  zyn_addsynth_ptr->frequency_lfo_params.frequency = 70.0 / 127.0;
+  zyn_addsynth_ptr->frequency_lfo_params.depth = 0;
+  zyn_addsynth_ptr->frequency_lfo_params.random_start_phase = FALSE;
+  zyn_addsynth_ptr->frequency_lfo_params.start_phase = 0.5;
+  zyn_addsynth_ptr->frequency_lfo_params.depth_randomness_enabled = FALSE;
+  zyn_addsynth_ptr->frequency_lfo_params.depth_randomness = 0.5;
+  zyn_addsynth_ptr->frequency_lfo_params.frequency_randomness_enabled = FALSE;
+  zyn_addsynth_ptr->frequency_lfo_params.frequency_randomness = 0.5;
+  zyn_addsynth_ptr->frequency_lfo_params.delay = 0;
+  zyn_addsynth_ptr->frequency_lfo_params.stretch = 0;
+  zyn_addsynth_ptr->frequency_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
   for (note_index = 0 ; note_index < ZYN_DEFAULT_POLYPHONY ; note_index++)
   {
@@ -376,14 +406,11 @@ zyn_addsynth_destroy(
     delete (zyn_addsynth_ptr->VoicePar[voice_index].FMSmp);
 
     delete (zyn_addsynth_ptr->VoicePar[voice_index].AmpEnvelope);
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].AmpLfo);
 
     delete (zyn_addsynth_ptr->VoicePar[voice_index].FreqEnvelope);
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].FreqLfo);
 
     delete (zyn_addsynth_ptr->VoicePar[voice_index].VoiceFilter);
     delete (zyn_addsynth_ptr->VoicePar[voice_index].FilterEnvelope);
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].FilterLfo);
 
     delete (zyn_addsynth_ptr->VoicePar[voice_index].FMFreqEnvelope);
     delete (zyn_addsynth_ptr->VoicePar[voice_index].FMAmpEnvelope);
@@ -437,19 +464,19 @@ zyn_addsynth_get_float_parameter(
   case ZYNADD_PARAMETER_FLOAT_AMP_ENV_STRETCH:
     return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.AmpEnvelope->m_stretch) * 2;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY:
-    return zyn_addsynth_ptr->amplitude_lfo_frequency;
+    return zyn_addsynth_ptr->amplitude_lfo_params.frequency;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH:
-    return zyn_addsynth_ptr->amplitude_lfo_depth * 100;
+    return zyn_addsynth_ptr->amplitude_lfo_params.depth * 100;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_START_PHASE:
-    return zyn_addsynth_ptr->amplitude_lfo_start_phase;
+    return zyn_addsynth_ptr->amplitude_lfo_params.start_phase;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DELAY:
-    return zyn_addsynth_ptr->amplitude_lfo_delay;
+    return zyn_addsynth_ptr->amplitude_lfo_params.delay;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_STRETCH:
-    return zyn_addsynth_ptr->amplitude_lfo_stretch;
+    return zyn_addsynth_ptr->amplitude_lfo_params.stretch;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH_RANDOMNESS:
-    return zyn_addsynth_ptr->amplitude_lfo_depth_randomness * 100;
+    return zyn_addsynth_ptr->amplitude_lfo_params.depth_randomness * 100;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY_RANDOMNESS:
-    return zyn_addsynth_ptr->amplitude_lfo_frequency_randomness * 100;
+    return zyn_addsynth_ptr->amplitude_lfo_params.frequency_randomness * 100;
 
   case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_ATTACK_VALUE:
     return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.FilterEnvelope->m_attack_value);
@@ -467,34 +494,34 @@ zyn_addsynth_get_float_parameter(
     return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.FilterEnvelope->m_stretch) * 2;
 
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_FREQUENCY:
-    return zyn_addsynth_ptr->filter_lfo_frequency;
+    return zyn_addsynth_ptr->filter_lfo_params.frequency;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DEPTH:
-    return zyn_addsynth_ptr->filter_lfo_depth * 100;
+    return zyn_addsynth_ptr->filter_lfo_params.depth * 100;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_START_PHASE:
-    return zyn_addsynth_ptr->filter_lfo_start_phase;
+    return zyn_addsynth_ptr->filter_lfo_params.start_phase;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DELAY:
-    return zyn_addsynth_ptr->filter_lfo_delay;
+    return zyn_addsynth_ptr->filter_lfo_params.delay;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_STRETCH:
-    return zyn_addsynth_ptr->filter_lfo_stretch;
+    return zyn_addsynth_ptr->filter_lfo_params.stretch;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DEPTH_RANDOMNESS:
-    return zyn_addsynth_ptr->filter_lfo_depth_randomness * 100;
+    return zyn_addsynth_ptr->filter_lfo_params.depth_randomness * 100;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_FREQUENCY_RANDOMNESS:
-    return zyn_addsynth_ptr->filter_lfo_frequency_randomness * 100;
+    return zyn_addsynth_ptr->filter_lfo_params.frequency_randomness * 100;
 
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_FREQUENCY:
-    return zyn_addsynth_ptr->frequency_lfo_frequency;
+    return zyn_addsynth_ptr->frequency_lfo_params.frequency;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_DEPTH:
-    return zyn_addsynth_ptr->frequency_lfo_depth * 100;
+    return zyn_addsynth_ptr->frequency_lfo_params.depth * 100;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_START_PHASE:
-    return zyn_addsynth_ptr->frequency_lfo_start_phase;
+    return zyn_addsynth_ptr->frequency_lfo_params.start_phase;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_DELAY:
-    return zyn_addsynth_ptr->frequency_lfo_delay;
+    return zyn_addsynth_ptr->frequency_lfo_params.delay;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_STRETCH:
-    return zyn_addsynth_ptr->frequency_lfo_stretch;
+    return zyn_addsynth_ptr->frequency_lfo_params.stretch;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_DEPTH_RANDOMNESS:
-    return zyn_addsynth_ptr->frequency_lfo_depth_randomness * 100;
+    return zyn_addsynth_ptr->frequency_lfo_params.depth_randomness * 100;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_FREQUENCY_RANDOMNESS:
-    return zyn_addsynth_ptr->frequency_lfo_frequency_randomness * 100;
+    return zyn_addsynth_ptr->frequency_lfo_params.frequency_randomness * 100;
 
   default:
     LOG_ERROR("Unknown parameter %u", parameter);
@@ -547,25 +574,25 @@ zyn_addsynth_set_float_parameter(
     zyn_addsynth_ptr->GlobalPar.AmpEnvelope->m_stretch = percent_to_0_127(value/2);
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY:
-    zyn_addsynth_ptr->amplitude_lfo_frequency = value;
+    zyn_addsynth_ptr->amplitude_lfo_params.frequency = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH:
-    zyn_addsynth_ptr->amplitude_lfo_depth = value / 100;
+    zyn_addsynth_ptr->amplitude_lfo_params.depth = value / 100;
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_START_PHASE:
-    zyn_addsynth_ptr->amplitude_lfo_start_phase = value;
+    zyn_addsynth_ptr->amplitude_lfo_params.start_phase = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DELAY:
-    zyn_addsynth_ptr->amplitude_lfo_delay = value;
+    zyn_addsynth_ptr->amplitude_lfo_params.delay = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_STRETCH:
-    zyn_addsynth_ptr->amplitude_lfo_stretch = value;
+    zyn_addsynth_ptr->amplitude_lfo_params.stretch = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_DEPTH_RANDOMNESS:
-    zyn_addsynth_ptr->amplitude_lfo_depth_randomness = value / 100;
+    zyn_addsynth_ptr->amplitude_lfo_params.depth_randomness = value / 100;
     return;
   case ZYNADD_PARAMETER_FLOAT_AMP_LFO_FREQUENCY_RANDOMNESS:
-    zyn_addsynth_ptr->amplitude_lfo_frequency_randomness = value / 100;
+    zyn_addsynth_ptr->amplitude_lfo_params.frequency_randomness = value / 100;
     return;
 
   case ZYNADD_PARAMETER_FLOAT_FILTER_ENV_ATTACK_VALUE:
@@ -591,47 +618,47 @@ zyn_addsynth_set_float_parameter(
     return;
 
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_FREQUENCY:
-    zyn_addsynth_ptr->filter_lfo_frequency = value;
+    zyn_addsynth_ptr->filter_lfo_params.frequency = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DEPTH:
-    zyn_addsynth_ptr->filter_lfo_depth = value / 100;
+    zyn_addsynth_ptr->filter_lfo_params.depth = value / 100;
     return;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_START_PHASE:
-    zyn_addsynth_ptr->filter_lfo_start_phase = value;
+    zyn_addsynth_ptr->filter_lfo_params.start_phase = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DELAY:
-    zyn_addsynth_ptr->filter_lfo_delay = value;
+    zyn_addsynth_ptr->filter_lfo_params.delay = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_STRETCH:
-    zyn_addsynth_ptr->filter_lfo_stretch = value;
+    zyn_addsynth_ptr->filter_lfo_params.stretch = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_DEPTH_RANDOMNESS:
-    zyn_addsynth_ptr->filter_lfo_depth_randomness = value / 100;
+    zyn_addsynth_ptr->filter_lfo_params.depth_randomness = value / 100;
     return;
   case ZYNADD_PARAMETER_FLOAT_FILTER_LFO_FREQUENCY_RANDOMNESS:
-    zyn_addsynth_ptr->filter_lfo_frequency_randomness = value / 100;
+    zyn_addsynth_ptr->filter_lfo_params.frequency_randomness = value / 100;
     return;
 
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_FREQUENCY:
-    zyn_addsynth_ptr->frequency_lfo_frequency = value;
+    zyn_addsynth_ptr->frequency_lfo_params.frequency = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_DEPTH:
-    zyn_addsynth_ptr->frequency_lfo_depth = value / 100;
+    zyn_addsynth_ptr->frequency_lfo_params.depth = value / 100;
     return;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_START_PHASE:
-    zyn_addsynth_ptr->frequency_lfo_start_phase = value;
+    zyn_addsynth_ptr->frequency_lfo_params.start_phase = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_DELAY:
-    zyn_addsynth_ptr->frequency_lfo_delay = value;
+    zyn_addsynth_ptr->frequency_lfo_params.delay = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_STRETCH:
-    zyn_addsynth_ptr->frequency_lfo_stretch = value;
+    zyn_addsynth_ptr->frequency_lfo_params.stretch = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_DEPTH_RANDOMNESS:
-    zyn_addsynth_ptr->frequency_lfo_depth_randomness = value / 100;
+    zyn_addsynth_ptr->frequency_lfo_params.depth_randomness = value / 100;
     return;
   case ZYNADD_PARAMETER_FLOAT_FREQUENCY_LFO_FREQUENCY_RANDOMNESS:
-    zyn_addsynth_ptr->frequency_lfo_frequency_randomness = value / 100;
+    zyn_addsynth_ptr->frequency_lfo_params.frequency_randomness = value / 100;
     return;
 
   default:
@@ -657,27 +684,27 @@ zyn_addsynth_get_bool_parameter(
   case ZYNADD_PARAMETER_BOOL_AMP_ENV_LINEAR:
     return zyn_addsynth_ptr->GlobalPar.AmpEnvelope->m_linear;
   case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_START_PHASE:
-    return zyn_addsynth_ptr->amplitude_lfo_random_start_phase;
+    return zyn_addsynth_ptr->amplitude_lfo_params.random_start_phase;
   case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_DEPTH:
-    return zyn_addsynth_ptr->amplitude_lfo_depth_randomness_enabled;
+    return zyn_addsynth_ptr->amplitude_lfo_params.depth_randomness_enabled;
   case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_FREQUENCY:
-    return zyn_addsynth_ptr->amplitude_lfo_frequency_randomness_enabled;
+    return zyn_addsynth_ptr->amplitude_lfo_params.frequency_randomness_enabled;
   case ZYNADD_PARAMETER_BOOL_FILTER_ENV_FORCED_RELEASE:
     return zyn_addsynth_ptr->GlobalPar.FilterEnvelope->m_forced_release;
 
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_START_PHASE:
-    return zyn_addsynth_ptr->filter_lfo_random_start_phase;
+    return zyn_addsynth_ptr->filter_lfo_params.random_start_phase;
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_DEPTH:
-    return zyn_addsynth_ptr->filter_lfo_depth_randomness_enabled;
+    return zyn_addsynth_ptr->filter_lfo_params.depth_randomness_enabled;
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_FREQUENCY:
-    return zyn_addsynth_ptr->filter_lfo_frequency_randomness_enabled;
+    return zyn_addsynth_ptr->filter_lfo_params.frequency_randomness_enabled;
 
   case ZYNADD_PARAMETER_BOOL_FREQUENCY_LFO_RANDOM_START_PHASE:
-    return zyn_addsynth_ptr->frequency_lfo_random_start_phase;
+    return zyn_addsynth_ptr->frequency_lfo_params.random_start_phase;
   case ZYNADD_PARAMETER_BOOL_FREQUENCY_LFO_RANDOM_DEPTH:
-    return zyn_addsynth_ptr->frequency_lfo_depth_randomness_enabled;
+    return zyn_addsynth_ptr->frequency_lfo_params.depth_randomness_enabled;
   case ZYNADD_PARAMETER_BOOL_FREQUENCY_LFO_RANDOM_FREQUENCY:
-    return zyn_addsynth_ptr->frequency_lfo_frequency_randomness_enabled;
+    return zyn_addsynth_ptr->frequency_lfo_params.frequency_randomness_enabled;
 
   default:
     assert(0);
@@ -708,36 +735,36 @@ zyn_addsynth_set_bool_parameter(
     zyn_addsynth_ptr->GlobalPar.AmpEnvelope->m_linear = value;
     return;
   case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_START_PHASE:
-    zyn_addsynth_ptr->amplitude_lfo_random_start_phase = value;
+    zyn_addsynth_ptr->amplitude_lfo_params.random_start_phase = value;
     return;
   case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_DEPTH:
-    zyn_addsynth_ptr->amplitude_lfo_depth_randomness_enabled = value;
+    zyn_addsynth_ptr->amplitude_lfo_params.depth_randomness_enabled = value;
     return;
   case ZYNADD_PARAMETER_BOOL_AMP_LFO_RANDOM_FREQUENCY:
-    zyn_addsynth_ptr->amplitude_lfo_frequency_randomness_enabled = value;
+    zyn_addsynth_ptr->amplitude_lfo_params.frequency_randomness_enabled = value;
     return;
   case ZYNADD_PARAMETER_BOOL_FILTER_ENV_FORCED_RELEASE:
     zyn_addsynth_ptr->GlobalPar.FilterEnvelope->m_forced_release = value;
     return;
 
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_START_PHASE:
-    zyn_addsynth_ptr->filter_lfo_random_start_phase = value;
+    zyn_addsynth_ptr->filter_lfo_params.random_start_phase = value;
     return;
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_DEPTH:
-    zyn_addsynth_ptr->filter_lfo_depth_randomness_enabled = value;
+    zyn_addsynth_ptr->filter_lfo_params.depth_randomness_enabled = value;
     return;
   case ZYNADD_PARAMETER_BOOL_FILTER_LFO_RANDOM_FREQUENCY:
-    zyn_addsynth_ptr->filter_lfo_frequency_randomness_enabled = value;
+    zyn_addsynth_ptr->filter_lfo_params.frequency_randomness_enabled = value;
     return;
 
   case ZYNADD_PARAMETER_BOOL_FREQUENCY_LFO_RANDOM_START_PHASE:
-    zyn_addsynth_ptr->frequency_lfo_random_start_phase = value;
+    zyn_addsynth_ptr->frequency_lfo_params.random_start_phase = value;
     return;
   case ZYNADD_PARAMETER_BOOL_FREQUENCY_LFO_RANDOM_DEPTH:
-    zyn_addsynth_ptr->frequency_lfo_depth_randomness_enabled = value;
+    zyn_addsynth_ptr->frequency_lfo_params.depth_randomness_enabled = value;
     return;
   case ZYNADD_PARAMETER_BOOL_FREQUENCY_LFO_RANDOM_FREQUENCY:
-    zyn_addsynth_ptr->frequency_lfo_frequency_randomness_enabled = value;
+    zyn_addsynth_ptr->frequency_lfo_params.frequency_randomness_enabled = value;
     return;
 
   default:
@@ -753,11 +780,11 @@ zyn_addsynth_get_shape_parameter(
   switch (parameter)
   {
   case ZYNADD_PARAMETER_SHAPE_AMP_LFO:
-    return zyn_addsynth_ptr->amplitude_lfo_shape;
+    return zyn_addsynth_ptr->amplitude_lfo_params.shape;
   case ZYNADD_PARAMETER_SHAPE_FILTER_LFO:
-    return zyn_addsynth_ptr->filter_lfo_shape;
+    return zyn_addsynth_ptr->filter_lfo_params.shape;
   case ZYNADD_PARAMETER_SHAPE_FREQUENCY_LFO:
-    return zyn_addsynth_ptr->frequency_lfo_shape;
+    return zyn_addsynth_ptr->frequency_lfo_params.shape;
   default:
     assert(0);
   }
@@ -772,13 +799,13 @@ zyn_addsynth_set_shape_parameter(
   switch (parameter)
   {
   case ZYNADD_PARAMETER_SHAPE_AMP_LFO:
-    zyn_addsynth_ptr->amplitude_lfo_shape = value;
+    zyn_addsynth_ptr->amplitude_lfo_params.shape = value;
     break;
   case ZYNADD_PARAMETER_SHAPE_FILTER_LFO:
-    zyn_addsynth_ptr->filter_lfo_shape = value;
+    zyn_addsynth_ptr->filter_lfo_params.shape = value;
     break;
   case ZYNADD_PARAMETER_SHAPE_FREQUENCY_LFO:
-    zyn_addsynth_ptr->frequency_lfo_shape = value;
+    zyn_addsynth_ptr->frequency_lfo_params.shape = value;
     break;
   default:
     assert(0);
