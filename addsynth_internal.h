@@ -266,7 +266,7 @@ struct zyn_addsynth
 
   ADnoteGlobalParam GlobalPar;
 
-  ADnoteVoiceParam VoicePar[NUM_VOICES];
+  ADnoteVoiceParam voices_params[NUM_VOICES];
 };
 
 #endif /* #ifndef ADDSYNTH_INTERNAL_H__9870368A_F1C9_4F0D_ADC1_B07ECFF2F9C7__INCLUDED */

@@ -74,60 +74,60 @@ zyn_addsynth_create(
 
   for (voice_index=0;voice_index<NUM_VOICES;voice_index++)
   {
-    zyn_addsynth_ptr->VoicePar[voice_index].OscilSmp =
+    zyn_addsynth_ptr->voices_params[voice_index].OscilSmp =
       new OscilGen(zyn_addsynth_ptr->fft_ptr, zyn_addsynth_ptr->GlobalPar.Reson);
-    zyn_addsynth_ptr->VoicePar[voice_index].FMSmp=new OscilGen(zyn_addsynth_ptr->fft_ptr, NULL);
+    zyn_addsynth_ptr->voices_params[voice_index].FMSmp=new OscilGen(zyn_addsynth_ptr->fft_ptr, NULL);
 
-    zyn_addsynth_ptr->VoicePar[voice_index].AmpEnvelope=new EnvelopeParams(64,1);
-    zyn_addsynth_ptr->VoicePar[voice_index].AmpEnvelope->ADSRinit_dB(0,100,127,100); 
+    zyn_addsynth_ptr->voices_params[voice_index].AmpEnvelope=new EnvelopeParams(64,1);
+    zyn_addsynth_ptr->voices_params[voice_index].AmpEnvelope->ADSRinit_dB(0,100,127,100); 
 
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.frequency = 90.0 / 127.0;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.depth = 32.0 / 127.0;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.random_start_phase = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.start_phase = 0.5;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.depth_randomness_enabled = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.depth = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.frequency_randomness_enabled = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.frequency_randomness = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.delay = 30.0 / 127.0 * 4.0;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.stretch = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].amplitude_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.frequency = 90.0 / 127.0;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.depth = 32.0 / 127.0;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.random_start_phase = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.start_phase = 0.5;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.depth_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.depth = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.frequency_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.frequency_randomness = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.delay = 30.0 / 127.0 * 4.0;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.stretch = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].amplitude_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
-    zyn_addsynth_ptr->VoicePar[voice_index].FreqEnvelope=new EnvelopeParams(0,0);
-    zyn_addsynth_ptr->VoicePar[voice_index].FreqEnvelope->ASRinit(30,40,64,60);
+    zyn_addsynth_ptr->voices_params[voice_index].FreqEnvelope=new EnvelopeParams(0,0);
+    zyn_addsynth_ptr->voices_params[voice_index].FreqEnvelope->ASRinit(30,40,64,60);
 
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.frequency = 50.0 / 127.0;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.depth = 40.0 / 127.0;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.random_start_phase = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.start_phase = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.depth_randomness_enabled = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.depth = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.frequency_randomness_enabled = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.frequency_randomness = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.delay = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.stretch = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].frequency_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.frequency = 50.0 / 127.0;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.depth = 40.0 / 127.0;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.random_start_phase = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.start_phase = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.depth_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.depth = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.frequency_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.frequency_randomness = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.delay = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.stretch = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
-    zyn_addsynth_ptr->VoicePar[voice_index].VoiceFilter=new FilterParams(2,50,60);
-    zyn_addsynth_ptr->VoicePar[voice_index].FilterEnvelope=new EnvelopeParams(0,0);
-    zyn_addsynth_ptr->VoicePar[voice_index].FilterEnvelope->ADSRinit_filter(90,70,40,70,10,40);
+    zyn_addsynth_ptr->voices_params[voice_index].VoiceFilter=new FilterParams(2,50,60);
+    zyn_addsynth_ptr->voices_params[voice_index].FilterEnvelope=new EnvelopeParams(0,0);
+    zyn_addsynth_ptr->voices_params[voice_index].FilterEnvelope->ADSRinit_filter(90,70,40,70,10,40);
 
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.frequency = 50.0 / 127.0;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.depth = 20.0 / 127.0;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.random_start_phase = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.start_phase = 0.5;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.depth_randomness_enabled = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.depth = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.frequency_randomness_enabled = FALSE;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.frequency_randomness = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.delay = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.stretch = 0;
-    zyn_addsynth_ptr->VoicePar[voice_index].filter_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.frequency = 50.0 / 127.0;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.depth = 20.0 / 127.0;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.random_start_phase = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.start_phase = 0.5;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.depth_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.depth = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.frequency_randomness_enabled = FALSE;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.frequency_randomness = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.delay = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.stretch = 0;
+    zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
-    zyn_addsynth_ptr->VoicePar[voice_index].FMFreqEnvelope=new EnvelopeParams(0,0);
-    zyn_addsynth_ptr->VoicePar[voice_index].FMFreqEnvelope->ASRinit(20,90,40,80);
-    zyn_addsynth_ptr->VoicePar[voice_index].FMAmpEnvelope=new EnvelopeParams(64,1);
-    zyn_addsynth_ptr->VoicePar[voice_index].FMAmpEnvelope->ADSRinit(80,90,127,100);
+    zyn_addsynth_ptr->voices_params[voice_index].FMFreqEnvelope=new EnvelopeParams(0,0);
+    zyn_addsynth_ptr->voices_params[voice_index].FMFreqEnvelope->ASRinit(20,90,40,80);
+    zyn_addsynth_ptr->voices_params[voice_index].FMAmpEnvelope=new EnvelopeParams(64,1);
+    zyn_addsynth_ptr->voices_params[voice_index].FMAmpEnvelope->ADSRinit(80,90,127,100);
   }
     
   /* Frequency Global Parameters */
@@ -157,60 +157,60 @@ zyn_addsynth_create(
 
   for (voice_index=0;voice_index<NUM_VOICES;voice_index++)
   {
-    zyn_addsynth_ptr->VoicePar[voice_index].Enabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].Type=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].Pfixedfreq=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PfixedfreqET=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].Presonance=1;
-    zyn_addsynth_ptr->VoicePar[voice_index].Pfilterbypass=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].Pextoscil=-1;
-    zyn_addsynth_ptr->VoicePar[voice_index].PextFMoscil=-1;
-    zyn_addsynth_ptr->VoicePar[voice_index].Poscilphase=64;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMoscilphase=64;
-    zyn_addsynth_ptr->VoicePar[voice_index].PDelay=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PVolume=100;
-    zyn_addsynth_ptr->VoicePar[voice_index].PVolumeminus=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PPanning=64;//center
-    zyn_addsynth_ptr->VoicePar[voice_index].PDetune=8192;//8192=0
-    zyn_addsynth_ptr->VoicePar[voice_index].PCoarseDetune=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PDetuneType=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFreqLfoEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFreqEnvelopeEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PAmpEnvelopeEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PAmpLfoEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PAmpVelocityScaleFunction=127;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFilterEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFilterEnvelopeEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFilterLfoEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].fm_type = ZYN_FM_TYPE_NONE;
+    zyn_addsynth_ptr->voices_params[voice_index].Enabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].Type=0;
+    zyn_addsynth_ptr->voices_params[voice_index].Pfixedfreq=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PfixedfreqET=0;
+    zyn_addsynth_ptr->voices_params[voice_index].Presonance=1;
+    zyn_addsynth_ptr->voices_params[voice_index].Pfilterbypass=0;
+    zyn_addsynth_ptr->voices_params[voice_index].Pextoscil=-1;
+    zyn_addsynth_ptr->voices_params[voice_index].PextFMoscil=-1;
+    zyn_addsynth_ptr->voices_params[voice_index].Poscilphase=64;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMoscilphase=64;
+    zyn_addsynth_ptr->voices_params[voice_index].PDelay=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PVolume=100;
+    zyn_addsynth_ptr->voices_params[voice_index].PVolumeminus=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PPanning=64;//center
+    zyn_addsynth_ptr->voices_params[voice_index].PDetune=8192;//8192=0
+    zyn_addsynth_ptr->voices_params[voice_index].PCoarseDetune=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PDetuneType=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PFreqLfoEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PFreqEnvelopeEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PAmpEnvelopeEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PAmpLfoEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PAmpVelocityScaleFunction=127;
+    zyn_addsynth_ptr->voices_params[voice_index].PFilterEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PFilterEnvelopeEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PFilterLfoEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].fm_type = ZYN_FM_TYPE_NONE;
 
     //I use the internal oscillator (-1)
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMVoice=-1;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMVoice=-1;
 
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMVolume=90;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMVolumeDamp=64;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMDetune=8192;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMCoarseDetune=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMDetuneType=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMFreqEnvelopeEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMAmpEnvelopeEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMVelocityScaleFunction=64; 
+    zyn_addsynth_ptr->voices_params[voice_index].PFMVolume=90;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMVolumeDamp=64;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMDetune=8192;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMCoarseDetune=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMDetuneType=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMFreqEnvelopeEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMAmpEnvelopeEnabled=0;
+    zyn_addsynth_ptr->voices_params[voice_index].PFMVelocityScaleFunction=64; 
 
-    zyn_addsynth_ptr->VoicePar[voice_index].OscilSmp->defaults();
-    zyn_addsynth_ptr->VoicePar[voice_index].FMSmp->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].OscilSmp->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].FMSmp->defaults();
 
-    zyn_addsynth_ptr->VoicePar[voice_index].AmpEnvelope->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].AmpEnvelope->defaults();
 
-    zyn_addsynth_ptr->VoicePar[voice_index].FreqEnvelope->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].FreqEnvelope->defaults();
 
-    zyn_addsynth_ptr->VoicePar[voice_index].VoiceFilter->defaults();
-    zyn_addsynth_ptr->VoicePar[voice_index].FilterEnvelope->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].VoiceFilter->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].FilterEnvelope->defaults();
 
-    zyn_addsynth_ptr->VoicePar[voice_index].FMFreqEnvelope->defaults();
-    zyn_addsynth_ptr->VoicePar[voice_index].FMAmpEnvelope->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].FMFreqEnvelope->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].FMAmpEnvelope->defaults();
   }
 
-  zyn_addsynth_ptr->VoicePar[0].Enabled=1;
+  zyn_addsynth_ptr->voices_params[0].Enabled=1;
   // ADnoteParameters temp end
 
   zyn_addsynth_ptr->ctl_ptr = new Controller;
@@ -402,18 +402,18 @@ zyn_addsynth_destroy(
 
   for (voice_index = 0 ; voice_index < NUM_VOICES ; voice_index++)
   {
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].OscilSmp);
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].FMSmp);
+    delete (zyn_addsynth_ptr->voices_params[voice_index].OscilSmp);
+    delete (zyn_addsynth_ptr->voices_params[voice_index].FMSmp);
 
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].AmpEnvelope);
+    delete (zyn_addsynth_ptr->voices_params[voice_index].AmpEnvelope);
 
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].FreqEnvelope);
+    delete (zyn_addsynth_ptr->voices_params[voice_index].FreqEnvelope);
 
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].VoiceFilter);
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].FilterEnvelope);
+    delete (zyn_addsynth_ptr->voices_params[voice_index].VoiceFilter);
+    delete (zyn_addsynth_ptr->voices_params[voice_index].FilterEnvelope);
 
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].FMFreqEnvelope);
-    delete (zyn_addsynth_ptr->VoicePar[voice_index].FMAmpEnvelope);
+    delete (zyn_addsynth_ptr->voices_params[voice_index].FMFreqEnvelope);
+    delete (zyn_addsynth_ptr->voices_params[voice_index].FMAmpEnvelope);
   }
   // ADnoteParameters temp end
 
