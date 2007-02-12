@@ -135,13 +135,11 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->GlobalPar.PDetune=8192;//zero
   zyn_addsynth_ptr->GlobalPar.PCoarseDetune=0;
   zyn_addsynth_ptr->GlobalPar.PDetuneType=1;
-  zyn_addsynth_ptr->GlobalPar.FreqEnvelope->defaults();
   zyn_addsynth_ptr->GlobalPar.PBandwidth=64;
     
   /* Amplitude Global Parameters */
   zyn_addsynth_ptr->GlobalPar.PVolume=90;
   zyn_addsynth_ptr->GlobalPar.PAmpVelocityScaleFunction=64;
-  zyn_addsynth_ptr->GlobalPar.AmpEnvelope->defaults();
   zyn_addsynth_ptr->GlobalPar.PPunchStrength=0;
   zyn_addsynth_ptr->GlobalPar.PPunchTime=60;
   zyn_addsynth_ptr->GlobalPar.PPunchStretch=64;
@@ -151,9 +149,7 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->GlobalPar.PFilterVelocityScale=64;
   zyn_addsynth_ptr->GlobalPar.PFilterVelocityScaleFunction=64;
   zyn_addsynth_ptr->GlobalPar.GlobalFilter->defaults();
-  zyn_addsynth_ptr->GlobalPar.FilterEnvelope->defaults();
   zyn_addsynth_ptr->GlobalPar.Reson->defaults();
-
 
   for (voice_index=0;voice_index<NUM_VOICES;voice_index++)
   {
@@ -199,15 +195,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params[voice_index].OscilSmp->defaults();
     zyn_addsynth_ptr->voices_params[voice_index].FMSmp->defaults();
 
-    zyn_addsynth_ptr->voices_params[voice_index].AmpEnvelope->defaults();
-
-    zyn_addsynth_ptr->voices_params[voice_index].FreqEnvelope->defaults();
-
     zyn_addsynth_ptr->voices_params[voice_index].VoiceFilter->defaults();
-    zyn_addsynth_ptr->voices_params[voice_index].FilterEnvelope->defaults();
-
-    zyn_addsynth_ptr->voices_params[voice_index].FMFreqEnvelope->defaults();
-    zyn_addsynth_ptr->voices_params[voice_index].FMAmpEnvelope->defaults();
   }
 
   zyn_addsynth_ptr->voices_params[0].Enabled=1;

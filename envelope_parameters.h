@@ -45,11 +45,7 @@ public:
   void ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt);
   void converttofree();
 
-  void defaults();
-
   REALTYPE getdt(unsigned char i);
-
-  void store2defaults();
 
   BOOL m_free_mode;             // free or ADSR/ASR mode
 
@@ -85,15 +81,6 @@ public:
   BOOL m_forced_release_default;
 
   unsigned char m_linear_default;
-
-  unsigned char m_attack_duration_default;
-  unsigned char m_decay_duration_default;
-  unsigned char m_release_duration_default;
-
-  unsigned char m_attack_value_default;
-  unsigned char m_decay_value_default;
-  unsigned char m_sustain_value_default;
-  unsigned char m_release_value_default;
 };
 
 #endif

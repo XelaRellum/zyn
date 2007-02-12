@@ -53,8 +53,6 @@ EnvelopeParams::EnvelopeParams(
   m_forced_release = forced_release;        
   m_free_mode = TRUE;
   m_linear = FALSE;
-    
-  store2defaults();
 }
 
 EnvelopeParams::~EnvelopeParams()
@@ -81,8 +79,6 @@ void EnvelopeParams::ADSRinit(char A_dt,char D_dt,char S_val,char R_dt)
   m_free_mode = FALSE;
 
   converttofree();
-
-  store2defaults();
 }
 
 void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt)
@@ -97,8 +93,6 @@ void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt)
   m_free_mode = FALSE;
 
   converttofree();
-
-  store2defaults();
 }
 
 void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt)
@@ -113,8 +107,6 @@ void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt)
   m_free_mode = FALSE;
 
   converttofree();
-
-  store2defaults();
 }
 
 void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,char R_dt,char R_val)
@@ -131,8 +123,6 @@ void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,c
   m_free_mode = FALSE;
 
   converttofree();
-
-  store2defaults();
 }
 
 void EnvelopeParams::ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt)
@@ -147,8 +137,6 @@ void EnvelopeParams::ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt)
   m_free_mode = FALSE;
 
   converttofree();
-
-  store2defaults();
 }
 
 /*
@@ -211,40 +199,4 @@ EnvelopeParams::converttofree()
     Penvval[2] = m_release_value;
     break;
   }
-}
-
-void EnvelopeParams::defaults()
-{
-  m_stretch = m_stretch_default;
-  m_forced_release = m_forced_release_default;
-  m_linear = m_linear_default;
-
-  m_attack_duration = m_attack_duration_default;
-  m_decay_duration = m_decay_duration_default;
-  m_release_duration = m_release_duration_default;
-
-  m_attack_value = m_attack_value_default;
-  m_decay_value = m_decay_value_default;
-  m_sustain_value = m_sustain_value_default;
-  m_release_value = m_release_value_default;
-
-  m_free_mode = FALSE;
-
-  converttofree();
-}
-
-void EnvelopeParams::store2defaults()
-{
-  m_stretch_default = m_stretch;
-  m_forced_release_default = m_forced_release;
-  m_linear_default = m_linear;
-
-  m_attack_duration_default = m_attack_duration;
-  m_decay_duration_default = m_decay_duration;
-  m_release_duration_default = m_release_duration;
-
-  m_attack_value_default = m_attack_value;
-  m_decay_value_default = m_decay_value;
-  m_sustain_value_default = m_sustain_value;
-  m_release_value_default = m_release_value;
 }
