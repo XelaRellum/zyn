@@ -213,41 +213,35 @@ ADnote::note_on(
     m_voices[voice_index].FilterCenterPitch=m_synth_ptr->VoicePar[voice_index].VoiceFilter->getfreq();
     m_voices[voice_index].filterbypass=m_synth_ptr->VoicePar[voice_index].Pfilterbypass;
 
-    switch(m_synth_ptr->VoicePar[voice_index].PFMEnabled)
-    {
-    case 1:
-      m_voices[voice_index].FMEnabled = MORPH;
-      break;
-    case 2:
-      m_voices[voice_index].FMEnabled = RING_MOD;
-      break;
-    case 3:
-      m_voices[voice_index].FMEnabled = PHASE_MOD;
-      break;
-    case 4:
-      m_voices[voice_index].FMEnabled = FREQ_MOD;
-      break;
-    case 5:
-      m_voices[voice_index].FMEnabled = PITCH_MOD;
-      break;
-    default:
-      m_voices[voice_index].FMEnabled = NONE;
-    }
+    m_voices[voice_index].fm_type = m_synth_ptr->VoicePar[voice_index].fm_type;
 
     m_voices[voice_index].FMVoice=m_synth_ptr->VoicePar[voice_index].PFMVoice;
 
     //Compute the Voice's modulator volume (incl. damping)
     REALTYPE fmvoldamp=pow(440.0/getvoicebasefreq(voice_index),m_synth_ptr->VoicePar[voice_index].PFMVolumeDamp/64.0-1.0);
-    switch (m_voices[voice_index].FMEnabled){
-    case PHASE_MOD:fmvoldamp=pow(440.0/getvoicebasefreq(voice_index),m_synth_ptr->VoicePar[voice_index].PFMVolumeDamp/64.0);
-      m_voices[voice_index].FMVolume=(exp(m_synth_ptr->VoicePar[voice_index].PFMVolume/127.0*FM_AMP_MULTIPLIER)-1.0)*fmvoldamp*4.0;
+    switch (m_voices[voice_index].fm_type)
+    {
+    case ZYN_FM_TYPE_PHASE_MOD:
+      fmvoldamp = pow(440.0/getvoicebasefreq(voice_index),m_synth_ptr->VoicePar[voice_index].PFMVolumeDamp/64.0);
+      m_voices[voice_index].FMVolume = (exp(m_synth_ptr->VoicePar[voice_index].PFMVolume/127.0*FM_AMP_MULTIPLIER)-1.0)*fmvoldamp*4.0;
       break;
-    case FREQ_MOD:m_voices[voice_index].FMVolume=(exp(m_synth_ptr->VoicePar[voice_index].PFMVolume/127.0*FM_AMP_MULTIPLIER)-1.0)*fmvoldamp*4.0;
+    case ZYN_FM_TYPE_FREQ_MOD:
+      m_voices[voice_index].FMVolume = exp(m_synth_ptr->VoicePar[voice_index].PFMVolume / 127.0 * FM_AMP_MULTIPLIER);
+      m_voices[voice_index].FMVolume -= 1.0;
+      m_voices[voice_index].FMVolume *= fmvoldamp * 4.0;
       break;
-      //    case PITCH_MOD:m_voices[voice_index].FMVolume=(m_synth_ptr->VoicePar[voice_index].PFMVolume/127.0*8.0)*fmvoldamp;//???????????
-      //            break;
-    default:if (fmvoldamp>1.0) fmvoldamp=1.0;
-      m_voices[voice_index].FMVolume=m_synth_ptr->VoicePar[voice_index].PFMVolume/127.0*fmvoldamp;
+#if 0                           // ???????????
+    case ZYN_FM_TYPE_PITCH_MOD:
+      m_voices[voice_index].FMVolume=(m_synth_ptr->VoicePar[voice_index].PFMVolume/127.0*8.0)*fmvoldamp;
+      break;
+#endif
+    default:
+      if (fmvoldamp > 1.0)
+      {
+        fmvoldamp = 1.0;
+      }
+
+      m_voices[voice_index].FMVolume = m_synth_ptr->VoicePar[voice_index].PFMVolume / 127.0 * fmvoldamp;
     }
 
     //Voice's modulator velocity sensing
@@ -301,10 +295,10 @@ ADnote::note_on(
 
   globalnewamplitude = m_volume * m_amplitude_envelope.envout_dB() * m_amplitude_lfo.amplfoout();
 
-//FIXME   m_filter_left.init(m_synth_ptr->GlobalPar.GlobalFilter);
+  m_filter_left.init(m_synth_ptr->GlobalPar.GlobalFilter);
   if (m_stereo)
   {
-//FIXME     m_filter_right.init(m_synth_ptr->GlobalPar.GlobalFilter);
+    m_filter_right.init(m_synth_ptr->GlobalPar.GlobalFilter);
   }
 
   m_filter_envelope.init(m_synth_ptr->GlobalPar.FilterEnvelope, m_basefreq);
@@ -393,7 +387,8 @@ ADnote::note_on(
     m_voices[nvoice].FilterFreqTracking=m_synth_ptr->VoicePar[nvoice].VoiceFilter->getfreqtracking(m_basefreq);
 
     /* Voice Modulation Parameters Init */
-    if ((m_voices[nvoice].FMEnabled!=NONE)&&(m_voices[nvoice].FMVoice<0)){
+    if (m_voices[nvoice].fm_type != ZYN_FM_TYPE_NONE && m_voices[nvoice].FMVoice < 0)
+    {
       m_synth_ptr->VoicePar[nvoice].FMSmp->newrandseed(rand());
       m_voices[nvoice].FMSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];
 
@@ -403,10 +398,11 @@ ADnote::note_on(
       if (m_synth_ptr->VoicePar[nvoice].PextFMoscil!=-1) vc=m_synth_ptr->VoicePar[nvoice].PextFMoscil;
 
       REALTYPE tmp=1.0;
-      if ((m_synth_ptr->VoicePar[vc].FMSmp->Padaptiveharmonics!=0)||
-          (m_voices[nvoice].FMEnabled==MORPH)||
-          (m_voices[nvoice].FMEnabled==RING_MOD)){
-        tmp=getFMvoicebasefreq(nvoice);
+      if ((m_synth_ptr->VoicePar[vc].FMSmp->Padaptiveharmonics != 0) ||
+          (m_voices[nvoice].fm_type == ZYN_FM_TYPE_MORPH) ||
+          (m_voices[nvoice].fm_type == ZYN_FM_TYPE_RING_MOD))
+      {
+        tmp = getFMvoicebasefreq(nvoice);
       }
 
       if (!random_grouping)
@@ -453,7 +449,7 @@ void ADnote::KillVoice(int nvoice)
   int i;
   delete [] (m_voices[nvoice].OscilSmp);
 
-  if ((m_voices[nvoice].FMEnabled != NONE) && (m_voices[nvoice].FMVoice < 0))
+  if ((m_voices[nvoice].fm_type != ZYN_FM_TYPE_NONE) && (m_voices[nvoice].FMVoice < 0))
   {
     delete m_voices[nvoice].FMSmp;
   }
@@ -715,7 +711,7 @@ ADnote::computecurrentparameters()
       /***************/
       /*  Modulator */
       /***************/
-      if (m_voices[nvoice].FMEnabled != NONE)
+      if (m_voices[nvoice].fm_type != ZYN_FM_TYPE_NONE)
       {
         FMrelativepitch = m_voices[nvoice].FMDetune / 100.0;
         if (m_synth_ptr->VoicePar[nvoice].PFMFreqEnvelopeEnabled)
@@ -1023,20 +1019,44 @@ ADnote::noteout(
 
   computecurrentparameters();
 
-  for (nvoice=0;nvoice<NUM_VOICES;nvoice++){
-    if ((!m_voices[nvoice].enabled) || (m_voices[nvoice].DelayTicks>0)) continue;
-    if (m_voices[nvoice].noisetype==0){//voice mode=sound
-      switch (m_voices[nvoice].FMEnabled){
-      case MORPH:ComputeVoiceOscillatorMorph(nvoice);break;
-      case RING_MOD:ComputeVoiceOscillatorRingModulation(nvoice);break;
-      case PHASE_MOD:ComputeVoiceOscillatorFrequencyModulation(nvoice,0);break;
-      case FREQ_MOD:ComputeVoiceOscillatorFrequencyModulation(nvoice,1);break;
-        //case PITCH_MOD:ComputeVoiceOscillatorPitchModulation(nvoice);break;
-      default:ComputeVoiceOscillator_LinearInterpolation(nvoice);
-        //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
+  for (nvoice = 0 ; nvoice < NUM_VOICES ; nvoice++)
+  {
+    if (!m_voices[nvoice].enabled || m_voices[nvoice].DelayTicks > 0)
+    {
+      continue;
+    }
 
+    if (m_voices[nvoice].noisetype == 0) //voice mode = sound
+    {
+      switch (m_voices[nvoice].fm_type)
+      {
+      case ZYN_FM_TYPE_MORPH:
+        ComputeVoiceOscillatorMorph(nvoice);
+        break;
+      case ZYN_FM_TYPE_RING_MOD:
+        ComputeVoiceOscillatorRingModulation(nvoice);
+        break;
+      case ZYN_FM_TYPE_PHASE_MOD:
+        ComputeVoiceOscillatorFrequencyModulation(nvoice,0);
+        break;
+      case ZYN_FM_TYPE_FREQ_MOD:
+        ComputeVoiceOscillatorFrequencyModulation(nvoice,1);
+        break;
+#if 0
+      case ZYN_FM_TYPE_PITCH_MOD:
+        ComputeVoiceOscillatorPitchModulation(nvoice);
+        break;
+#endif
+      default:
+        ComputeVoiceOscillator_LinearInterpolation(nvoice);
+        //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
       }
-    } else ComputeVoiceNoise(nvoice);
+    }
+    else
+    {
+      ComputeVoiceNoise(nvoice);
+    }
+
     // Voice Processing
 
     // Amplitude

@@ -149,7 +149,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->VoicePar[voice_index].PFilterEnabled=0;
     zyn_addsynth_ptr->VoicePar[voice_index].PFilterEnvelopeEnabled=0;
     zyn_addsynth_ptr->VoicePar[voice_index].PFilterLfoEnabled=0;
-    zyn_addsynth_ptr->VoicePar[voice_index].PFMEnabled=0;
+    zyn_addsynth_ptr->VoicePar[voice_index].fm_type = ZYN_FM_TYPE_NONE;
 
     //I use the internal oscillator (-1)
     zyn_addsynth_ptr->VoicePar[voice_index].PFMVoice=-1;

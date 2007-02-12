@@ -144,7 +144,7 @@ private:
      *   MODULLATOR PARAMETERS   *
      ****************************/
 
-    FMTYPE FMEnabled;
+    unsigned int fm_type;
 
     int FMVoice;
 

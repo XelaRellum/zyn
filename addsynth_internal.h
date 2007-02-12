@@ -29,7 +29,12 @@ struct note_channel
   ADnote * note_ptr;
 };
 
-enum FMTYPE{NONE,MORPH,RING_MOD,PHASE_MOD,FREQ_MOD,PITCH_MOD};
+#define ZYN_FM_TYPE_NONE          0
+#define ZYN_FM_TYPE_MORPH         1
+#define ZYN_FM_TYPE_RING_MOD      2
+#define ZYN_FM_TYPE_PHASE_MOD     3
+#define ZYN_FM_TYPE_FREQ_MOD      4
+#define ZYN_FM_TYPE_PITCH_MOD     5 /* code for this is disabled for some reason */
 
 struct ADnoteGlobalParam
 {
@@ -195,8 +200,8 @@ struct ADnoteVoiceParam
    *   MODULLATOR PARAMETERS   *
    ****************************/
 
-  /* Modullator Parameters (0=off,1=Morph,2=RM,3=PM,4=FM.. */
-  unsigned char PFMEnabled;
+  /* Modullator Parameters, one of ZYN_FM_TYPE_XXX */
+  unsigned int fm_type;
 
   /* Voice that I use as modullator instead of FMSmp.
      It is -1 if I use FMSmp(default).
