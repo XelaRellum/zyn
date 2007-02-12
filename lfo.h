@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
  
   LFO.h - LFO implementation
-  Copyright (C) 2006 Nedko Arnaudov <nedko@arnaudov.name>
+  Copyright (C) 2006,2007 Nedko Arnaudov <nedko@arnaudov.name>
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
