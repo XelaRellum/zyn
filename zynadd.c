@@ -28,7 +28,6 @@
 #include "lv2dynparam/lv2.h"
 #include "lv2-miditype.h"
 #include "lv2-midifunctions.h"
-#include "zynadd.peg"
 #include "zynadd.h"
 #include "addsynth.h"
 #include "lv2dynparam/lv2dynparam.h"
@@ -36,6 +35,11 @@
 #include "zynadd_internal.h"
 //#define LOG_LEVEL LOG_LEVEL_DEBUG
 #include "log.h"
+
+#define LV2_PORT_MIDI_IN 0
+#define LV2_PORT_OUTPUT_LEFT 1
+#define LV2_PORT_OUTPUT_RIGHT 2
+#define LV2_PORTS_COUNT 3
 
 LV2_Handle
 zynadd_instantiate(
@@ -75,7 +79,7 @@ zynadd_instantiate(
     goto fail_free_instance;
   }
 
-  zynadd_ptr->ports = malloc(peg_n_ports * sizeof(void *));
+  zynadd_ptr->ports = malloc(LV2_PORTS_COUNT * sizeof(void *));
   if (zynadd_ptr->ports == NULL)
   {
     goto fail_free_bundle_path;
@@ -136,7 +140,7 @@ zynadd_run(
 
 /*   printf("%u\n", sample_count); fflush(stdout); */
 
-  midi.midi = (LV2_MIDI *)zynadd_ptr->ports[peg_midi_in];
+  midi.midi = (LV2_MIDI *)zynadd_ptr->ports[LV2_PORT_MIDI_IN];
   midi.frame_count = samples_count;
   midi.position = 0;
 
@@ -197,8 +201,8 @@ zynadd_run(
 
     assert(zynadd_ptr->synth_output_offset == synth_output_offset_future);
 
-    memcpy((float *)(zynadd_ptr->ports[peg_output_left]) + now, zynadd_ptr->synth_output_left, fill * sizeof(float));
-    memcpy((float *)(zynadd_ptr->ports[peg_output_right]) + now, zynadd_ptr->synth_output_right, fill * sizeof(float));
+    memcpy((float *)(zynadd_ptr->ports[LV2_PORT_OUTPUT_LEFT]) + now, zynadd_ptr->synth_output_left, fill * sizeof(float));
+    memcpy((float *)(zynadd_ptr->ports[LV2_PORT_OUTPUT_RIGHT]) + now, zynadd_ptr->synth_output_right, fill * sizeof(float));
 
     zynadd_ptr->synth_output_offset += fill;
     assert(zynadd_ptr->synth_output_offset <= SOUND_BUFFER_SIZE);
@@ -224,7 +228,7 @@ zynadd_connect_port(
   uint32_t port,
   void * data_location)
 {
-  if (port >= peg_n_ports)
+  if (port >= LV2_PORTS_COUNT)
   {
     assert(0);
     return;

@@ -21,9 +21,6 @@ CC = gcc -c -Wall -Werror
 CXX = g++ -c
 CFLAGS := -g -fPIC -DPIC -Wall $(strip $(shell pkg-config --cflags fftw3 lv2dynparamplugin-1))
 
-# The lv2peg program - edit if it's not in your path
-LV2PEG = lv2peg
-
 GENDEP_SED_EXPR = "s/^\\(.*\\)\\.o *: /$(subst /,\/,$(@:.d=.o)) $(subst /,\/,$@) : /g"
 GENDEP_C = set -e; $(GCC_PREFIX)gcc -MM $(CFLAGS) $< | sed $(GENDEP_SED_EXPR) > $@; [ -s $@ ] || rm -f $@
 GENDEP_CXX = set -e; $(GCC_PREFIX)g++ -MM $(CXXFLAGS) $< | sed $(GENDEP_SED_EXPR) > $@; [ -s $@ ] || rm -f $@
@@ -49,7 +46,7 @@ PLUGIN_SOURCES_CXX += resonance.cpp
 PLUGIN_SOURCES_CXX += Controller.cpp
 
 PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c zynadd_dynparam.c log.c
-PLUGIN_HEADERS = lv2plugin.hpp lv2.h lv2-miditype.h lv2-midifunctions.h zynadd.peg
+PLUGIN_HEADERS = lv2plugin.hpp lv2.h lv2-miditype.h lv2-midifunctions.h
 
 # Derived variables - do not edit
 PLUGIN_OBJECTS = $(subst .cpp,.o,$(PLUGIN_SOURCES_CXX)) $(subst .c,.o,$(PLUGIN_SOURCES_C))
@@ -75,7 +72,7 @@ zyn: addnote_cpp.o main.o util.o
 
 # Remove all generated files
 clean:
-	-rm -rf $(PLUGIN_NAME).lv2 zynadd.so zynadd_gtk *.d *.o zyn zynadd.peg
+	-rm -rf $(PLUGIN_NAME).lv2 zynadd.so zynadd_gtk *.d *.o zyn
 
 rebuild: clean zyn
 
@@ -98,7 +95,7 @@ DEPFILES = $(ALL_SOURCES_CXX:.cpp=.d) $(ALL_SOURCES_C:.c=.d)
 # All header dependencies need to be generated and included
 -include  $(DEPFILES)
 
-$(DEPFILES): zynadd.peg
+$(DEPFILES):
 
 # This is how to generate the dependency files
 %.d: %.cpp
@@ -108,10 +105,6 @@ $(DEPFILES): zynadd.peg
 %.d: %.c
 	@echo "Generating dependency for $< to $@ ..."
 	@$(GENDEP_C)
-
-# PEG files contain info about the plugin ports
-%.peg: %.ttl
-	$(LV2PEG) $(subst .peg,.ttl,$@) $@
 
 install: $(PLUGIN_NAME).lv2
 ifneq ($(LV2_PATH),)
