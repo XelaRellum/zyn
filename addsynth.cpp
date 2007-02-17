@@ -531,7 +531,34 @@ zyn_addsynth_get_float_parameter(
     case ZYNADD_PARAMETER_FLOAT_ENV_STRETCH:
       return percent_from_0_127(zyn_addsynth_ptr->m_filter_envelope_params.m_stretch) * 2;
     default:
-      LOG_ERROR("Unknown parameter %u", parameter);
+      LOG_ERROR("Unknown filter envelope parameter %u", parameter);
+      assert(0);
+    }
+  }
+  else if (component == ZYNADD_COMPONENT_FREQUENCY_ENV)
+  {
+    switch (parameter)
+    {
+    case ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_VALUE:
+      return percent_from_0_127(
+        zyn_addsynth_ptr->m_frequency_envelope_params.get_value(
+          zyn_addsynth_ptr->m_frequency_envelope_params.m_attack_value_index));
+    case ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_DURATION:
+      return percent_from_0_127(
+        zyn_addsynth_ptr->m_frequency_envelope_params.get_duration(
+          zyn_addsynth_ptr->m_frequency_envelope_params.m_attack_duration_index));
+    case ZYNADD_PARAMETER_FLOAT_ENV_RELEASE_VALUE:
+      return percent_from_0_127(
+        zyn_addsynth_ptr->m_frequency_envelope_params.get_value(
+          zyn_addsynth_ptr->m_frequency_envelope_params.m_release_value_index));
+    case ZYNADD_PARAMETER_FLOAT_ENV_RELEASE_DURATION:
+      return percent_from_0_127(
+        zyn_addsynth_ptr->m_frequency_envelope_params.get_duration(
+          zyn_addsynth_ptr->m_frequency_envelope_params.m_release_duration_index));
+    case ZYNADD_PARAMETER_FLOAT_ENV_STRETCH:
+      return percent_from_0_127(zyn_addsynth_ptr->m_frequency_envelope_params.m_stretch) * 2;
+    default:
+      LOG_ERROR("Unknown frequency envelope parameter %u", parameter);
       assert(0);
     }
   }
@@ -609,7 +636,7 @@ zyn_addsynth_set_float_parameter(
       zyn_addsynth_ptr->m_amplitude_envelope_params.m_stretch = percent_to_0_127(value/2);
       return;
     default:
-      LOG_ERROR("Unknown envelope parameter %u", parameter);
+      LOG_ERROR("Unknown amplitude envelope parameter %u", parameter);
       assert(0);
     }
   }
@@ -698,7 +725,39 @@ zyn_addsynth_set_float_parameter(
       zyn_addsynth_ptr->m_filter_envelope_params.m_stretch = percent_to_0_127(value/2);
       return;
     default:
-      LOG_ERROR("Unknown envelope parameter %u", parameter);
+      LOG_ERROR("Unknown filter envelope parameter %u", parameter);
+      assert(0);
+    }
+  }
+  else if (component == ZYNADD_COMPONENT_FREQUENCY_ENV)
+  {
+    switch (parameter)
+    {
+    case ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_VALUE:
+      zyn_addsynth_ptr->m_frequency_envelope_params.set_value(
+        zyn_addsynth_ptr->m_frequency_envelope_params.m_attack_value_index,
+        percent_to_0_127(value));
+      return;
+    case ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_DURATION:
+      zyn_addsynth_ptr->m_frequency_envelope_params.set_duration(
+        zyn_addsynth_ptr->m_frequency_envelope_params.m_attack_duration_index,
+        percent_to_0_127(value));
+      return;
+    case ZYNADD_PARAMETER_FLOAT_ENV_RELEASE_VALUE:
+      zyn_addsynth_ptr->m_frequency_envelope_params.set_value(
+        zyn_addsynth_ptr->m_frequency_envelope_params.m_release_value_index,
+        percent_to_0_127(value));
+      return;
+    case ZYNADD_PARAMETER_FLOAT_ENV_RELEASE_DURATION:
+      zyn_addsynth_ptr->m_frequency_envelope_params.set_duration(
+        zyn_addsynth_ptr->m_frequency_envelope_params.m_release_duration_index,
+        percent_to_0_127(value));
+      return;
+    case ZYNADD_PARAMETER_FLOAT_ENV_STRETCH:
+      zyn_addsynth_ptr->m_frequency_envelope_params.m_stretch = percent_to_0_127(value/2);
+      return;
+    default:
+      LOG_ERROR("Unknown frequency envelope parameter %u", parameter);
       assert(0);
     }
   }
@@ -785,6 +844,17 @@ zyn_addsynth_get_bool_parameter(
       return zyn_addsynth_ptr->m_filter_envelope_params.m_forced_release;
     default:
       LOG_ERROR("Unknown bool filter envelope parameter %u", parameter);
+      assert(0);
+    }
+  }
+  else if (component == ZYNADD_COMPONENT_FREQUENCY_ENV)
+  {
+    switch (parameter)
+    {
+    case ZYNADD_PARAMETER_BOOL_ENV_FORCED_RELEASE:
+      return zyn_addsynth_ptr->m_frequency_envelope_params.m_forced_release;
+    default:
+      LOG_ERROR("Unknown bool frequency envelope parameter %u", parameter);
       assert(0);
     }
   }
@@ -881,6 +951,18 @@ zyn_addsynth_set_bool_parameter(
       return;
     default:
       LOG_ERROR("Unknown bool filter envelope parameter %u", parameter);
+      assert(0);
+    }
+  }
+  else if (component == ZYNADD_COMPONENT_FREQUENCY_ENV)
+  {
+    switch (parameter)
+    {
+    case ZYNADD_PARAMETER_BOOL_ENV_FORCED_RELEASE:
+      zyn_addsynth_ptr->m_frequency_envelope_params.m_forced_release = value;
+      return;
+    default:
+      LOG_ERROR("Unknown bool frequency envelope parameter %u", parameter);
       assert(0);
     }
   }
