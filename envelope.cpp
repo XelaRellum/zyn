@@ -33,7 +33,6 @@ Envelope::init(
 {
   int i;
   float buffer_duration;
-  unsigned int mode;
 
   envpoints = parameters_ptr->Penvpoints;
 
@@ -47,25 +46,7 @@ Envelope::init(
   m_stretch = pow(440.0 / basefreq, parameters_ptr->m_stretch / 64.0);
   m_linear = parameters_ptr->m_linear;
 
-  if (!parameters_ptr->m_free_mode)
-  {
-    parameters_ptr->converttofree();
-  }
-
   buffer_duration = SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
-
-  mode = parameters_ptr->m_mode;
-
-  // for amplitude envelopes
-  if (mode == ZYN_ENVELOPE_MODE_ADSR && !m_linear)
-  {
-    mode = ZYN_ENVELOPE_MODE_ADSR_DB; // change to log envelope
-  }
-
-  if (mode == ZYN_ENVELOPE_MODE_ADSR_DB && m_linear)
-  {
-    mode = ZYN_ENVELOPE_MODE_ADSR; // change to linear
-  }
 
   for (i = 0 ; i < MAX_ENVELOPE_POINTS ; i++)
   {
@@ -79,27 +60,7 @@ Envelope::init(
       envdt[i] = 2.0;             // any value larger than 1
     }
 
-    switch (mode)
-    {
-    case ZYN_ENVELOPE_MODE_ADSR_DB:
-      envval[i] = (1.0 - parameters_ptr->Penvval[i] / 127.0) * MIN_ENVELOPE_DB;
-      break;
-    case ZYN_ENVELOPE_MODE_ASR:
-      envval[i] = (pow(2,6.0 * fabs(parameters_ptr->Penvval[i] - 64.0) / 64.0) - 1.0) * 100.0;
-      if (parameters_ptr->Penvval[i] < 64)
-      {
-        envval[i] = -envval[i];
-      }
-      break;
-    case ZYN_ENVELOPE_MODE_ADSR_FILTER:
-      envval[i] = (parameters_ptr->Penvval[i] - 64.0) / 64.0 * 6.0; // 6 octaves (filtru)
-      break;
-    case ZYN_ENVELOPE_MODE_ASR_BW:
-      envval[i] = (parameters_ptr->Penvval[i] - 64.0) / 64.0 * 10;
-      break;
-    default:
-      envval[i] = parameters_ptr->Penvval[i] / 127.0;
-    }
+    envval[i] = parameters_ptr->m_values[i];
   }
 
   envdt[0] = 1.0;

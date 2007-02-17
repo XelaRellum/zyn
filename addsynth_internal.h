@@ -47,8 +47,6 @@ struct ADnoteGlobalParam
 
   unsigned char PBandwidth;//how much the relative fine detunes of the voices are changed
 
-  EnvelopeParams *FreqEnvelope; //Frequency Envelope
-
   /********************************************
    *     AMPLITUDE GLOBAL PARAMETERS          *
    ********************************************/
@@ -58,8 +56,6 @@ struct ADnoteGlobalParam
 
   // 0-127, velocity sensing
   unsigned char PAmpVelocityScaleFunction;
-
-  EnvelopeParams *AmpEnvelope;
 
   // 0-127
   unsigned char PPunchStrength;
@@ -83,8 +79,6 @@ struct ADnoteGlobalParam
 
   // filter velocity sensing
   unsigned char PFilterVelocityScaleFunction;
-
-  EnvelopeParams *FilterEnvelope;
 
   // RESONANCE
   Resonance *Reson;
@@ -143,7 +137,7 @@ struct ADnoteVoiceParam
 
   /* Frequency Envelope */
   unsigned char PFreqEnvelopeEnabled;
-  EnvelopeParams *FreqEnvelope;
+  EnvelopeParams m_frequency_envelope_params;
 
   /* Frequency LFO */
   unsigned char PFreqLfoEnabled;
@@ -171,7 +165,7 @@ struct ADnoteVoiceParam
 
   /* Amplitude Envelope */
   unsigned char PAmpEnvelopeEnabled;
-  EnvelopeParams *AmpEnvelope;
+  EnvelopeParams m_amplitude_envelope_params;
 
   /* Amplitude LFO */
   unsigned char PAmpLfoEnabled;
@@ -187,7 +181,7 @@ struct ADnoteVoiceParam
 
   /* Filter Envelope */
   unsigned char PFilterEnvelopeEnabled;
-  EnvelopeParams *FilterEnvelope;
+  EnvelopeParams m_filter_envelope_params;
 
   /* LFO Envelope */
   unsigned char PFilterLfoEnabled;
@@ -228,11 +222,11 @@ struct ADnoteVoiceParam
 
   /* Frequency Envelope of the Modullator */
   unsigned char PFMFreqEnvelopeEnabled;
-  EnvelopeParams *FMFreqEnvelope;
+  EnvelopeParams m_fm_frequency_envelope_params;
 
   /* Frequency Envelope of the Modullator */
   unsigned char PFMAmpEnvelopeEnabled;
-  EnvelopeParams *FMAmpEnvelope;
+  EnvelopeParams m_fm_amplitude_envelope_params;
 };
 
 struct zyn_addsynth
@@ -258,11 +252,17 @@ struct zyn_addsynth
   // Amplitude LFO parameters
   struct zyn_lfo_parameters amplitude_lfo_params;
 
+  EnvelopeParams m_amplitude_envelope_params;
+
   // Filter LFO parameters
   struct zyn_lfo_parameters filter_lfo_params;
 
+  EnvelopeParams m_filter_envelope_params;
+
   // Frequency LFO parameters
   struct zyn_lfo_parameters frequency_lfo_params;
+
+  EnvelopeParams m_frequency_envelope_params;
 
   ADnoteGlobalParam GlobalPar;
 

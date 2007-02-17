@@ -256,14 +256,14 @@ ADnote::note_on(
   int nvoice,tmp[NUM_VOICES];
 
   // Global Parameters
-  m_frequency_envelope.init(m_synth_ptr->GlobalPar.FreqEnvelope, m_basefreq);
+  m_frequency_envelope.init(&m_synth_ptr->m_frequency_envelope_params, m_basefreq);
 
   m_frequency_lfo.init(
     m_basefreq,
     &m_synth_ptr->frequency_lfo_params,
     ZYN_LFO_TYPE_FREQUENCY);
 
-  m_amplitude_envelope.init(m_synth_ptr->GlobalPar.AmpEnvelope,m_basefreq);
+  m_amplitude_envelope.init(&m_synth_ptr->m_amplitude_envelope_params, m_basefreq);
 
   m_amplitude_lfo.init(
     m_basefreq,
@@ -283,7 +283,7 @@ ADnote::note_on(
     m_filter_right.init(m_synth_ptr->GlobalPar.GlobalFilter);
   }
 
-  m_filter_envelope.init(m_synth_ptr->GlobalPar.FilterEnvelope, m_basefreq);
+  m_filter_envelope.init(&m_synth_ptr->m_filter_envelope_params, m_basefreq);
 
   m_filter_lfo.init(
     m_basefreq,
@@ -319,7 +319,7 @@ ADnote::note_on(
     newamplitude[nvoice]=1.0;
     if (m_synth_ptr->voices_params[nvoice].PAmpEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_amplitude_envelope.init(m_synth_ptr->voices_params[nvoice].AmpEnvelope, m_basefreq);
+      m_voices[nvoice].m_amplitude_envelope.init(&m_synth_ptr->voices_params[nvoice].m_amplitude_envelope_params, m_basefreq);
       m_voices[nvoice].m_amplitude_envelope.envout_dB(); // discard the first envelope sample
       newamplitude[nvoice] *= m_voices[nvoice].m_amplitude_envelope.envout_dB();
     }
@@ -337,7 +337,7 @@ ADnote::note_on(
     /* Voice Frequency Parameters Init */
     if (m_synth_ptr->voices_params[nvoice].PFreqEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_frequency_envelope.init(m_synth_ptr->voices_params[nvoice].FreqEnvelope, m_basefreq);
+      m_voices[nvoice].m_frequency_envelope.init(&m_synth_ptr->voices_params[nvoice].m_frequency_envelope_params, m_basefreq);
     }
 
     if (m_synth_ptr->voices_params[nvoice].PFreqLfoEnabled != 0)
@@ -356,7 +356,7 @@ ADnote::note_on(
 
     if (m_synth_ptr->voices_params[nvoice].PFilterEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_filter_envelope.init(m_synth_ptr->voices_params[nvoice].FilterEnvelope, m_basefreq);
+      m_voices[nvoice].m_filter_envelope.init(&m_synth_ptr->voices_params[nvoice].m_filter_envelope_params, m_basefreq);
     }
 
     if (m_synth_ptr->voices_params[nvoice].PFilterLfoEnabled != 0)
@@ -401,26 +401,41 @@ ADnote::note_on(
 
     if (m_synth_ptr->voices_params[nvoice].PFMFreqEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_fm_frequency_envelope.init(m_synth_ptr->voices_params[nvoice].FMFreqEnvelope, m_basefreq);
+      m_voices[nvoice].m_fm_frequency_envelope.init(&m_synth_ptr->voices_params[nvoice].m_fm_frequency_envelope_params, m_basefreq);
     }
 
     FMnewamplitude[nvoice] = m_voices[nvoice].FMVolume*m_ctl->fmamp.relamp;
 
     if (m_synth_ptr->voices_params[nvoice].PFMAmpEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_fm_amplitude_envelope.init(m_synth_ptr->voices_params[nvoice].FMAmpEnvelope, m_basefreq);
+      m_voices[nvoice].m_fm_amplitude_envelope.init(&m_synth_ptr->voices_params[nvoice].m_fm_amplitude_envelope_params, m_basefreq);
       FMnewamplitude[nvoice] *= m_voices[nvoice].m_fm_amplitude_envelope.envout_dB();
     }
   }
 
-  for (nvoice=0;nvoice<NUM_VOICES;nvoice++){
-    for (i=nvoice+1;i<NUM_VOICES;i++) tmp[i]=0;
-    for (i=nvoice+1;i<NUM_VOICES;i++)
-      if ((m_voices[i].FMVoice==nvoice)&&(tmp[i]==0)){
-        m_voices[nvoice].VoiceOut=new REALTYPE[SOUND_BUFFER_SIZE];
-        tmp[i]=1;
+  for (nvoice = 0 ; nvoice < NUM_VOICES ; nvoice++)
+  {
+    for (i = nvoice + 1 ; i < NUM_VOICES ; i++)
+    {
+      tmp[i] = 0;
+    }
+
+    for (i = nvoice + 1 ; i < NUM_VOICES ; i++)
+    {
+      if (m_voices[i].FMVoice == nvoice && tmp[i] == 0)
+      {
+        m_voices[nvoice].VoiceOut = new REALTYPE[SOUND_BUFFER_SIZE];
+        tmp[i] = 1;
       }
-    if (m_voices[nvoice].VoiceOut!=NULL) for (i=0;i<SOUND_BUFFER_SIZE;i++) m_voices[nvoice].VoiceOut[i]=0.0;
+    }
+
+    if (m_voices[nvoice].VoiceOut != NULL)
+    {
+      for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
+      {
+        m_voices[nvoice].VoiceOut[i] = 0.0;
+      }
+    }
   }
 }
 

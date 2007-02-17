@@ -99,25 +99,25 @@
 #define LV2DYNPARAM_GROUP_INVALID                                   -2
 #define LV2DYNPARAM_GROUP_ROOT                                      -1
 
-#define LV2DYNPARAM_GROUP_AMPLITUDE                                  0
+#define LV2DYNPARAM_GROUP_AMP                                        0
 #define LV2DYNPARAM_GROUP_FILTER                                     1
 #define LV2DYNPARAM_GROUP_FREQUENCY                                  2
 
-#define LV2DYNPARAM_GROUP_AMPLITUDE_PANORAMA                         3
-#define LV2DYNPARAM_GROUP_AMPLITUDE_PUNCH                            4
-#define LV2DYNPARAM_GROUP_AMPLITUDE_ENVELOPE                         5
-#define LV2DYNPARAM_GROUP_AMPLITUDE_LFO                              6
-#define LV2DYNPARAM_GROUP_AMPLITUDE_LFO_START_PHASE                  7
-#define LV2DYNPARAM_GROUP_AMPLITUDE_LFO_DEPTH_RANDOMNESS             8
-#define LV2DYNPARAM_GROUP_AMPLITUDE_LFO_FREQUENCY_RANDOMNESS         9
+#define LV2DYNPARAM_GROUP_AMP_PANORAMA                               3
+#define LV2DYNPARAM_GROUP_AMP_PUNCH                                  4
+#define LV2DYNPARAM_GROUP_AMP_ENV                                    5
+#define LV2DYNPARAM_GROUP_AMP_LFO                                    6
+#define LV2DYNPARAM_GROUP_AMP_LFO_START_PHASE                        7
+#define LV2DYNPARAM_GROUP_AMP_LFO_DEPTH_RANDOMNESS                   8
+#define LV2DYNPARAM_GROUP_AMP_LFO_FREQUENCY_RANDOMNESS               9
 
-#define LV2DYNPARAM_GROUP_FILTER_ENVELOPE                           10
+#define LV2DYNPARAM_GROUP_FILTER_ENV                                10
 #define LV2DYNPARAM_GROUP_FILTER_LFO                                11
 #define LV2DYNPARAM_GROUP_FILTER_LFO_START_PHASE                    12
 #define LV2DYNPARAM_GROUP_FILTER_LFO_DEPTH_RANDOMNESS               13
 #define LV2DYNPARAM_GROUP_FILTER_LFO_FREQUENCY_RANDOMNESS           14
  
-#define LV2DYNPARAM_GROUP_FREQUENCY_ENVELOPE                        15
+#define LV2DYNPARAM_GROUP_FREQUENCY_ENV                             15
 #define LV2DYNPARAM_GROUP_FREQUENCY_LFO                             16
 #define LV2DYNPARAM_GROUP_FREQUENCY_LFO_START_PHASE                 17
 #define LV2DYNPARAM_GROUP_FREQUENCY_LFO_DEPTH_RANDOMNESS            18
@@ -128,6 +128,7 @@
 struct zynadd_parameter
 {
   struct zynadd * synth_ptr;
+  unsigned int addsynth_component; /* one of ZYNADD_COMPONENT_XXX */
   unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
   unsigned int scope;           /* one of LV2DYNPARAM_PARAMETER_SCOPE_TYPE_XXX */
   unsigned int scope_specific;

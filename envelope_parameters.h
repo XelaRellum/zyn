@@ -35,24 +35,74 @@
 class EnvelopeParams
 {
 public:
-  EnvelopeParams(unsigned char stretch, BOOL forced_release);
+  EnvelopeParams();
   ~EnvelopeParams();
 
-  void ADSRinit(char A_dt,char D_dt,char S_val,char R_dt);
-  void ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt);
-  void ASRinit(char A_val,char A_dt,char R_val,char R_dt);
-  void ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,char R_dt,char R_val);
-  void ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt);
-  void converttofree();
+  void
+  init_adsr(
+    unsigned char stretch,
+    BOOL forced_release,
+    char attack_duration,
+    char decay_duration,
+    char sustain_value,
+    char release_duration,
+    BOOL linear);
+
+  void
+  init_asr(
+    unsigned char stretch,
+    BOOL forced_release,
+    char attack_value,
+    char attack_duration,
+    char release_value,
+    char release_duration);
+
+  void
+  init_adsr_filter(
+    unsigned char stretch,
+    BOOL forced_release,
+    char attack_value,
+    char attack_duration,
+    char decay_value,
+    char decay_duration,
+    char release_duration,
+    char release_value);
+
+  void
+  init_asr_bw(
+    unsigned char stretch,
+    BOOL forced_release,
+    char attack_value,
+    char attack_duration,
+    char release_value,
+    char release_duration);
+
+  unsigned char
+  get_value(
+    int index);
+
+  void
+  set_value(
+    int index,
+    unsigned char value);
+
+  unsigned char
+  get_duration(
+    int index);
+
+  void
+  set_duration(
+    int index,
+    unsigned char duration);
 
   REALTYPE getdt(unsigned char i);
-
-  BOOL m_free_mode;             // free or ADSR/ASR mode
+  void set_point_value(int i, unsigned char value);
 
   unsigned char Penvpoints;
   unsigned char Penvsustain;    // 127 pentru dezactivat
   unsigned char Penvdt[MAX_ENVELOPE_POINTS];
-  unsigned char Penvval[MAX_ENVELOPE_POINTS];
+  float m_values[MAX_ENVELOPE_POINTS];
+  unsigned char m_values_params[MAX_ENVELOPE_POINTS];
 
   // 0 = no stretch
   // 64 = normal stretch (piano-like)
@@ -63,24 +113,16 @@ public:
 
   BOOL m_linear; // if the amplitude envelope is linear
 
-  unsigned char m_attack_duration;
-  unsigned char m_decay_duration;
-  unsigned char m_release_duration;
-
-  unsigned char m_attack_value;
-  unsigned char m_decay_value;
-  unsigned char m_sustain_value;
-  unsigned char m_release_value;
-
   unsigned int m_mode;          // one of ZYN_ENVELOPE_MODE_XXX
 
-  /* Default parameters */
+  int m_attack_duration_index;
+  int m_decay_duration_index;
+  int m_release_duration_index;
 
-  unsigned char m_stretch_default;
-
-  BOOL m_forced_release_default;
-
-  unsigned char m_linear_default;
+  int m_attack_value_index;
+  int m_decay_value_index;
+  int m_sustain_value_index;
+  int m_release_value_index;
 };
 
 #endif

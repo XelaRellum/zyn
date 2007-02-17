@@ -44,6 +44,7 @@ struct parameter_descriptor
 
   unsigned int type;            /* one of LV2DYNPARAM_PARAMETER_TYPE_XXX */
 
+  unsigned int addsynth_component; /* one of ZYNADD_COMPONENT_XXX */
   unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
 
   unsigned int scope;                   /* one of LV2DYNPARAM_PARAMETER_SCOPE_TYPE_XXX */
@@ -112,7 +113,10 @@ zynadd_appear_parameter(
           zynadd_ptr->dynparams,
           parent_group,
           g_map_parameters[parameter_index].name,
-          zyn_addsynth_get_bool_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[parameter_index].addsynth_parameter),
+          zyn_addsynth_get_bool_parameter(
+            zynadd_ptr->synth,
+            zynadd_ptr->parameters[parameter_index].addsynth_component,
+            zynadd_ptr->parameters[parameter_index].addsynth_parameter),
           zynadd_bool_parameter_changed,
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
@@ -127,7 +131,10 @@ zynadd_appear_parameter(
           zynadd_ptr->dynparams,
           parent_group,
           g_map_parameters[parameter_index].name,
-          zyn_addsynth_get_float_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[parameter_index].addsynth_parameter),
+          zyn_addsynth_get_float_parameter(
+            zynadd_ptr->synth,
+            zynadd_ptr->parameters[parameter_index].addsynth_component,
+            zynadd_ptr->parameters[parameter_index].addsynth_parameter),
           g_map_parameters[parameter_index].min.fpoint,
           g_map_parameters[parameter_index].max.fpoint,
           zynadd_float_parameter_changed,
@@ -146,7 +153,7 @@ zynadd_appear_parameter(
           g_map_parameters[parameter_index].name,
           g_shape_names,
           ZYN_LFO_SHAPES_COUNT,
-          zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[parameter_index].addsynth_parameter),
+          zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[parameter_index].addsynth_component),
           zynadd_shape_parameter_changed,
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
@@ -175,6 +182,7 @@ zynadd_bool_parameter_changed(
   {
     current_value = zyn_addsynth_get_bool_parameter(
       parameter_ptr->synth_ptr->synth,
+      parameter_ptr->addsynth_component,
       parameter_ptr->addsynth_parameter);
 
     if ((current_value && value) ||
@@ -206,6 +214,7 @@ zynadd_bool_parameter_changed(
 
   zyn_addsynth_set_bool_parameter(
     parameter_ptr->synth_ptr->synth,
+    parameter_ptr->addsynth_component,
     parameter_ptr->addsynth_parameter,
     value);
 
@@ -219,6 +228,7 @@ zynadd_float_parameter_changed(
 {
   zyn_addsynth_set_float_parameter(
     parameter_ptr->synth_ptr->synth,
+    parameter_ptr->addsynth_component,
     parameter_ptr->addsynth_parameter,
     value);
 
@@ -233,7 +243,7 @@ zynadd_shape_parameter_changed(
 {
   zyn_addsynth_set_shape_parameter(
     parameter_ptr->synth_ptr->synth,
-    parameter_ptr->addsynth_parameter,
+    parameter_ptr->addsynth_component,
     value_index);
 
   return TRUE;
@@ -255,53 +265,56 @@ zynadd_shape_parameter_changed(
   g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;             \
   g_map_groups[LV2DYNPARAM_GROUP(group)].type_uri = type
 
-#define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, parameter, name_value, scope_value) \
+#define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, lv2parameter, component, zynparameter, name_value, scope_value) \
   LOG_DEBUG("Registering %u (\"%s\") bool -> %u",                       \
-            LV2DYNPARAM_PARAMETER(parameter),                           \
+            LV2DYNPARAM_PARAMETER(lv2parameter),                        \
             name_value,                                                 \
-            ZYNADD_PARAMETER_BOOL_ ## parameter);                       \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## parameter;
+            ZYNADD_PARAMETER_BOOL_ ## zynparameter);                    \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter;
 
-#define LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(parent_group, parameter, name_value, scope_value, other_parameter) \
+#define LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(parent_group, lv2parameter, component, zynparameter, name_value, scope_value, other_parameter) \
   LOG_DEBUG("Registering %u (\"%s\") bool -> %u; with other %u",        \
-            LV2DYNPARAM_PARAMETER(parameter),                           \
+            LV2DYNPARAM_PARAMETER(lv2parameter),                        \
             name_value,                                                 \
-            ZYNADD_PARAMETER_BOOL_ ## parameter,                        \
+            ZYNADD_PARAMETER_BOOL_ ## zynparameter,                     \
             LV2DYNPARAM_PARAMETER(other_parameter));                    \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value ## _OTHER; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## parameter; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].scope_specific = LV2DYNPARAM_PARAMETER(other_parameter);
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value ## _OTHER; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope_specific = LV2DYNPARAM_PARAMETER(other_parameter);
 
-#define LV2DYNPARAM_PARAMETER_INIT_FLOAT(parent_group, parameter, name_value, min_value, max_value, scope_value) \
-  LOG_DEBUG("Registering %u (\"%s\") float -> %u",                      \
-            LV2DYNPARAM_PARAMETER(parameter),                           \
+#define LV2DYNPARAM_PARAMETER_INIT_FLOAT(parent_group, lv2parameter, component, zynparameter, name_value, min_value, max_value, scope_value) \
+  LOG_DEBUG("Registering %u (\"%s\") float -> %u:%u",                   \
+            LV2DYNPARAM_PARAMETER(lv2parameter),                        \
             name_value,                                                 \
-            ZYNADD_PARAMETER_FLOAT_ ## parameter);                      \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].min.fpoint = min_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].max.fpoint = max_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(parameter)].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## parameter;
+            ZYNADD_COMPONENT_ ## component,                             \
+            ZYNADD_PARAMETER_FLOAT_ ## zynparameter);                   \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].min.fpoint = min_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].max.fpoint = max_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## zynparameter;
 
-#define LV2DYNPARAM_PARAMETER_INIT_SHAPE(parent_group, parameter, name_value, scope_value) \
+#define LV2DYNPARAM_PARAMETER_INIT_SHAPE(parent_group, lv2parameter, component, name_value, scope_value) \
   LOG_DEBUG("Registering %u (\"%s\") shape -> %u",                      \
-            LV2DYNPARAM_PARAMETER_SHAPE(parameter),                     \
-            name_value,                                                 \
-            ZYNADD_PARAMETER_SHAPE_ ## parameter);                      \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_SHAPE; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(parameter)].addsynth_parameter = ZYNADD_PARAMETER_SHAPE_ ## parameter;
+            LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter),                  \
+            name_value);                                                \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].name = name_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_SHAPE; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component;
 
 void zynadd_map_initialise() __attribute__((constructor));
 void zynadd_map_initialise()
@@ -326,141 +339,141 @@ void zynadd_map_initialise()
     g_map_parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
   }
 
-  LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, AMPLITUDE, "Amplitude");
+  LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, AMP, "Amplitude");
   {
-    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, STEREO, "Stereo", ALWAYS);
-    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE, RANDOM_GROUPING, "Random Grouping", ALWAYS);
-    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, VOLUME, "Master Volume", 0, 100, ALWAYS);
-    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE, VELOCITY_SENSING, "Velocity sensing", 0, 100, ALWAYS);
+    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMP, STEREO, AMP_GLOBALS, STEREO, "Stereo", ALWAYS);
+    LV2DYNPARAM_PARAMETER_INIT_BOOL(AMP, RANDOM_GROUPING, AMP_GLOBALS, RANDOM_GROUPING, "Random Grouping", ALWAYS);
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP, VOLUME, AMP_GLOBALS, VOLUME, "Master Volume", 0, 100, ALWAYS);
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP, VELOCITY_SENSING, AMP_GLOBALS, VELOCITY_SENSING, "Velocity sensing", 0, 100, ALWAYS);
 
-    LV2DYNPARAM_GROUP_INIT_CUSTOM(AMPLITUDE, AMPLITUDE_PANORAMA, "Random:Panorama", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+    LV2DYNPARAM_GROUP_INIT_CUSTOM(AMP, AMP_PANORAMA, "Random:Panorama", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
     {
-      LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMPLITUDE_PANORAMA, RANDOM_PANORAMA, "Random", HIDE, PANORAMA);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PANORAMA, PANORAMA, "Panorama", -1, 1, SEMI);
+      LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMP_PANORAMA, RANDOM_PANORAMA, AMP_GLOBALS, RANDOM_PANORAMA, "Random", HIDE, PANORAMA);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PANORAMA, PANORAMA, AMP_GLOBALS, PANORAMA, "Panorama", -1, 1, SEMI);
     }
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_PUNCH, "Punch");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(AMP, AMP_PUNCH, "Punch");
     {
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRENGTH, "Strength", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_TIME, "Time", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_STRETCH, "Stretch", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_PUNCH, PUNCH_VELOCITY_SENSING, "Velocity sensing", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PUNCH, PUNCH_STRENGTH, AMP_GLOBALS, PUNCH_STRENGTH, "Strength", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PUNCH, PUNCH_TIME, AMP_GLOBALS, PUNCH_TIME, "Time", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PUNCH, PUNCH_STRETCH, AMP_GLOBALS, PUNCH_STRETCH, "Stretch", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PUNCH, PUNCH_VELOCITY_SENSING, AMP_GLOBALS, PUNCH_VELOCITY_SENSING, "Velocity sensing", 0, 100, ALWAYS);
     }
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_ENVELOPE, "Envelope");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(AMP, AMP_ENV, "Envelope");
     {
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_ENVELOPE, AMP_ENV_ATTACK, "Attack", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_ENVELOPE, AMP_ENV_DECAY, "Decay", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_ENVELOPE, AMP_ENV_SUSTAIN, "Sustain", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_ENVELOPE, AMP_ENV_RELEASE, "Release", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_ENVELOPE, AMP_ENV_STRETCH, "Stretch", 0, 200, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE_ENVELOPE, AMP_ENV_FORCED_RELEASE, "Forced release", ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_BOOL(AMPLITUDE_ENVELOPE, AMP_ENV_LINEAR, "Linear", ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_ENV, AMP_ENV_ATTACK, AMP_ENV, ENV_ATTACK_DURATION, "Attack", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_ENV, AMP_ENV_DECAY, AMP_ENV, ENV_DECAY_DURATION, "Decay", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_ENV, AMP_ENV_SUSTAIN, AMP_ENV, ENV_SUSTAIN_VALUE, "Sustain", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_ENV, AMP_ENV_RELEASE, AMP_ENV, ENV_RELEASE_DURATION, "Release", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_ENV, AMP_ENV_STRETCH, AMP_ENV, ENV_STRETCH, "Stretch", 0, 200, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_BOOL(AMP_ENV, AMP_ENV_FORCED_RELEASE, AMP_ENV, ENV_FORCED_RELEASE, "Forced release", ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_BOOL(AMP_ENV, AMP_ENV_LINEAR, AMP_ENV, ENV_LINEAR, "Linear", ALWAYS);
     }
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(AMPLITUDE, AMPLITUDE_LFO, "LFO");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(AMP, AMP_LFO, "LFO");
     {
-      LV2DYNPARAM_PARAMETER_INIT_SHAPE(AMPLITUDE_LFO, AMP_LFO, "Shape", ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO, AMP_LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO, AMP_LFO_DEPTH, "Depth", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_SHAPE(AMP_LFO, AMP_LFO, AMP_LFO, "Shape", ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO, AMP_LFO_FREQUENCY, AMP_LFO, LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO, AMP_LFO_DEPTH, AMP_LFO, LFO_DEPTH, "Depth", 0, 100, ALWAYS);
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMPLITUDE_LFO, AMPLITUDE_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMP_LFO, AMP_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMPLITUDE_LFO_START_PHASE, AMP_LFO_RANDOM_START_PHASE, "Random", HIDE, AMP_LFO_START_PHASE);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO_START_PHASE, AMP_LFO_START_PHASE, "Start phase", 0, 1, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMP_LFO_START_PHASE, AMP_LFO_RANDOM_START_PHASE, AMP_LFO, LFO_RANDOM_START_PHASE, "Random", HIDE, AMP_LFO_START_PHASE);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO_START_PHASE, AMP_LFO_START_PHASE, AMP_LFO, LFO_START_PHASE, "Start phase", 0, 1, SEMI);
       }
 
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO, AMP_LFO_DELAY, "Delay", 0, 4, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO, AMP_LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO, AMP_LFO_DELAY, AMP_LFO, LFO_DELAY, "Delay", 0, 4, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO, AMP_LFO_STRETCH, AMP_LFO, LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMPLITUDE_LFO, AMPLITUDE_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMP_LFO, AMP_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMPLITUDE_LFO_DEPTH_RANDOMNESS, AMP_LFO_RANDOM_DEPTH, "Random depth", SHOW, AMP_LFO_DEPTH_RANDOMNESS);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO_DEPTH_RANDOMNESS, AMP_LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMP_LFO_DEPTH_RANDOMNESS, AMP_LFO_RANDOM_DEPTH, AMP_LFO, LFO_RANDOM_DEPTH, "Random depth", SHOW, AMP_LFO_DEPTH_RANDOMNESS);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO_DEPTH_RANDOMNESS, AMP_LFO_DEPTH_RANDOMNESS, AMP_LFO, LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMPLITUDE_LFO, AMPLITUDE_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMP_LFO, AMP_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMPLITUDE_LFO_FREQUENCY_RANDOMNESS, AMP_LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, AMP_LFO_FREQUENCY_RANDOMNESS);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMPLITUDE_LFO_FREQUENCY_RANDOMNESS, AMP_LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMP_LFO_FREQUENCY_RANDOMNESS, AMP_LFO_RANDOM_FREQUENCY, AMP_LFO, LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, AMP_LFO_FREQUENCY_RANDOMNESS);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO_FREQUENCY_RANDOMNESS, AMP_LFO_FREQUENCY_RANDOMNESS, AMP_LFO, LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
    }
   }
 
   LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, FILTER, "Filter");
   {
-    LV2DYNPARAM_GROUP_INIT_GENERIC(FILTER, FILTER_ENVELOPE, "Envelope");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(FILTER, FILTER_ENV, "Envelope");
     {
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENVELOPE, FILTER_ENV_ATTACK_VALUE, "Attack value", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENVELOPE, FILTER_ENV_ATTACK_DURATION, "Attack duration", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENVELOPE, FILTER_ENV_DECAY_VALUE, "Decay value", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENVELOPE, FILTER_ENV_DECAY_DURATION, "Decay duration", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENVELOPE, FILTER_ENV_RELEASE_VALUE, "Release value", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENVELOPE, FILTER_ENV_RELEASE_DURATION, "Release duration", 0, 100, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENVELOPE, FILTER_ENV_STRETCH, "Stretch", 0, 200, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_BOOL(FILTER_ENVELOPE, FILTER_ENV_FORCED_RELEASE, "Forced release", ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_ATTACK_VALUE, FILTER_ENV, ENV_ATTACK_VALUE, "Attack value", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_ATTACK_DURATION, FILTER_ENV, ENV_ATTACK_DURATION, "Attack duration", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_DECAY_VALUE, FILTER_ENV, ENV_DECAY_VALUE, "Decay value", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_DECAY_DURATION, FILTER_ENV, ENV_DECAY_DURATION, "Decay duration", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_RELEASE_VALUE, FILTER_ENV, ENV_RELEASE_VALUE, "Release value", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_RELEASE_DURATION, FILTER_ENV, ENV_RELEASE_DURATION, "Release duration", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_STRETCH, FILTER_ENV, ENV_STRETCH, "Stretch", 0, 200, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_BOOL(FILTER_ENV, FILTER_ENV_FORCED_RELEASE, FILTER_ENV, ENV_FORCED_RELEASE, "Forced release", ALWAYS);
     }
 
     LV2DYNPARAM_GROUP_INIT_GENERIC(FILTER, FILTER_LFO, "LFO");
     {
-      LV2DYNPARAM_PARAMETER_INIT_SHAPE(FILTER_LFO, FILTER_LFO, "Shape", ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_DEPTH, "Depth", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_SHAPE(FILTER_LFO, FILTER_LFO, FILTER_LFO, "Shape", ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_FREQUENCY, FILTER_LFO, LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_DEPTH, FILTER_LFO, LFO_DEPTH, "Depth", 0, 100, ALWAYS);
 
       LV2DYNPARAM_GROUP_INIT_CUSTOM(FILTER_LFO, FILTER_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_START_PHASE, FILTER_LFO_RANDOM_START_PHASE, "Random", HIDE, FILTER_LFO_START_PHASE);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_START_PHASE, FILTER_LFO_START_PHASE, "Start phase", 0, 1, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_START_PHASE, FILTER_LFO_RANDOM_START_PHASE, FILTER_LFO, LFO_RANDOM_START_PHASE, "Random", HIDE, FILTER_LFO_START_PHASE);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_START_PHASE, FILTER_LFO_START_PHASE, FILTER_LFO, LFO_START_PHASE, "Start phase", 0, 1, SEMI);
       }
 
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_DELAY, "Delay", 0, 4, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_DELAY, FILTER_LFO, LFO_DELAY, "Delay", 0, 4, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_STRETCH, FILTER_LFO, LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
 
       LV2DYNPARAM_GROUP_INIT_CUSTOM(FILTER_LFO, FILTER_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_DEPTH_RANDOMNESS, FILTER_LFO_RANDOM_DEPTH, "Random depth", SHOW, FILTER_LFO_DEPTH_RANDOMNESS);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_DEPTH_RANDOMNESS, FILTER_LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_DEPTH_RANDOMNESS, FILTER_LFO_RANDOM_DEPTH, FILTER_LFO, LFO_RANDOM_DEPTH, "Random depth", SHOW, FILTER_LFO_DEPTH_RANDOMNESS);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_DEPTH_RANDOMNESS, FILTER_LFO_DEPTH_RANDOMNESS, FILTER_LFO, LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
 
       LV2DYNPARAM_GROUP_INIT_CUSTOM(FILTER_LFO, FILTER_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_FREQUENCY_RANDOMNESS, FILTER_LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, FILTER_LFO_FREQUENCY_RANDOMNESS);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_FREQUENCY_RANDOMNESS, FILTER_LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_FREQUENCY_RANDOMNESS, FILTER_LFO_RANDOM_FREQUENCY, FILTER_LFO, LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, FILTER_LFO_FREQUENCY_RANDOMNESS);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_FREQUENCY_RANDOMNESS, FILTER_LFO_FREQUENCY_RANDOMNESS, FILTER_LFO, LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
     }
   }
 
   LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, FREQUENCY, "Frequency");
   {
-    LV2DYNPARAM_GROUP_INIT_GENERIC(FREQUENCY, FREQUENCY_ENVELOPE, "Envelope");
+    LV2DYNPARAM_GROUP_INIT_GENERIC(FREQUENCY, FREQUENCY_ENV, "Envelope");
     {
     }
 
     LV2DYNPARAM_GROUP_INIT_GENERIC(FREQUENCY, FREQUENCY_LFO, "LFO");
     {
-      LV2DYNPARAM_PARAMETER_INIT_SHAPE(FREQUENCY_LFO, FREQUENCY_LFO, "Shape", ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_DEPTH, "Depth", 0, 100, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_SHAPE(FREQUENCY_LFO, FREQUENCY_LFO, FREQUENCY_LFO, "Shape", ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_FREQUENCY, FREQUENCY_LFO, LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_DEPTH, FREQUENCY_LFO, LFO_DEPTH, "Depth", 0, 100, ALWAYS);
 
       LV2DYNPARAM_GROUP_INIT_CUSTOM(FREQUENCY_LFO, FREQUENCY_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_START_PHASE, FREQUENCY_LFO_RANDOM_START_PHASE, "Random", HIDE, FREQUENCY_LFO_START_PHASE);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_START_PHASE, FREQUENCY_LFO_START_PHASE, "Start phase", 0, 1, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_START_PHASE, FREQUENCY_LFO_RANDOM_START_PHASE, FREQUENCY_LFO, LFO_RANDOM_START_PHASE, "Random", HIDE, FREQUENCY_LFO_START_PHASE);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_START_PHASE, FREQUENCY_LFO_START_PHASE, FREQUENCY_LFO, LFO_START_PHASE, "Start phase", 0, 1, SEMI);
       }
 
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_DELAY, "Delay", 0, 4, ALWAYS);
-      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_DELAY, FREQUENCY_LFO, LFO_DELAY, "Delay", 0, 4, ALWAYS);
+      LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_STRETCH, FREQUENCY_LFO, LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
 
       LV2DYNPARAM_GROUP_INIT_CUSTOM(FREQUENCY_LFO, FREQUENCY_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_DEPTH_RANDOMNESS, FREQUENCY_LFO_RANDOM_DEPTH, "Random depth", SHOW, FREQUENCY_LFO_DEPTH_RANDOMNESS);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_DEPTH_RANDOMNESS, FREQUENCY_LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_DEPTH_RANDOMNESS, FREQUENCY_LFO_RANDOM_DEPTH, FREQUENCY_LFO, LFO_RANDOM_DEPTH, "Random depth", SHOW, FREQUENCY_LFO_DEPTH_RANDOMNESS);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_DEPTH_RANDOMNESS, FREQUENCY_LFO_DEPTH_RANDOMNESS, FREQUENCY_LFO, LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
 
       LV2DYNPARAM_GROUP_INIT_CUSTOM(FREQUENCY_LFO, FREQUENCY_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
       {
-        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_FREQUENCY_RANDOMNESS, FREQUENCY_LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, FREQUENCY_LFO_FREQUENCY_RANDOMNESS);
-        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_FREQUENCY_RANDOMNESS, FREQUENCY_LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
+        LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_FREQUENCY_RANDOMNESS, FREQUENCY_LFO_RANDOM_FREQUENCY, FREQUENCY_LFO, LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, FREQUENCY_LFO_FREQUENCY_RANDOMNESS);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_FREQUENCY_RANDOMNESS, FREQUENCY_LFO_FREQUENCY_RANDOMNESS, FREQUENCY_LFO, LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
     }
   }
@@ -519,6 +532,7 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
   {
     zynadd_ptr->parameters[i].synth_ptr = zynadd_ptr;
     zynadd_ptr->parameters[i].addsynth_parameter = g_map_parameters[i].addsynth_parameter;
+    zynadd_ptr->parameters[i].addsynth_component = g_map_parameters[i].addsynth_component;
     zynadd_ptr->parameters[i].scope = g_map_parameters[i].scope;
     zynadd_ptr->parameters[i].scope_specific = g_map_parameters[i].scope_specific;
   }
@@ -540,6 +554,7 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
 
       tmp_bool = zyn_addsynth_get_bool_parameter(
         zynadd_ptr->synth,
+        g_map_parameters[i].addsynth_component,
         g_map_parameters[i].addsynth_parameter);
 
       if (!zynadd_appear_parameter(zynadd_ptr, i))
