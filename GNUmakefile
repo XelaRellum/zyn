@@ -46,13 +46,11 @@ PLUGIN_SOURCES_CXX += resonance.cpp
 PLUGIN_SOURCES_CXX += Controller.cpp
 
 PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c zynadd_dynparam.c log.c
-PLUGIN_HEADERS = lv2plugin.hpp lv2.h lv2-miditype.h lv2-midifunctions.h
 
 # Derived variables - do not edit
 PLUGIN_OBJECTS = $(subst .cpp,.o,$(PLUGIN_SOURCES_CXX)) $(subst .c,.o,$(PLUGIN_SOURCES_C))
 ALL_SOURCES_CXX = $(sort $(PLUGIN_SOURCES_CXX))
 ALL_SOURCES_C = $(sort $(PLUGIN_SOURCES_C))
-ALL_HEADERS = $(sort $(PLUGIN_HEADERS))
 
 default: $(PLUGIN_NAME).lv2
 
