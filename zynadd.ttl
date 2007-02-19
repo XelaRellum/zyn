@@ -7,7 +7,7 @@
 <http://home.gna.org/zyn/zynadd/0>
   a lv2:Plugin;
   doap:name "zynadd";
-  doap:licence <http://usefulinc.com/doap/licenses/gpl>;
+  doap:license <http://usefulinc.com/doap/licenses/gpl>;
 #  ll:standaloneGui <zynadd_gtk>;
   lv2:optionalHostFeature <http://home.gna.org/lv2dynparam/>;
   ll:pegName "peg";  
