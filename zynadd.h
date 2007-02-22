@@ -26,7 +26,7 @@ zynadd_instantiate(
   const LV2_Descriptor * descriptor,
   uint32_t sample_rate,
   const char * bundle_path,
-  const LV2_Host_Feature ** host_features);
+  const LV2_Host_Feature * const * host_features);
 
 void
 zynadd_connect_port(

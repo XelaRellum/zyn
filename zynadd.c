@@ -46,7 +46,7 @@ zynadd_instantiate(
   const LV2_Descriptor * descriptor,
   uint32_t sample_rate,
   const char * bundle_path,
-  const LV2_Host_Feature ** host_features)
+  const LV2_Host_Feature * const * host_features)
 {
   struct zynadd * zynadd_ptr;
   const LV2_Host_Feature * feature_ptr;
