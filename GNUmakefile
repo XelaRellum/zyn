@@ -105,8 +105,4 @@ $(DEPFILES):
 	@$(GENDEP_C)
 
 install: $(PLUGIN_NAME).lv2
-ifneq ($(LV2_PATH),)
-	cp -R zynadd.lv2 $(LV2_PATH)
-else
-	$(error Please specify LV2_PATH)
-endif
+	@./install_lv2.sh zynadd.lv2
