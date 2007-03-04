@@ -24,7 +24,6 @@
 #include "lv2dynparam/lv2.h"
 #include "lv2plugin.h"
 #include "zynadd.h"
-#include "lv2dynparam/plugin.h"
 
 static LV2_Descriptor g_lv2_plugins[] =
 {
