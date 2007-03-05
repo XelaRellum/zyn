@@ -19,6 +19,7 @@
  *****************************************************************************/
 
 #include <assert.h>
+#include <stdarg.h>
 
 #include "common.h"
 #include "lv2dynparam/lv2.h"
@@ -30,17 +31,27 @@
 #define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
 
+#define ZYN_MAX_HINTS 10
+
 struct group_descriptor
 {
   int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
+
   const char * name;            /* group name */
-  const char * type_uri;        /* group type */
+
+  struct lv2dynparam_hints hints;
+  const char * hint_names[ZYN_MAX_HINTS];
+  const char * hint_values[ZYN_MAX_HINTS];
 };
 
 struct parameter_descriptor
 {
   int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
   const char * name;            /* parameter name */
+
+  struct lv2dynparam_hints hints;
+  const char * hint_names[ZYN_MAX_HINTS];
+  const char * hint_values[ZYN_MAX_HINTS];
 
   unsigned int type;            /* one of LV2DYNPARAM_PARAMETER_TYPE_XXX */
 
@@ -113,6 +124,7 @@ zynadd_appear_parameter(
           zynadd_ptr->dynparams,
           parent_group,
           g_map_parameters[parameter_index].name,
+          &g_map_parameters[parameter_index].hints,
           zyn_addsynth_get_bool_parameter(
             zynadd_ptr->synth,
             zynadd_ptr->parameters[parameter_index].addsynth_component,
@@ -131,6 +143,7 @@ zynadd_appear_parameter(
           zynadd_ptr->dynparams,
           parent_group,
           g_map_parameters[parameter_index].name,
+          &g_map_parameters[parameter_index].hints,
           zyn_addsynth_get_float_parameter(
             zynadd_ptr->synth,
             zynadd_ptr->parameters[parameter_index].addsynth_component,
@@ -151,6 +164,7 @@ zynadd_appear_parameter(
           zynadd_ptr->dynparams,
           parent_group,
           g_map_parameters[parameter_index].name,
+          &g_map_parameters[parameter_index].hints,
           g_shape_names,
           ZYN_LFO_SHAPES_COUNT,
           zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[parameter_index].addsynth_component),
@@ -255,15 +269,46 @@ zynadd_shape_parameter_changed(
 #define LV2DYNPARAM_PARAMETER(parameter) LV2DYNPARAM_PARAMETER_ ## parameter
 #define LV2DYNPARAM_PARAMETER_SHAPE(parameter) LV2DYNPARAM_PARAMETER_ ## parameter ## _SHAPE
 
-#define LV2DYNPARAM_GROUP_INIT_GENERIC(parent_group, group, name_value) \
-  g_map_groups[LV2DYNPARAM_GROUP(group)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;             \
-  g_map_groups[LV2DYNPARAM_GROUP(group)].type_uri = LV2DYNPARAM_GROUP_TYPE_GENERIC_URI
+static void
+lv2dynparam_group_init(unsigned int parent, unsigned int group, const char * name, ...)
+{
+  va_list ap;
+  const char * hint_name;
+  const char * hint_value;
 
-#define LV2DYNPARAM_GROUP_INIT_CUSTOM(parent_group, group, name_value, type) \
-  g_map_groups[LV2DYNPARAM_GROUP(group)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_groups[LV2DYNPARAM_GROUP(group)].name = name_value;             \
-  g_map_groups[LV2DYNPARAM_GROUP(group)].type_uri = type
+  LOG_DEBUG("group \"%s\"", name);
+
+  g_map_groups[group].parent = parent;
+  g_map_groups[group].name = name;
+
+  g_map_groups[group].hints.count = 0;
+  g_map_groups[group].hints.names = (char **)g_map_groups[group].hint_names;
+  g_map_groups[group].hints.values = (char **)g_map_groups[group].hint_values;
+
+  va_start(ap, name);
+  while ((hint_name = va_arg(ap, const char *)) != NULL)
+  {
+    assert(g_map_groups[group].hints.count < ZYN_MAX_HINTS);
+    g_map_groups[group].hint_names[g_map_groups[group].hints.count] = hint_name;
+
+    hint_value = va_arg(ap, const char *);
+    if (hint_value == NULL)
+    {
+      LOG_DEBUG("hint \"%s\"", hint_name);
+    }
+    else
+    {
+      LOG_DEBUG("hint \"%s\":\"%s\"", hint_name, hint_value);
+      g_map_groups[group].hint_values[g_map_groups[group].hints.count] = hint_value;
+    }
+
+    g_map_groups[group].hints.count++;
+  }
+  va_end(ap);
+}
+
+#define LV2DYNPARAM_GROUP_INIT(parent_group, group, name_value, hints...) \
+  lv2dynparam_group_init(LV2DYNPARAM_GROUP(parent_group), LV2DYNPARAM_GROUP(group), name_value, ## hints)
 
 #define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, lv2parameter, component, zynparameter, name_value, scope_value) \
   LOG_DEBUG("Registering %u (\"%s\") bool -> %u",                       \
@@ -339,20 +384,20 @@ void zynadd_map_initialise()
     g_map_parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
   }
 
-  LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, AMP, "Amplitude");
+  LV2DYNPARAM_GROUP_INIT(ROOT, AMP, "Amplitude", NULL);
   {
     LV2DYNPARAM_PARAMETER_INIT_BOOL(AMP, STEREO, AMP_GLOBALS, STEREO, "Stereo", ALWAYS);
     LV2DYNPARAM_PARAMETER_INIT_BOOL(AMP, RANDOM_GROUPING, AMP_GLOBALS, RANDOM_GROUPING, "Random Grouping", ALWAYS);
     LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP, VOLUME, AMP_GLOBALS, VOLUME, "Master Volume", 0, 100, ALWAYS);
     LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP, VELOCITY_SENSING, AMP_GLOBALS, VELOCITY_SENSING, "Velocity sensing", 0, 100, ALWAYS);
 
-    LV2DYNPARAM_GROUP_INIT_CUSTOM(AMP, AMP_PANORAMA, "Random:Panorama", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+    LV2DYNPARAM_GROUP_INIT(AMP, AMP_PANORAMA, "Random:Panorama", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
     {
       LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMP_PANORAMA, RANDOM_PANORAMA, AMP_GLOBALS, RANDOM_PANORAMA, "Random", HIDE, PANORAMA);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PANORAMA, PANORAMA, AMP_GLOBALS, PANORAMA, "Panorama", -1, 1, SEMI);
     }
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(AMP, AMP_PUNCH, "Punch");
+    LV2DYNPARAM_GROUP_INIT(AMP, AMP_PUNCH, "Punch", NULL);
     {
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PUNCH, PUNCH_STRENGTH, AMP_GLOBALS, PUNCH_STRENGTH, "Strength", 0, 100, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PUNCH, PUNCH_TIME, AMP_GLOBALS, PUNCH_TIME, "Time", 0, 100, ALWAYS);
@@ -360,7 +405,7 @@ void zynadd_map_initialise()
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_PUNCH, PUNCH_VELOCITY_SENSING, AMP_GLOBALS, PUNCH_VELOCITY_SENSING, "Velocity sensing", 0, 100, ALWAYS);
     }
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(AMP, AMP_ENV, "Envelope");
+    LV2DYNPARAM_GROUP_INIT(AMP, AMP_ENV, "Envelope", NULL);
     {
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_ENV, AMP_ENV_ATTACK, AMP_ENV, ENV_ATTACK_DURATION, "Attack", 0, 100, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_ENV, AMP_ENV_DECAY, AMP_ENV, ENV_DECAY_DURATION, "Decay", 0, 100, ALWAYS);
@@ -371,13 +416,13 @@ void zynadd_map_initialise()
       LV2DYNPARAM_PARAMETER_INIT_BOOL(AMP_ENV, AMP_ENV_LINEAR, AMP_ENV, ENV_LINEAR, "Linear", ALWAYS);
     }
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(AMP, AMP_LFO, "LFO");
+    LV2DYNPARAM_GROUP_INIT(AMP, AMP_LFO, "LFO", NULL);
     {
       LV2DYNPARAM_PARAMETER_INIT_SHAPE(AMP_LFO, AMP_LFO, AMP_LFO, "Shape", ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO, AMP_LFO_FREQUENCY, AMP_LFO, LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO, AMP_LFO_DEPTH, AMP_LFO, LFO_DEPTH, "Depth", 0, 100, ALWAYS);
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMP_LFO, AMP_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(AMP_LFO, AMP_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMP_LFO_START_PHASE, AMP_LFO_RANDOM_START_PHASE, AMP_LFO, LFO_RANDOM_START_PHASE, "Random", HIDE, AMP_LFO_START_PHASE);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO_START_PHASE, AMP_LFO_START_PHASE, AMP_LFO, LFO_START_PHASE, "Start phase", 0, 1, SEMI);
@@ -386,13 +431,13 @@ void zynadd_map_initialise()
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO, AMP_LFO_DELAY, AMP_LFO, LFO_DELAY, "Delay", 0, 4, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO, AMP_LFO_STRETCH, AMP_LFO, LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMP_LFO, AMP_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(AMP_LFO, AMP_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMP_LFO_DEPTH_RANDOMNESS, AMP_LFO_RANDOM_DEPTH, AMP_LFO, LFO_RANDOM_DEPTH, "Random depth", SHOW, AMP_LFO_DEPTH_RANDOMNESS);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO_DEPTH_RANDOMNESS, AMP_LFO_DEPTH_RANDOMNESS, AMP_LFO, LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(AMP_LFO, AMP_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(AMP_LFO, AMP_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(AMP_LFO_FREQUENCY_RANDOMNESS, AMP_LFO_RANDOM_FREQUENCY, AMP_LFO, LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, AMP_LFO_FREQUENCY_RANDOMNESS);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(AMP_LFO_FREQUENCY_RANDOMNESS, AMP_LFO_FREQUENCY_RANDOMNESS, AMP_LFO, LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
@@ -400,9 +445,9 @@ void zynadd_map_initialise()
    }
   }
 
-  LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, FILTER, "Filter");
+  LV2DYNPARAM_GROUP_INIT(ROOT, FILTER, "Filter", NULL);
   {
-    LV2DYNPARAM_GROUP_INIT_GENERIC(FILTER, FILTER_ENV, "Envelope");
+    LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_ENV, "Envelope", NULL);
     {
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_ATTACK_VALUE, FILTER_ENV, ENV_ATTACK_VALUE, "Attack value", 0, 100, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ENV, FILTER_ENV_ATTACK_DURATION, FILTER_ENV, ENV_ATTACK_DURATION, "Attack duration", 0, 100, ALWAYS);
@@ -414,13 +459,13 @@ void zynadd_map_initialise()
       LV2DYNPARAM_PARAMETER_INIT_BOOL(FILTER_ENV, FILTER_ENV_FORCED_RELEASE, FILTER_ENV, ENV_FORCED_RELEASE, "Forced release", ALWAYS);
     }
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(FILTER, FILTER_LFO, "LFO");
+    LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_LFO, "LFO", NULL);
     {
       LV2DYNPARAM_PARAMETER_INIT_SHAPE(FILTER_LFO, FILTER_LFO, FILTER_LFO, "Shape", ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_FREQUENCY, FILTER_LFO, LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_DEPTH, FILTER_LFO, LFO_DEPTH, "Depth", 0, 100, ALWAYS);
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(FILTER_LFO, FILTER_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(FILTER_LFO, FILTER_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_START_PHASE, FILTER_LFO_RANDOM_START_PHASE, FILTER_LFO, LFO_RANDOM_START_PHASE, "Random", HIDE, FILTER_LFO_START_PHASE);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_START_PHASE, FILTER_LFO_START_PHASE, FILTER_LFO, LFO_START_PHASE, "Start phase", 0, 1, SEMI);
@@ -429,13 +474,13 @@ void zynadd_map_initialise()
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_DELAY, FILTER_LFO, LFO_DELAY, "Delay", 0, 4, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO, FILTER_LFO_STRETCH, FILTER_LFO, LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(FILTER_LFO, FILTER_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(FILTER_LFO, FILTER_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_DEPTH_RANDOMNESS, FILTER_LFO_RANDOM_DEPTH, FILTER_LFO, LFO_RANDOM_DEPTH, "Random depth", SHOW, FILTER_LFO_DEPTH_RANDOMNESS);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_DEPTH_RANDOMNESS, FILTER_LFO_DEPTH_RANDOMNESS, FILTER_LFO, LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(FILTER_LFO, FILTER_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(FILTER_LFO, FILTER_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FILTER_LFO_FREQUENCY_RANDOMNESS, FILTER_LFO_RANDOM_FREQUENCY, FILTER_LFO, LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, FILTER_LFO_FREQUENCY_RANDOMNESS);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_LFO_FREQUENCY_RANDOMNESS, FILTER_LFO_FREQUENCY_RANDOMNESS, FILTER_LFO, LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
@@ -443,9 +488,9 @@ void zynadd_map_initialise()
     }
   }
 
-  LV2DYNPARAM_GROUP_INIT_GENERIC(ROOT, FREQUENCY, "Frequency");
+  LV2DYNPARAM_GROUP_INIT(ROOT, FREQUENCY, "Frequency", NULL);
   {
-    LV2DYNPARAM_GROUP_INIT_GENERIC(FREQUENCY, FREQUENCY_ENV, "Envelope");
+    LV2DYNPARAM_GROUP_INIT(FREQUENCY, FREQUENCY_ENV, "Envelope", NULL);
     {
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_ENV, FREQUENCY_ENV_ATTACK_VALUE, FREQUENCY_ENV, ENV_ATTACK_VALUE, "Attack value", 0, 100, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_ENV, FREQUENCY_ENV_ATTACK_DURATION, FREQUENCY_ENV, ENV_ATTACK_DURATION, "Attack duration", 0, 100, ALWAYS);
@@ -455,13 +500,13 @@ void zynadd_map_initialise()
       LV2DYNPARAM_PARAMETER_INIT_BOOL(FREQUENCY_ENV, FREQUENCY_ENV_FORCED_RELEASE, FREQUENCY_ENV, ENV_FORCED_RELEASE, "Forced release", ALWAYS);
     }
 
-    LV2DYNPARAM_GROUP_INIT_GENERIC(FREQUENCY, FREQUENCY_LFO, "LFO");
+    LV2DYNPARAM_GROUP_INIT(FREQUENCY, FREQUENCY_LFO, "LFO", NULL);
     {
       LV2DYNPARAM_PARAMETER_INIT_SHAPE(FREQUENCY_LFO, FREQUENCY_LFO, FREQUENCY_LFO, "Shape", ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_FREQUENCY, FREQUENCY_LFO, LFO_FREQUENCY, "Frequency", 0, 1, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_DEPTH, FREQUENCY_LFO, LFO_DEPTH, "Depth", 0, 100, ALWAYS);
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(FREQUENCY_LFO, FREQUENCY_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(FREQUENCY_LFO, FREQUENCY_LFO_START_PHASE, "Random:Start phase", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_START_PHASE, FREQUENCY_LFO_RANDOM_START_PHASE, FREQUENCY_LFO, LFO_RANDOM_START_PHASE, "Random", HIDE, FREQUENCY_LFO_START_PHASE);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_START_PHASE, FREQUENCY_LFO_START_PHASE, FREQUENCY_LFO, LFO_START_PHASE, "Start phase", 0, 1, SEMI);
@@ -470,13 +515,13 @@ void zynadd_map_initialise()
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_DELAY, FREQUENCY_LFO, LFO_DELAY, "Delay", 0, 4, ALWAYS);
       LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO, FREQUENCY_LFO_STRETCH, FREQUENCY_LFO, LFO_STRETCH, "Stretch", -1, 1, ALWAYS); 
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(FREQUENCY_LFO, FREQUENCY_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(FREQUENCY_LFO, FREQUENCY_LFO_DEPTH_RANDOMNESS, "Random depth:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_DEPTH_RANDOMNESS, FREQUENCY_LFO_RANDOM_DEPTH, FREQUENCY_LFO, LFO_RANDOM_DEPTH, "Random depth", SHOW, FREQUENCY_LFO_DEPTH_RANDOMNESS);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_DEPTH_RANDOMNESS, FREQUENCY_LFO_DEPTH_RANDOMNESS, FREQUENCY_LFO, LFO_DEPTH_RANDOMNESS, "Randomness", 0, 100, SEMI);
       }
 
-      LV2DYNPARAM_GROUP_INIT_CUSTOM(FREQUENCY_LFO, FREQUENCY_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI);
+      LV2DYNPARAM_GROUP_INIT(FREQUENCY_LFO, FREQUENCY_LFO_FREQUENCY_RANDOMNESS, "Random frequency:Randomness", LV2DYNPARAM_GROUP_TYPE_TOGGLE_FLOAT_URI, NULL, NULL);
       {
         LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(FREQUENCY_LFO_FREQUENCY_RANDOMNESS, FREQUENCY_LFO_RANDOM_FREQUENCY, FREQUENCY_LFO, LFO_RANDOM_FREQUENCY, "Random frequency", SHOW, FREQUENCY_LFO_FREQUENCY_RANDOMNESS);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(FREQUENCY_LFO_FREQUENCY_RANDOMNESS, FREQUENCY_LFO_FREQUENCY_RANDOMNESS, FREQUENCY_LFO, LFO_FREQUENCY_RANDOMNESS, "Randomness", 0, 100, SEMI);
@@ -527,7 +572,7 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
           zynadd_ptr->dynparams,
           g_map_groups[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->groups[g_map_groups[i].parent],
           g_map_groups[i].name,
-          g_map_groups[i].type_uri,
+          &g_map_groups[i].hints,
           zynadd_ptr->groups + i))
     {
       goto fail_clean_dynparams;
