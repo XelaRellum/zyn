@@ -48,7 +48,7 @@ Filter::init(FilterParams *pars)
     break;
   case ZYN_FILTER_TYPE_STATE_VARIABLE:
     filter = new SVFilter(Ftype,1000.0,pars->getq(),Fstages);
-    filter->outgain = dB2rap(pars->getgain());
+    filter->outgain = dB2rap(pars->m_gain);
     if (filter->outgain>1.0)
     {
       filter->outgain = sqrt(filter->outgain);
@@ -60,11 +60,11 @@ Filter::init(FilterParams *pars)
     if (Ftype >= ZYN_FILTER_ANALOG_TYPE_PKF2 &&
         Ftype <= ZYN_FILTER_ANALOG_TYPE_HSH2)
     {
-      filter->setgain(pars->getgain());
+      filter->setgain(pars->m_gain);
     }
     else
     {
-      filter->outgain = dB2rap(pars->getgain());
+      filter->outgain = dB2rap(pars->m_gain);
     }
     break;
   default:

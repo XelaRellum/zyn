@@ -69,19 +69,6 @@ struct ADnoteGlobalParam
   // 0-127
   unsigned char PPunchVelocitySensing;
 
-  /******************************************
-   *        FILTER GLOBAL PARAMETERS        *
-   ******************************************/
-  FilterParams *GlobalFilter;
-
-  // Velocity sensing amount of the Filter
-  // 0 .. 127
-  unsigned char PFilterVelocityScale;
-
-  // 0 .. 127
-  // Velocity Sensing Function of the Filter
-  unsigned char PFilterVelocityScaleFunction;
-
   // RESONANCE
   Resonance *Reson;
 };
@@ -179,7 +166,7 @@ struct ADnoteVoiceParam
 
   /* Voice Filter */
   unsigned char PFilterEnabled;
-  FilterParams *VoiceFilter;
+  FilterParams m_filter_params;
 
   /* Filter Envelope */
   unsigned char PFilterEnvelopeEnabled;
@@ -255,6 +242,14 @@ struct zyn_addsynth
   struct zyn_lfo_parameters amplitude_lfo_params;
 
   EnvelopeParams m_amplitude_envelope_params;
+
+  FilterParams m_filter_params;
+
+  // Velocity sensing amount of the Filter, 0 .. 1
+  float m_filter_velocity_sensing_amount;
+
+  // Velocity sensing function of the Filter, 1 .. -1
+  float m_filter_velocity_scale_function;
 
   // Filter LFO parameters
   struct zyn_lfo_parameters filter_lfo_params;

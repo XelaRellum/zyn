@@ -33,6 +33,9 @@ extern "C" {
 // Velocity Sensing function
 extern REALTYPE VelF(REALTYPE velocity,unsigned char scaling);
 
+float
+zyn_velocity_scale(float velocity, float scaling);
+
 #define N_DETUNE_TYPES 4 //the number of detune types
 extern REALTYPE getdetune(unsigned char type,unsigned short int coarsedetune,unsigned short int finedetune);
 

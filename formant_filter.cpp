@@ -89,7 +89,7 @@ FormantFilter::FormantFilter(FilterParams *pars)
     sequencestretch *= -1.0;
   }
 
-  outgain = dB2rap(pars->getgain());
+  outgain = dB2rap(pars->m_gain);
 
   oldinput = -1.0;
 

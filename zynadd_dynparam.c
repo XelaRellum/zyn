@@ -82,6 +82,7 @@ struct parameter_descriptor
 struct group_descriptor g_map_groups[LV2DYNPARAM_GROUPS_COUNT];
 struct parameter_descriptor g_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
 const char * g_shape_names[ZYN_LFO_SHAPES_COUNT];
+const char * g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPES_COUNT];
 
 BOOL
 zynadd_bool_parameter_changed(
@@ -95,6 +96,12 @@ zynadd_float_parameter_changed(
 
 BOOL
 zynadd_shape_parameter_changed(
+  void * context,
+  const char * value,
+  unsigned int value_index);
+
+BOOL
+zynadd_analog_filter_type_parameter_changed(
   void * context,
   const char * value,
   unsigned int value_index);
@@ -173,6 +180,23 @@ zynadd_appear_parameter(
           ZYN_LFO_SHAPES_COUNT,
           zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[parameter_index].addsynth_component),
           zynadd_shape_parameter_changed,
+          zynadd_ptr->parameters + parameter_index,
+          &zynadd_ptr->parameters[parameter_index].lv2parameter))
+    {
+      return FALSE;
+    }
+
+    return TRUE;
+  case LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE:
+    if (!lv2dynparam_plugin_param_enum_add(
+          zynadd_ptr->dynparams,
+          parent_group,
+          g_map_parameters[parameter_index].name,
+          &g_map_parameters[parameter_index].hints,
+          g_analog_filter_type_names,
+          ZYN_FILTER_ANALOG_TYPES_COUNT,
+          zyn_addsynth_get_analog_filter_type_parameter(zynadd_ptr->synth, zynadd_ptr->parameters[parameter_index].addsynth_component),
+          zynadd_analog_filter_type_parameter_changed,
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
@@ -264,6 +288,15 @@ zynadd_shape_parameter_changed(
     parameter_ptr->addsynth_component,
     value_index);
 
+  return TRUE;
+}
+
+BOOL
+zynadd_analog_filter_type_parameter_changed(
+  void * context,
+  const char * value,
+  unsigned int value_index)
+{
   return TRUE;
 }
 
@@ -378,6 +411,16 @@ void zynadd_map_initialise()
   g_shape_names[ZYN_LFO_SHAPE_TYPE_EXP_DOWN_1] = "E1Down";
   g_shape_names[ZYN_LFO_SHAPE_TYPE_EXP_DOWN_2] = "E2Down";
 
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LPF1] = "LPF 1 pole";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HPF1] = "HPF 1 pole";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LPF2] = "LPF 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HPF2] = "HPF 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_BPF2] = "BPF 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_NF2] = "NOTCH 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_PKF2] = "PEAK (2 poles)";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LSH2] = "Low Shelf - 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HSH2] = "High Shelf - 2 poles";
+
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
     g_map_groups[i].parent = LV2DYNPARAM_GROUP_INVALID;
@@ -455,6 +498,18 @@ void zynadd_map_initialise()
     {
       LV2DYNPARAM_GROUP_INIT(FILTER_FILTERS, FILTER_ANALOG, "Analog", HINT_HIDDEN, NULL, NULL);
       {
+        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].parent = LV2DYNPARAM_GROUP(FILTER_ANALOG);
+        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].name = "Filter type";
+        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].type = LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE;
+        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
+        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
+
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_FREQUENCY, FILTER_GLOBALS, FREQUNECY, "Frequency", 0, 1, ALWAYS, NULL);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_Q_FACTOR, FILTER_GLOBALS, Q_FACTOR, "Q (resonance)", 0, 1, ALWAYS, NULL);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_VELOCITY_SENSING_AMOUNT, FILTER_GLOBALS, VELOCITY_SENSING_AMOUNT, "Velocity sensing amount", 0, 1, ALWAYS, NULL);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_VELOCITY_SENSING_FUNCTION, FILTER_GLOBALS, VELOCITY_SENSING_FUNCTION, "Velocity sensing function", -1, 1, ALWAYS, NULL);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_FREQUENCY_TRACKING, FILTER_GLOBALS, FREQUENCY_TRACKING, "Frequency tracking", -1, 1, ALWAYS, NULL);
+        LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_GAIN, FILTER_GLOBALS, VOLUME, "Gain", -30, 30, ALWAYS, NULL);
       }
 
       LV2DYNPARAM_GROUP_INIT(FILTER_FILTERS, FILTER_FORMANT, "Formant", HINT_HIDDEN, NULL, NULL);

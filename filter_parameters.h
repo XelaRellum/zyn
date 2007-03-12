@@ -26,23 +26,21 @@
 class FilterParams
 {
 public:
-  FilterParams(unsigned char Ptype_,unsigned char Pfreq,unsigned char Pq_);
-  ~FilterParams();
+  void init(unsigned char Ptype_,unsigned char Pfreq,unsigned char Pq_);
 
   void defaults();
 
   REALTYPE getfreq();
   REALTYPE getq();
   REALTYPE getfreqtracking(REALTYPE notefreq);
-  REALTYPE getgain();
   
   unsigned char Pcategory;//Filter category (Analog/Formant/StVar)
   unsigned char Ptype;// Filter type  (for analog lpf,hpf,bpf..)
   unsigned char Pfreq;// Frequency (64-central frequency)
   unsigned char Pq;   // Q parameters (resonance or bandwidth)
   unsigned char Pstages; //filter stages+1
-  unsigned char Pfreqtrack;//how the filter frequency is changing according the note frequency
-  unsigned char Pgain;//filter's output gain
+  float m_frequency_tracking;   //how the filter frequency is changing according the note frequency, -1 .. 1
+  float m_gain;                 // filter's output gain, in dB, -30 .. 30
   
   //Formant filter parameters
   unsigned char Pnumformants;//how many formants are used

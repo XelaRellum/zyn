@@ -25,7 +25,7 @@
 #include "globals.h"
 #include "filter_parameters.h"
 
-FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  char Pq_)
+void FilterParams::init(unsigned char Ptype_,unsigned char Pfreq_,unsigned  char Pq_)
 {
   Dtype=Ptype_;
   Dfreq=Pfreq_;
@@ -33,11 +33,7 @@ FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  c
 
   changed=false;
   defaults();    
-};
-
-FilterParams::~FilterParams(){
-};
-
+}
 
 void FilterParams::defaults(){
   Ptype=Dtype;
@@ -45,8 +41,8 @@ void FilterParams::defaults(){
   Pq=Dq;
 
   Pstages=0;
-  Pfreqtrack=64;
-  Pgain=64;
+  m_frequency_tracking = 0;
+  m_gain = 0;
   Pcategory=0;
     
   Pnumformants=3;
@@ -84,12 +80,9 @@ REALTYPE FilterParams::getfreq(){
 REALTYPE FilterParams::getq(){
   return(exp(pow((REALTYPE) Pq/127.0,2)*log(1000.0))-0.9);
 };
-REALTYPE FilterParams::getfreqtracking(REALTYPE notefreq){
-  return(log(notefreq/440.0)*(Pfreqtrack-64.0)/(64.0*LOG_2));
-};
-
-REALTYPE FilterParams::getgain(){
-  return((Pgain/64.0-1.0)*30.0);//-30..30dB
+REALTYPE FilterParams::getfreqtracking(REALTYPE notefreq)
+{
+  return log(notefreq / 440.0) * m_frequency_tracking / LOG_2;
 };
 
 /*
@@ -181,7 +174,7 @@ void FilterParams::formantfilterH(int nvowel,int nfreqs,REALTYPE *freqs){
     };
   };
   for (int i=0;i<nfreqs;i++) {
-    if (freqs[i]>0.000000001) freqs[i]=rap2dB(freqs[i])+getgain();
+    if (freqs[i]>0.000000001) freqs[i]=rap2dB(freqs[i]) + m_gain;
     else freqs[i]=-90.0;    
   };
 

@@ -27,11 +27,40 @@
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)
  */
-REALTYPE VelF(REALTYPE velocity,unsigned char scaling){
-  REALTYPE x;
-  x=pow(VELOCITY_MAX_SCALE,(64.0-scaling)/64.0);
-  if ((scaling==127)||(velocity>0.99)) return(1.0);
-  else return(pow(velocity,x));
+float
+VelF(REALTYPE velocity,unsigned char scaling)
+{
+  float x;
+
+  x = (64.0 - scaling) / 64.0;  /* 0 .. 127 -> 1 .. -1 */
+
+  x = pow(VELOCITY_MAX_SCALE, x);
+
+  if (scaling == 127 || velocity > 0.99)
+  {
+    return 1.0;
+  }
+  else
+  {
+    return pow(velocity, x);
+  }
+}
+
+float
+zyn_velocity_scale(float velocity, float scaling)
+{
+  float x;
+
+  x = pow(VELOCITY_MAX_SCALE, scaling);
+
+  if (scaling < -0.99 || velocity > 0.99)
+  {
+    return 1.0;
+  }
+  else
+  {
+    return pow(velocity, x);
+  }
 }
 
 /*

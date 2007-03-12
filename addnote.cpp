@@ -103,9 +103,9 @@ ADnote::note_on(
   m_panning = (panorama + 1.0) / 2; // -1..1 -> 0 - 1
 
   m_filter_center_pitch =
-    m_synth_ptr->GlobalPar.GlobalFilter->getfreq() + //center freq
-    m_synth_ptr->GlobalPar.PFilterVelocityScale / 127.0 * 6.0 * // velocity sensing
-    (VelF(m_velocity,m_synth_ptr->GlobalPar.PFilterVelocityScaleFunction) - 1);
+    m_synth_ptr->m_filter_params.getfreq() + // center freq
+    m_synth_ptr->m_filter_velocity_sensing_amount * 6.0 * // velocity sensing
+    (zyn_velocity_scale(m_velocity, m_synth_ptr->m_filter_velocity_scale_function) - 1);
 
   if (m_synth_ptr->GlobalPar.PPunchStrength != 0)
   {
@@ -211,7 +211,7 @@ ADnote::note_on(
     oscposhi[voice_index]+=(int)((m_synth_ptr->voices_params[voice_index].Poscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
     oscposhi[voice_index]%=OSCIL_SIZE;
 
-    m_voices[voice_index].FilterCenterPitch=m_synth_ptr->voices_params[voice_index].VoiceFilter->getfreq();
+    m_voices[voice_index].FilterCenterPitch=m_synth_ptr->voices_params[voice_index].m_filter_params.getfreq();
     m_voices[voice_index].filterbypass=m_synth_ptr->voices_params[voice_index].Pfilterbypass;
 
     m_voices[voice_index].fm_type = m_synth_ptr->voices_params[voice_index].fm_type;
@@ -278,10 +278,10 @@ ADnote::note_on(
 
   globalnewamplitude = m_volume * m_amplitude_envelope.envout_dB() * m_amplitude_lfo.amplfoout();
 
-  m_filter_left.init(m_synth_ptr->GlobalPar.GlobalFilter);
+  m_filter_left.init(&m_synth_ptr->m_filter_params);
   if (m_stereo)
   {
-    m_filter_right.init(m_synth_ptr->GlobalPar.GlobalFilter);
+    m_filter_right.init(&m_synth_ptr->m_filter_params);
   }
 
   m_filter_envelope.init(&m_synth_ptr->m_filter_envelope_params, m_basefreq);
@@ -291,8 +291,8 @@ ADnote::note_on(
     &m_synth_ptr->filter_lfo_params,
     ZYN_LFO_TYPE_FILTER);
 
-  m_filter_q_factor = m_synth_ptr->GlobalPar.GlobalFilter->getq();
-  m_filter_frequency_tracking = m_synth_ptr->GlobalPar.GlobalFilter->getfreqtracking(m_basefreq);
+  m_filter_q_factor = m_synth_ptr->m_filter_params.getq();
+  m_filter_frequency_tracking = m_synth_ptr->m_filter_params.getfreqtracking(m_basefreq);
 
   // Forbids the Modulation Voice to be greater or equal than voice
   for (i=0;i<NUM_VOICES;i++) if (m_voices[i].FMVoice>=i) m_voices[i].FMVoice=-1;
@@ -352,7 +352,7 @@ ADnote::note_on(
     /* Voice Filter Parameters Init */
     if (m_synth_ptr->voices_params[nvoice].PFilterEnabled != 0)
     {
-      m_voices[nvoice].m_voice_filter.init(m_synth_ptr->voices_params[nvoice].VoiceFilter);
+      m_voices[nvoice].m_voice_filter.init(&m_synth_ptr->voices_params[nvoice].m_filter_params);
     }
 
     if (m_synth_ptr->voices_params[nvoice].PFilterEnvelopeEnabled != 0)
@@ -368,7 +368,7 @@ ADnote::note_on(
         ZYN_LFO_TYPE_FILTER);
     }
 
-    m_voices[nvoice].FilterFreqTracking=m_synth_ptr->voices_params[nvoice].VoiceFilter->getfreqtracking(m_basefreq);
+    m_voices[nvoice].FilterFreqTracking = m_synth_ptr->voices_params[nvoice].m_filter_params.getfreqtracking(m_basefreq);
 
     /* Voice Modulation Parameters Init */
     if (m_voices[nvoice].fm_type != ZYN_FM_TYPE_NONE && m_voices[nvoice].FMVoice < 0)

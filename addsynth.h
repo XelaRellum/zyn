@@ -92,6 +92,12 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_FLOAT_LFO_DEPTH_RANDOMNESS       20 /* 0 .. 100 */
 #define ZYNADD_PARAMETER_FLOAT_LFO_FREQUENCY_RANDOMNESS   21 /* 0 .. 100 */
 
+#define ZYNADD_PARAMETER_FLOAT_FREQUNECY                  22 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_Q_FACTOR                   23 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT    24 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION  25 /* -1 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING         26 /* -1 .. 1 */
+
 /* bool - globals */
 #define ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA                       0
 #define ZYNADD_PARAMETER_BOOL_STEREO                                1
@@ -139,6 +145,17 @@ zyn_addsynth_get_shape_parameter(
 
 void
 zyn_addsynth_set_shape_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component,
+  unsigned int value);
+
+unsigned int
+zyn_addsynth_get_analog_filter_type_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component);
+
+void
+zyn_addsynth_set_analog_filter_type_parameter(
   zyn_addsynth_handle handle,
   unsigned int component,
   unsigned int value);

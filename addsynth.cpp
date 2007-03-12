@@ -66,7 +66,7 @@ zyn_addsynth_create(
     
   zyn_addsynth_ptr->m_amplitude_envelope_params.init_adsr(64, TRUE, 0, 40, 127, 25, FALSE);
 
-  zyn_addsynth_ptr->GlobalPar.GlobalFilter=new FilterParams(2,94,40);
+  zyn_addsynth_ptr->m_filter_params.init(2, 94, 40);
   zyn_addsynth_ptr->m_filter_envelope_params.init_adsr_filter(0, TRUE, 64, 40, 64, 70, 60, 64);
   zyn_addsynth_ptr->GlobalPar.Reson=new Resonance();
 
@@ -104,7 +104,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.stretch = 0;
     zyn_addsynth_ptr->voices_params[voice_index].frequency_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
-    zyn_addsynth_ptr->voices_params[voice_index].VoiceFilter=new FilterParams(2,50,60);
+    zyn_addsynth_ptr->voices_params[voice_index].m_filter_params.init(2, 50, 60);
     zyn_addsynth_ptr->voices_params[voice_index].m_filter_envelope_params.init_adsr_filter(0, FALSE, 90, 70, 40, 70, 10, 40);
 
     zyn_addsynth_ptr->voices_params[voice_index].filter_lfo_params.frequency = 50.0 / 127.0;
@@ -139,15 +139,15 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->GlobalPar.PPunchVelocitySensing=72;
     
   /* Filter Global Parameters*/
-  zyn_addsynth_ptr->GlobalPar.PFilterVelocityScale=64;
-  zyn_addsynth_ptr->GlobalPar.PFilterVelocityScaleFunction=64;
-  zyn_addsynth_ptr->GlobalPar.GlobalFilter->defaults();
+  zyn_addsynth_ptr->m_filter_velocity_sensing_amount = 0.5;
+  zyn_addsynth_ptr->m_filter_velocity_scale_function = 0;
+  zyn_addsynth_ptr->m_filter_params.defaults();
   zyn_addsynth_ptr->GlobalPar.Reson->defaults();
 
   for (voice_index=0;voice_index<NUM_VOICES;voice_index++)
   {
     zyn_addsynth_ptr->voices_params[voice_index].Enabled=0;
-    zyn_addsynth_ptr->voices_params[voice_index].Type=0;
+    zyn_addsynth_ptr->voices_params[voice_index].Type=1;
     zyn_addsynth_ptr->voices_params[voice_index].Pfixedfreq=0;
     zyn_addsynth_ptr->voices_params[voice_index].PfixedfreqET=0;
     zyn_addsynth_ptr->voices_params[voice_index].Presonance=1;
@@ -188,7 +188,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params[voice_index].OscilSmp->defaults();
     zyn_addsynth_ptr->voices_params[voice_index].FMSmp->defaults();
 
-    zyn_addsynth_ptr->voices_params[voice_index].VoiceFilter->defaults();
+    zyn_addsynth_ptr->voices_params[voice_index].m_filter_params.defaults();
   }
 
   zyn_addsynth_ptr->voices_params[0].Enabled=1;
@@ -375,15 +375,12 @@ zyn_addsynth_destroy(
 
   // ADnoteParameters temp begin
 
-  delete(zyn_addsynth_ptr->GlobalPar.GlobalFilter);
   delete(zyn_addsynth_ptr->GlobalPar.Reson);
 
   for (voice_index = 0 ; voice_index < NUM_VOICES ; voice_index++)
   {
     delete (zyn_addsynth_ptr->voices_params[voice_index].OscilSmp);
     delete (zyn_addsynth_ptr->voices_params[voice_index].FMSmp);
-
-    delete (zyn_addsynth_ptr->voices_params[voice_index].VoiceFilter);
   }
   // ADnoteParameters temp end
 
@@ -560,6 +557,27 @@ zyn_addsynth_get_float_parameter(
       return percent_from_0_127(zyn_addsynth_ptr->m_frequency_envelope_params.m_stretch) * 2;
     default:
       LOG_ERROR("Unknown frequency envelope parameter %u", parameter);
+      assert(0);
+    }
+  }
+  else if (component == ZYNADD_COMPONENT_FILTER_GLOBALS)
+  {
+    switch (parameter)
+    {
+    case ZYNADD_PARAMETER_FLOAT_FREQUNECY:
+      return percent_from_0_127(zyn_addsynth_ptr->m_filter_params.Pfreq) / 100;
+    case ZYNADD_PARAMETER_FLOAT_Q_FACTOR:
+      return percent_from_0_127(zyn_addsynth_ptr->m_filter_params.Pq) / 100;
+    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT:
+      return zyn_addsynth_ptr->m_filter_velocity_sensing_amount;
+    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION:
+      return zyn_addsynth_ptr->m_filter_velocity_scale_function;
+    case ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING:
+      return zyn_addsynth_ptr->m_filter_params.m_frequency_tracking;
+    case ZYNADD_PARAMETER_FLOAT_VOLUME:
+      return zyn_addsynth_ptr->m_filter_params.m_gain;
+    default:
+      LOG_ERROR("Unknown filter parameter %u", parameter);
       assert(0);
     }
   }
@@ -759,6 +777,33 @@ zyn_addsynth_set_float_parameter(
       return;
     default:
       LOG_ERROR("Unknown frequency envelope parameter %u", parameter);
+      assert(0);
+    }
+  }
+  else if (component == ZYNADD_COMPONENT_FILTER_GLOBALS)
+  {
+    switch (parameter)
+    {
+    case ZYNADD_PARAMETER_FLOAT_FREQUNECY:
+      zyn_addsynth_ptr->m_filter_params.Pfreq = percent_to_0_127(value * 100);
+      return;
+    case ZYNADD_PARAMETER_FLOAT_Q_FACTOR:
+      zyn_addsynth_ptr->m_filter_params.Pq = percent_to_0_127(value * 100);
+      return;
+    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT:
+      zyn_addsynth_ptr->m_filter_velocity_sensing_amount = value;
+      return;
+    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION:
+      zyn_addsynth_ptr->m_filter_velocity_scale_function = -value;
+      return;
+    case ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING:
+      zyn_addsynth_ptr->m_filter_params.m_frequency_tracking = value;
+      return;
+    case ZYNADD_PARAMETER_FLOAT_VOLUME:
+      zyn_addsynth_ptr->m_filter_params.m_gain = value;
+      return;
+    default:
+      LOG_ERROR("Unknown filter parameter %u", parameter);
       assert(0);
     }
   }
@@ -1014,4 +1059,20 @@ zyn_addsynth_set_shape_parameter(
     LOG_ERROR("Unknown component %u", component);
     assert(0);
   }
+}
+
+unsigned int
+zyn_addsynth_get_analog_filter_type_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component)
+{
+  return ZYN_FILTER_ANALOG_TYPE_LPF1;
+}
+
+void
+zyn_addsynth_set_analog_filter_type_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component,
+  unsigned int value)
+{
 }

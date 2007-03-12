@@ -76,6 +76,7 @@ struct FFTFREQS
 #define ZYN_FILTER_ANALOG_TYPE_PKF2    6 /* PEAK (2 poles) */
 #define ZYN_FILTER_ANALOG_TYPE_LSH2    7 /* Low Shelf - 2 poles */
 #define ZYN_FILTER_ANALOG_TYPE_HSH2    8 /* High Shelf - 2 poles */
+#define ZYN_FILTER_ANALOG_TYPES_COUNT  9
 
 #define ZYN_FILTER_STATE_VARIABLE_TYPE_1LPF 0
 #define ZYN_FILTER_STATE_VARIABLE_TYPE_1HPF 1
