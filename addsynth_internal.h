@@ -74,10 +74,12 @@ struct ADnoteGlobalParam
    ******************************************/
   FilterParams *GlobalFilter;
 
-  // filter velocity sensing
+  // Velocity sensing amount of the Filter
+  // 0 .. 127
   unsigned char PFilterVelocityScale;
 
-  // filter velocity sensing
+  // 0 .. 127
+  // Velocity Sensing Function of the Filter
   unsigned char PFilterVelocityScaleFunction;
 
   // RESONANCE

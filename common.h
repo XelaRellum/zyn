@@ -67,6 +67,21 @@ struct FFTFREQS
 #define ZYN_FILTER_TYPE_FORMANT        1
 #define ZYN_FILTER_TYPE_STATE_VARIABLE 2
 
+#define ZYN_FILTER_ANALOG_TYPE_LPF1    0 /* LPF 1 pole */
+#define ZYN_FILTER_ANALOG_TYPE_HPF1    1 /* HPF 1 pole */
+#define ZYN_FILTER_ANALOG_TYPE_LPF2    2 /* LPF 2 poles */
+#define ZYN_FILTER_ANALOG_TYPE_HPF2    3 /* HPF 2 poles */
+#define ZYN_FILTER_ANALOG_TYPE_BPF2    4 /* BPF 2 poles */
+#define ZYN_FILTER_ANALOG_TYPE_NF2     5 /* NOTCH 2 poles */
+#define ZYN_FILTER_ANALOG_TYPE_PKF2    6 /* PEAK (2 poles) */
+#define ZYN_FILTER_ANALOG_TYPE_LSH2    7 /* Low Shelf - 2 poles */
+#define ZYN_FILTER_ANALOG_TYPE_HSH2    8 /* High Shelf - 2 poles */
+
+#define ZYN_FILTER_STATE_VARIABLE_TYPE_1LPF 0
+#define ZYN_FILTER_STATE_VARIABLE_TYPE_1HPF 1
+#define ZYN_FILTER_STATE_VARIABLE_TYPE_1BPF 2
+#define ZYN_FILTER_STATE_VARIABLE_TYPE_1NF  3
+
 #ifdef __cplusplus
 extern "C" {
 #endif

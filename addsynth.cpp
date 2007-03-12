@@ -34,6 +34,7 @@
 #include "lfo.h"
 #include "filter_parameters.h"
 #include "filter_base.h"
+#include "analog_filter.h"
 #include "filter.h"
 #include "Controller.h"
 #include "addsynth_internal.h"

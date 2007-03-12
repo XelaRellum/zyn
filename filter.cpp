@@ -27,6 +27,7 @@
 #include "globals.h"
 #include "filter_base.h"
 #include "filter_parameters.h"
+#include "analog_filter.h"
 #include "filter.h"
 #include "analog_filter.h"
 #include "formant_filter.h"
@@ -54,8 +55,9 @@ Filter::init(FilterParams *pars)
     }
     break;
   case ZYN_FILTER_TYPE_ANALOG:
-    filter = new AnalogFilter(Ftype,1000.0,pars->getq(),Fstages);
-    if ((Ftype>=6)&&(Ftype<=8))
+    m_analog_filter.init(Ftype, 1000.0, pars->getq(), Fstages);
+    if (Ftype >= ZYN_FILTER_ANALOG_TYPE_PKF2 &&
+        Ftype <= ZYN_FILTER_ANALOG_TYPE_HSH2)
     {
       filter->setgain(pars->getgain());
     }
@@ -105,7 +107,8 @@ void Filter::setq(REALTYPE q_)
 REALTYPE
 Filter::getrealfreq(REALTYPE freqpitch)
 {
-  if ((category==0)||(category==2))
+  if (category == ZYN_FILTER_TYPE_ANALOG ||
+      category == ZYN_FILTER_TYPE_STATE_VARIABLE)
   {
     return pow(2.0,freqpitch+9.96578428); // log2(1000)=9.95748
   }

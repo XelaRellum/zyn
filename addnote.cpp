@@ -35,6 +35,7 @@
 #include "Controller.h"
 #include "lfo.h"
 #include "filter_base.h"
+#include "analog_filter.h"
 #include "filter.h"
 #include "envelope.h"
 #include "addsynth_internal.h"

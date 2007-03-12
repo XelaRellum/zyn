@@ -59,6 +59,8 @@ mix_add_two_buffers(
 float
 zyn_random();
 
+#define ZYN_BOOL_XOR(p, q) (((p) && !(q)) || (!(p) && (q)))
+
 #if 0
 { /* Adjust editor indent */
 #endif

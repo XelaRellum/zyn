@@ -29,14 +29,7 @@ public:
   FilterParams(unsigned char Ptype_,unsigned char Pfreq,unsigned char Pq_);
   ~FilterParams();
 
-//  void add2XML(XMLwrapper *xml);
-//  void add2XMLsection(XMLwrapper *xml,int n);
   void defaults();
-//  void getfromXML(XMLwrapper *xml);
-//  void getfromXMLsection(XMLwrapper *xml,int n);
-
-
-  void getfromFilterParams(FilterParams *pars);
 
   REALTYPE getfreq();
   REALTYPE getq();

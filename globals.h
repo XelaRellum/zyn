@@ -117,9 +117,9 @@
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
 
-#define LOG_2 0.693147181
+#define LOG_2 0.693147181       // natural logarithm of 2
 #define PI 3.1415926536
-#define LOG_10 2.302585093
+#define LOG_10 2.302585093      // natural logarithm of 10
 
 /*
  * The threshold for the amplitude interpolation used if the amplitude

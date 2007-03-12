@@ -41,6 +41,8 @@ public:
 private:
   Filter_ *filter;
   unsigned char category;
+
+  AnalogFilter m_analog_filter;
 };
 
 #endif
