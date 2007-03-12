@@ -56,6 +56,7 @@ Filter::init(FilterParams *pars)
     break;
   case ZYN_FILTER_TYPE_ANALOG:
     m_analog_filter.init(Ftype, 1000.0, pars->getq(), Fstages);
+    filter = &m_analog_filter;
     if (Ftype >= ZYN_FILTER_ANALOG_TYPE_PKF2 &&
         Ftype <= ZYN_FILTER_ANALOG_TYPE_HSH2)
     {
