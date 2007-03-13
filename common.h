@@ -66,6 +66,7 @@ struct FFTFREQS
 #define ZYN_FILTER_TYPE_ANALOG         0
 #define ZYN_FILTER_TYPE_FORMANT        1
 #define ZYN_FILTER_TYPE_STATE_VARIABLE 2
+#define ZYN_FILTER_TYPES_COUNT         3
 
 #define ZYN_FILTER_ANALOG_TYPE_LPF1    0 /* LPF 1 pole */
 #define ZYN_FILTER_ANALOG_TYPE_HPF1    1 /* HPF 1 pole */

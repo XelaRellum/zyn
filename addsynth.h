@@ -150,6 +150,17 @@ zyn_addsynth_set_shape_parameter(
   unsigned int value);
 
 unsigned int
+zyn_addsynth_get_filter_type_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component);
+
+void
+zyn_addsynth_set_filter_type_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component,
+  unsigned int value);
+
+unsigned int
 zyn_addsynth_get_analog_filter_type_parameter(
   zyn_addsynth_handle handle,
   unsigned int component);
