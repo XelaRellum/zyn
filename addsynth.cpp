@@ -147,7 +147,7 @@ zyn_addsynth_create(
   for (voice_index=0;voice_index<NUM_VOICES;voice_index++)
   {
     zyn_addsynth_ptr->voices_params[voice_index].Enabled=0;
-    zyn_addsynth_ptr->voices_params[voice_index].Type=1;
+    zyn_addsynth_ptr->voices_params[voice_index].Type=0;
     zyn_addsynth_ptr->voices_params[voice_index].Pfixedfreq=0;
     zyn_addsynth_ptr->voices_params[voice_index].PfixedfreqET=0;
     zyn_addsynth_ptr->voices_params[voice_index].Presonance=1;
