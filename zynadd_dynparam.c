@@ -68,11 +68,13 @@ struct parameter_descriptor
   union
   {
     float fpoint;
+    signed int integer;
   } min;
 
   union
   {
     float fpoint;
+    signed int integer;
   } max;
 };
 
@@ -94,6 +96,11 @@ BOOL
 zynadd_float_parameter_changed(
   void * context,
   float value);
+
+BOOL
+zynadd_int_parameter_changed(
+  void * context,
+  signed int value);
 
 BOOL
 zynadd_shape_parameter_changed(
@@ -169,6 +176,27 @@ zynadd_appear_parameter(
           g_map_parameters[parameter_index].min.fpoint,
           g_map_parameters[parameter_index].max.fpoint,
           zynadd_float_parameter_changed,
+          zynadd_ptr->parameters + parameter_index,
+          &zynadd_ptr->parameters[parameter_index].lv2parameter))
+    {
+      return FALSE;
+    }
+
+    return TRUE;
+
+  case LV2DYNPARAM_PARAMETER_TYPE_INT:
+    if (!lv2dynparam_plugin_param_int_add(
+          zynadd_ptr->dynparams,
+          parent_group,
+          g_map_parameters[parameter_index].name,
+          &g_map_parameters[parameter_index].hints,
+          zyn_addsynth_get_int_parameter(
+            zynadd_ptr->synth,
+            zynadd_ptr->parameters[parameter_index].addsynth_component,
+            zynadd_ptr->parameters[parameter_index].addsynth_parameter),
+          g_map_parameters[parameter_index].min.integer,
+          g_map_parameters[parameter_index].max.integer,
+          zynadd_int_parameter_changed,
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
@@ -333,6 +361,15 @@ zynadd_analog_filter_type_parameter_changed(
   return TRUE;
 }
 
+BOOL
+zynadd_int_parameter_changed(
+  void * context,
+  signed int value)
+{
+//  LOG_ERROR("int parameter changed to value %d", value);
+  return TRUE;
+}
+
 #undef parameter_ptr
 
 #define LV2DYNPARAM_GROUP(group) LV2DYNPARAM_GROUP_ ## group
@@ -420,6 +457,21 @@ lv2dynparam_group_init(unsigned int parent, unsigned int group, const char * nam
   g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].max.fpoint = max_value; \
   g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
   g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## zynparameter;
+
+#define LV2DYNPARAM_PARAMETER_INIT_INT(parent_group, lv2parameter, component, zynparameter, name_value, min_value, max_value, scope_value, hints...) \
+  LOG_DEBUG("Registering %u (\"%s\") int -> %u:%u",                     \
+            LV2DYNPARAM_PARAMETER(lv2parameter),                        \
+            name_value,                                                 \
+            ZYNADD_COMPONENT_ ## component,                             \
+            ZYNADD_PARAMETER_INT_ ## zynparameter);                     \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_INT; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].min.integer = min_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].max.integer = max_value; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_INT_ ## zynparameter;
 
 #define LV2DYNPARAM_PARAMETER_INIT_SHAPE(parent_group, lv2parameter, component, name_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") shape -> %u",                      \
@@ -546,6 +598,8 @@ void zynadd_map_initialise()
         g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].type = LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE;
         g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
         g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
+
+        LV2DYNPARAM_PARAMETER_INIT_INT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_STAGES, FILTER_GLOBALS, STAGES, "Stages", 1, 5, ALWAYS, NULL);
 
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_FREQUENCY, FILTER_GLOBALS, FREQUNECY, "Frequency", 0, 1, ALWAYS, NULL);
         LV2DYNPARAM_PARAMETER_INIT_FLOAT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_Q_FACTOR, FILTER_GLOBALS, Q_FACTOR, "Q (resonance)", 0, 1, ALWAYS, NULL);

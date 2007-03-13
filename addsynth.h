@@ -112,6 +112,8 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_DEPTH                  6
 #define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_FREQUENCY              7
 
+#define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
+
 float
 zyn_addsynth_get_float_parameter(
   zyn_addsynth_handle handle,
@@ -124,6 +126,19 @@ zyn_addsynth_set_float_parameter(
   unsigned int component,
   unsigned int parameter,
   float value);
+
+signed int
+zyn_addsynth_get_int_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component,
+  unsigned int parameter);
+
+void
+zyn_addsynth_set_int_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component,
+  unsigned int parameter,
+  signed int value);
 
 BOOL
 zyn_addsynth_get_bool_parameter(

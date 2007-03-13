@@ -1092,3 +1092,21 @@ zyn_addsynth_set_analog_filter_type_parameter(
   unsigned int value)
 {
 }
+
+signed int
+zyn_addsynth_get_int_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component,
+  unsigned int parameter)
+{
+  return -1;
+}
+
+void
+zyn_addsynth_set_int_parameter(
+  zyn_addsynth_handle handle,
+  unsigned int component,
+  unsigned int parameter,
+  signed int value)
+{
+}
