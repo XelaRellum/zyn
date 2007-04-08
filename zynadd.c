@@ -179,14 +179,17 @@ zynadd_run(
       if (event_time >= 0 && event_time < now + fill)
       {
 /*         printf("%02X\n", (unsigned int)event[0]); */
-        switch (event[0])
+        if (event_size == 3)
         {
-        case 0x90:                /* note on */
-          zyn_addsynth_note_on(zynadd_ptr->synth, event[1]);
-          break;
-        case 0x80:                /* note off */
-          zyn_addsynth_note_off(zynadd_ptr->synth, event[1]);
-          break;
+          switch (event[0] & 0xF0)
+          {
+          case 0x90:                /* note on */
+            zyn_addsynth_note_on(zynadd_ptr->synth, event[1]);
+            break;
+          case 0x80:                /* note off */
+            zyn_addsynth_note_off(zynadd_ptr->synth, event[1]);
+            break;
+          }
         }
 
         event_time = -1.0;
