@@ -66,9 +66,9 @@ Envelope::init(
   envdt[0] = 1.0;
 
   currentpoint = 1; // the envelope starts from 1
-  m_key_released = FALSE;
+  m_key_released = false;
   t = 0.0;
-  m_finished = FALSE;
+  m_finished = false;
   inct = envdt[1];
   envoutval = 0.0;
 }
@@ -92,7 +92,7 @@ Envelope::relasekey()
     return;
   }
 
-  m_key_released = TRUE;
+  m_key_released = true;
 
   if (m_forced_release)
   {
@@ -138,12 +138,12 @@ Envelope::envout()
     if (t >= 1.0)
     {
       currentpoint = envsustain + 2;
-      m_forced_release = FALSE;
+      m_forced_release = false;
       t = 0.0;
       inct = envdt[currentpoint];
       if (currentpoint >= envpoints || envsustain < 0)
       {
-        m_finished = TRUE;
+        m_finished = true;
       }
     }
 
@@ -165,7 +165,7 @@ Envelope::envout()
   {
     if (currentpoint >= envpoints - 1)
     {
-      m_finished = TRUE;
+      m_finished = true;
     }
     else
     {
@@ -230,7 +230,7 @@ Envelope::envout_dB()
   return out;
 }
 
-BOOL
+bool
 Envelope::finished()
 {
   return m_finished;

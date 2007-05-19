@@ -30,7 +30,7 @@ extern "C" {
 
 typedef void * zyn_addsynth_handle;
 
-BOOL
+bool
 zyn_addsynth_create(
   zyn_addsynth_handle * handle_ptr);
 
@@ -140,7 +140,7 @@ zyn_addsynth_set_int_parameter(
   unsigned int parameter,
   signed int value);
 
-BOOL
+bool
 zyn_addsynth_get_bool_parameter(
   zyn_addsynth_handle handle,
   unsigned int component,
@@ -151,7 +151,7 @@ zyn_addsynth_set_bool_parameter(
   zyn_addsynth_handle handle,
   unsigned int component,
   unsigned int parameter,
-  BOOL value);
+  bool value);
 
 unsigned int
 zyn_addsynth_get_shape_parameter(

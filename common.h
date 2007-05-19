@@ -50,10 +50,6 @@ struct FFTFREQS
   zyn_sample_type *s,*c;               /* sine and cosine components */
 };
 
-#define BOOL int
-#define TRUE 1
-#define FALSE 0
-
 #define ZYN_LFO_SHAPE_TYPE_SINE        0
 #define ZYN_LFO_SHAPE_TYPE_TRIANGLE    1
 #define ZYN_LFO_SHAPE_TYPE_SQUARE      2

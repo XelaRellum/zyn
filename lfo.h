@@ -60,9 +60,9 @@ private:
 
   float m_lfointensity;
 
-  BOOL m_depth_randomness_enabled;
+  bool m_depth_randomness_enabled;
   float m_depth_randomness;
-  BOOL m_frequency_randomness_enabled;
+  bool m_frequency_randomness_enabled;
   float m_frequency_randomness;
 
   float m_delay;

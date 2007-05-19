@@ -36,7 +36,7 @@ public:
   float envout();
   float envout_dB();
 
-  BOOL finished();               // returns whether envelope has finished or not
+  bool finished();               // returns whether envelope has finished or not
 
 private:
   int envpoints;
@@ -44,12 +44,12 @@ private:
   float envdt[MAX_ENVELOPE_POINTS]; // millisecons
   float envval[MAX_ENVELOPE_POINTS]; // [0.0 .. 1.0]
   float m_stretch;
-  BOOL m_linear;
+  bool m_linear;
 
   int currentpoint;             // current envelope point (starts from 1)
-  BOOL m_forced_release;
-  BOOL m_key_released;          // whether the key was released or not
-  BOOL m_finished;              // whether envelope has finished or not
+  bool m_forced_release;
+  bool m_key_released;          // whether the key was released or not
+  bool m_finished;              // whether envelope has finished or not
   float t;                      // the time from the last point
   float inct;                   // the time increment
   float envoutval;              // used to do the forced release

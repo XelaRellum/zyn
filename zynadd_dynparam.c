@@ -20,6 +20,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #include "common.h"
 #include "lv2dynparam/lv2.h"
@@ -87,40 +88,40 @@ const char * g_shape_names[ZYN_LFO_SHAPES_COUNT];
 const char * g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPES_COUNT];
 const char * g_filter_type_names[ZYN_FILTER_TYPES_COUNT];
 
-BOOL
+bool
 zynadd_bool_parameter_changed(
   void * context,
-  BOOL value);
+  bool value);
 
-BOOL
+bool
 zynadd_float_parameter_changed(
   void * context,
   float value);
 
-BOOL
+bool
 zynadd_int_parameter_changed(
   void * context,
   signed int value);
 
-BOOL
+bool
 zynadd_shape_parameter_changed(
   void * context,
   const char * value,
   unsigned int value_index);
 
-BOOL
+bool
 zynadd_filter_type_parameter_changed(
   void * context,
   const char * value,
   unsigned int value_index);
 
-BOOL
+bool
 zynadd_analog_filter_type_parameter_changed(
   void * context,
   const char * value,
   unsigned int value_index);
 
-BOOL
+bool
 zynadd_appear_parameter(
   struct zynadd * zynadd_ptr,
   unsigned int parameter_index)
@@ -158,10 +159,10 @@ zynadd_appear_parameter(
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
-      return FALSE;
+      return false;
     }
 
-    return TRUE;
+    return true;
 
   case LV2DYNPARAM_PARAMETER_TYPE_FLOAT:
     if (!lv2dynparam_plugin_param_float_add(
@@ -179,10 +180,10 @@ zynadd_appear_parameter(
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
-      return FALSE;
+      return false;
     }
 
-    return TRUE;
+    return true;
 
   case LV2DYNPARAM_PARAMETER_TYPE_INT:
     if (!lv2dynparam_plugin_param_int_add(
@@ -200,10 +201,10 @@ zynadd_appear_parameter(
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
-      return FALSE;
+      return false;
     }
 
-    return TRUE;
+    return true;
 
   case LV2DYNPARAM_PARAMETER_TYPE_SHAPE:
     if (!lv2dynparam_plugin_param_enum_add(
@@ -218,10 +219,10 @@ zynadd_appear_parameter(
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
-      return FALSE;
+      return false;
     }
 
-    return TRUE;
+    return true;
   case LV2DYNPARAM_PARAMETER_TYPE_FILTER_TYPE:
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
@@ -235,10 +236,10 @@ zynadd_appear_parameter(
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
-      return FALSE;
+      return false;
     }
 
-    return TRUE;
+    return true;
   case LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE:
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
@@ -252,24 +253,24 @@ zynadd_appear_parameter(
           zynadd_ptr->parameters + parameter_index,
           &zynadd_ptr->parameters[parameter_index].lv2parameter))
     {
-      return FALSE;
+      return false;
     }
 
-    return TRUE;
+    return true;
   }
 
   assert(0);
-  return FALSE;
+  return false;
 }
 
 #define parameter_ptr ((struct zynadd_parameter *)context)
 
-BOOL
+bool
 zynadd_bool_parameter_changed(
   void * context,
-  BOOL value)
+  bool value)
 {
-  BOOL current_value;
+  bool current_value;
 
   if (parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
       parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
@@ -283,7 +284,7 @@ zynadd_bool_parameter_changed(
         (!current_value && !value))
     {
       /* value not changed */
-      return TRUE;
+      return true;
     }
 
     if ((parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER && value) ||
@@ -294,14 +295,14 @@ zynadd_bool_parameter_changed(
             parameter_ptr->synth_ptr->dynparams,
             parameter_ptr->synth_ptr->parameters[parameter_ptr->scope_specific].lv2parameter))
       {
-        return FALSE;
+        return false;
       }
     }
     else
     {
       if (!zynadd_appear_parameter(parameter_ptr->synth_ptr, parameter_ptr->scope_specific))
       {
-        return FALSE;
+        return false;
       }
     }
   }
@@ -312,10 +313,10 @@ zynadd_bool_parameter_changed(
     parameter_ptr->addsynth_parameter,
     value);
 
-  return TRUE;
+  return true;
 }
 
-BOOL
+bool
 zynadd_float_parameter_changed(
   void * context,
   float value)
@@ -326,10 +327,10 @@ zynadd_float_parameter_changed(
     parameter_ptr->addsynth_parameter,
     value);
 
-  return TRUE;
+  return true;
 }
 
-BOOL
+bool
 zynadd_shape_parameter_changed(
   void * context,
   const char * value,
@@ -340,34 +341,34 @@ zynadd_shape_parameter_changed(
     parameter_ptr->addsynth_component,
     value_index);
 
-  return TRUE;
+  return true;
 }
 
-BOOL
+bool
 zynadd_filter_type_parameter_changed(
   void * context,
   const char * value,
   unsigned int value_index)
 {
-  return TRUE;
+  return true;
 }
 
-BOOL
+bool
 zynadd_analog_filter_type_parameter_changed(
   void * context,
   const char * value,
   unsigned int value_index)
 {
-  return TRUE;
+  return true;
 }
 
-BOOL
+bool
 zynadd_int_parameter_changed(
   void * context,
   signed int value)
 {
 //  LOG_ERROR("int parameter changed to value %d", value);
-  return TRUE;
+  return true;
 }
 
 #undef parameter_ptr
@@ -722,10 +723,10 @@ void zynadd_map_initialise()
   }
 }
 
-BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
+bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
 {
   int i;
-  BOOL tmp_bool;
+  bool tmp_bool;
 
   if (!lv2dynparam_plugin_instantiate(
         (LV2_Handle)zynadd_ptr,
@@ -807,11 +808,11 @@ BOOL zynadd_dynparam_init(struct zynadd * zynadd_ptr)
     }
   }
 
-  return TRUE;
+  return true;
 
 fail_clean_dynparams:
   lv2dynparam_plugin_cleanup(zynadd_ptr->dynparams);
 
 fail:
-  return FALSE;
+  return false;
 }

@@ -67,7 +67,7 @@ ADnote::ADnote(
       2.0,
       m_bandwidth_detune_multiplier * pow(fabs(m_bandwidth_detune_multiplier), 0.2) * 5.0);
 
-  m_note_enabled = FALSE;
+  m_note_enabled = false;
 
   m_synth_ptr = synth_ptr;
 }
@@ -75,10 +75,10 @@ ADnote::ADnote(
 void
 ADnote::note_on(
   float panorama,
-  BOOL random_grouping,
+  bool random_grouping,
   REALTYPE freq,
   REALTYPE velocity,
-  BOOL portamento,
+  bool portamento,
   int midinote)
 {
   int voice_index;
@@ -86,7 +86,7 @@ ADnote::note_on(
 
   m_portamento = portamento;
   m_midinote = midinote;
-  m_note_enabled = TRUE;
+  m_note_enabled = true;
   m_basefreq = freq;
 
   if (velocity > 1.0)
@@ -109,7 +109,7 @@ ADnote::note_on(
 
   if (m_synth_ptr->GlobalPar.PPunchStrength != 0)
   {
-    m_punch_enabled = TRUE;
+    m_punch_enabled = true;
     m_punch_t = 1.0; //start from 1.0 and to 0.0
     m_punch_initial_value =
       ( (pow(10,1.5*m_synth_ptr->GlobalPar.PPunchStrength/127.0)-1.0)
@@ -120,7 +120,7 @@ ADnote::note_on(
   }
   else
   {
-    m_punch_enabled = FALSE;
+    m_punch_enabled = false;
   }
 
   for (voice_index=0;voice_index<NUM_VOICES;voice_index++)
@@ -133,11 +133,11 @@ ADnote::note_on(
     m_voices[voice_index].FMVoice=-1;
 
     if (m_synth_ptr->voices_params[voice_index].Enabled==0) {
-      m_voices[voice_index].enabled = FALSE;
+      m_voices[voice_index].enabled = false;
       continue; //the voice is disabled
     }
 
-    m_voices[voice_index].enabled = TRUE;
+    m_voices[voice_index].enabled = true;
     m_voices[voice_index].fixedfreq=m_synth_ptr->voices_params[voice_index].Pfixedfreq;
     m_voices[voice_index].fixedfreqET=m_synth_ptr->voices_params[voice_index].PfixedfreqET;
 
@@ -461,7 +461,7 @@ void ADnote::KillVoice(int nvoice)
     }
   }
 
-  m_voices[nvoice].enabled = FALSE;
+  m_voices[nvoice].enabled = false;
 }
 
 /*
@@ -487,7 +487,7 @@ ADnote::KillNote()
     }
   }
 
-  m_note_enabled = FALSE;
+  m_note_enabled = false;
 }
 
 ADnote::~ADnote(){
@@ -628,7 +628,7 @@ ADnote::computecurrentparameters()
     if (m_ctl->portamento.used == 0)
     {
       // the portamento has finished
-      m_portamento = FALSE;     // this note is no longer "portamented"
+      m_portamento = false;     // this note is no longer "portamented"
     }
   }
 
@@ -1214,7 +1214,7 @@ ADnote::noteout(
       m_punch_t -= m_punch_duration;
       if (m_punch_t < 0.0)
       {
-        m_punch_enabled = FALSE;
+        m_punch_enabled = false;
         break;
       }
     }
@@ -1286,7 +1286,7 @@ void ADnote::relasekey()
 /*
  * Check if the note is finished
  */
-BOOL
+bool
 ADnote::finished()
 {
   return !m_note_enabled;

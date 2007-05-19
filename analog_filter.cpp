@@ -62,14 +62,14 @@ AnalogFilter::init(
 
   cleanup();
 
-  m_first_time = FALSE;
+  m_first_time = false;
 
-  m_above_nq = FALSE;
-  m_old_above_nq = FALSE;
+  m_above_nq = false;
+  m_old_above_nq = false;
 
   setfreq_and_q(Ffreq, Fq);
 
-  m_first_time = TRUE;
+  m_first_time = true;
 
   m_d[0] = 0;                   // this is not used
   outgain = 1.0;
@@ -92,7 +92,7 @@ AnalogFilter::cleanup()
     m_y_old[i] = m_y[i];
   };
 
-  m_needs_interpolation = FALSE;
+  m_needs_interpolation = false;
 }
 
 void
@@ -395,7 +395,7 @@ void
 AnalogFilter::setfreq(float frequency)
 {
   float rap;
-  BOOL nyquist_thresh;
+  bool nyquist_thresh;
   int i;
 
   if (frequency < 0.1)
@@ -431,7 +431,7 @@ AnalogFilter::setfreq(float frequency)
 
     if (!m_first_time)
     {
-      m_needs_interpolation = TRUE;
+      m_needs_interpolation = true;
     }
   }
 
@@ -439,7 +439,7 @@ AnalogFilter::setfreq(float frequency)
 
   computefiltercoefs();
 
-  m_first_time = FALSE;
+  m_first_time = false;
 }
 
 void AnalogFilter::setfreq_and_q(float frequency, float q_factor)
@@ -555,7 +555,7 @@ void AnalogFilter::filterout(float *smp)
       smp[i] = m_interpolation_buffer[i] * (1.0 - x) + smp[i] * x;
     }
 
-    m_needs_interpolation = FALSE;
+    m_needs_interpolation = false;
   }
 
   for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)

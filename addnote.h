@@ -43,22 +43,22 @@ public:
   void
   note_on(
     float panorama,
-    BOOL random_grouping,
+    bool random_grouping,
     REALTYPE freq,
     REALTYPE velocity,
-    BOOL portamento,
+    bool portamento,
     int midinote);
 
   void noteout(REALTYPE *outl,REALTYPE *outr); 
   void relasekey();
-  BOOL finished();
+  bool finished();
 
 private:
   void setfreq(int nvoice,REALTYPE freq);
   void setfreqFM(int nvoice,REALTYPE freq);
   void computecurrentparameters();
 
-  void initparameters(BOOL random_grouping);
+  void initparameters(bool random_grouping);
 
   void KillVoice(int nvoice);
   void KillNote();
@@ -78,12 +78,12 @@ private:
 
 
   // GLOBALS
-  BOOL m_stereo;                // if the note is stereo (allows note Panning)
+  bool m_stereo;                // if the note is stereo (allows note Panning)
   int m_midinote;
   REALTYPE m_velocity;
   REALTYPE m_basefreq;
 
-  BOOL m_note_enabled;
+  bool m_note_enabled;
   Controller * m_ctl;
 
   /***********************************************************/
@@ -91,7 +91,7 @@ private:
   /***********************************************************/
   struct ADnoteVoice{
     /* If the voice is enabled */
-    BOOL enabled; 
+    bool enabled; 
 
     /* Voice Type (sound/noise)*/
     int noisetype;
@@ -203,7 +203,7 @@ private:
   char firsttick[NUM_VOICES];
     
   // whether note has portamento 
-  BOOL m_portamento;
+  bool m_portamento;
     
   //how the fine detunes are made bigger or smaller
   REALTYPE m_bandwidth_detune_multiplier;
@@ -231,7 +231,7 @@ private:
 
   float m_panning;              // [ 0 .. 1 ]
 
-  BOOL m_punch_enabled;
+  bool m_punch_enabled;
   float m_punch_initial_value;
   float m_punch_duration;
   float m_punch_t;

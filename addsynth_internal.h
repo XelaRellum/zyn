@@ -227,16 +227,16 @@ struct zyn_addsynth
   unsigned char velsns;         // velocity sensing (amplitude velocity scale)
   zyn_sample_type oldfreq;      // this is used for portamento
 
-  BOOL random_panorama;         // whether panorama is random for each note
+  bool random_panorama;         // whether panorama is random for each note
   float panorama;               // -1.0 for left, 0.0 for center, 1.0 for right
 
   /* The instrument type - MONO/STEREO
      If the mode is MONO, the panning of voices are not used
-     Stereo=TRUE, Mono=FALSE. */
-  BOOL stereo;                  // stereo or mono
+     Stereo=true, Mono=false. */
+  bool stereo;                  // stereo or mono
 
   // How the Harmonic Amplitude is applied to voices that use the same oscillator
-  BOOL random_grouping;
+  bool random_grouping;
 
   // Amplitude LFO parameters
   struct zyn_lfo_parameters amplitude_lfo_params;

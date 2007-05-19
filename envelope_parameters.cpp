@@ -40,8 +40,8 @@ EnvelopeParams::EnvelopeParams()
   Penvsustain = 1;
   Penvpoints = 1;
   m_stretch = 64;
-  m_forced_release = TRUE;
-  m_linear = FALSE;
+  m_forced_release = true;
+  m_linear = false;
 
   m_attack_duration_index = -1;
   m_decay_duration_index = -1;
@@ -99,12 +99,12 @@ void EnvelopeParams::set_point_value(int i, unsigned char value)
 void
 EnvelopeParams::init_adsr(
   unsigned char stretch,
-  BOOL forced_release,
+  bool forced_release,
   char attack_duration,
   char decay_duration,
   char sustain_value,
   char release_duration,
-  BOOL linear)
+  bool linear)
 {
   m_stretch = stretch;
   m_forced_release = forced_release;        
@@ -136,7 +136,7 @@ EnvelopeParams::init_adsr(
 void
 EnvelopeParams::init_asr(
   unsigned char stretch,
-  BOOL forced_release,
+  bool forced_release,
   char attack_value,
   char attack_duration,
   char release_value,
@@ -167,7 +167,7 @@ EnvelopeParams::init_asr(
 void
 EnvelopeParams::init_adsr_filter(
   unsigned char stretch,
-  BOOL forced_release,
+  bool forced_release,
   char attack_value,
   char attack_duration,
   char decay_value,
@@ -206,7 +206,7 @@ EnvelopeParams::init_adsr_filter(
 void
 EnvelopeParams::init_asr_bw(
   unsigned char stretch,
-  BOOL forced_release,
+  bool forced_release,
   char attack_value,
   char attack_duration,
   char release_value,

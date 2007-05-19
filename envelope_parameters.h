@@ -41,17 +41,17 @@ public:
   void
   init_adsr(
     unsigned char stretch,
-    BOOL forced_release,
+    bool forced_release,
     char attack_duration,
     char decay_duration,
     char sustain_value,
     char release_duration,
-    BOOL linear);
+    bool linear);
 
   void
   init_asr(
     unsigned char stretch,
-    BOOL forced_release,
+    bool forced_release,
     char attack_value,
     char attack_duration,
     char release_value,
@@ -60,7 +60,7 @@ public:
   void
   init_adsr_filter(
     unsigned char stretch,
-    BOOL forced_release,
+    bool forced_release,
     char attack_value,
     char attack_duration,
     char decay_value,
@@ -71,7 +71,7 @@ public:
   void
   init_asr_bw(
     unsigned char stretch,
-    BOOL forced_release,
+    bool forced_release,
     char attack_value,
     char attack_duration,
     char release_value,
@@ -109,9 +109,9 @@ public:
   // 127 = 200% = envelope is stretched about 4 times/octave
   unsigned char m_stretch;
 
-  BOOL m_forced_release;
+  bool m_forced_release;
 
-  BOOL m_linear; // if the amplitude envelope is linear
+  bool m_linear; // if the amplitude envelope is linear
 
   unsigned int m_mode;          // one of ZYN_ENVELOPE_MODE_XXX
 

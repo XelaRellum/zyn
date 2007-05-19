@@ -81,10 +81,10 @@ private:
   float m_c_old[3];
   float m_d_old[3];
 
-  BOOL m_needs_interpolation;
-  BOOL m_first_time;
-  BOOL m_above_nq;              // whether the frequency is above the nyquist
-  BOOL m_old_above_nq;          // whether last time was above nyquist (used to see if it needs interpolation)
+  bool m_needs_interpolation;
+  bool m_first_time;
+  bool m_above_nq;              // whether the frequency is above the nyquist
+  bool m_old_above_nq;          // whether last time was above nyquist (used to see if it needs interpolation)
 
   float m_interpolation_buffer[SOUND_BUFFER_SIZE];
 };

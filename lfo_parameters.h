@@ -25,11 +25,11 @@ struct zyn_lfo_parameters
 {
   float frequency;              /* 0.0 .. 1.0 */
   float depth;                  /* 0.0 .. 1.0 */
-  BOOL random_start_phase;
+  bool random_start_phase;
   float start_phase;            /* 0.0 .. 1.0 */
-  BOOL depth_randomness_enabled;
+  bool depth_randomness_enabled;
   float depth_randomness;       /* 0.0 .. 1.0 */
-  BOOL frequency_randomness_enabled;
+  bool frequency_randomness_enabled;
   float frequency_randomness;   /* 0.0 .. 1.0 */
   float delay;                  /* 0.0 .. 4.0, seconds */
   float stretch;                /* -1 .. 1, how the LFO is "stretched" according the note frequency (0=no stretch) */

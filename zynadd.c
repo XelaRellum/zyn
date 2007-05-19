@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "common.h"
 #include "lv2dynparam/lv2.h"
