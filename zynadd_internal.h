@@ -163,7 +163,7 @@ struct zynadd_parameter
 
 struct zynadd
 {
-  uint32_t sample_rate;
+  double sample_rate;
   char * bundle_path;
   void ** ports;
 

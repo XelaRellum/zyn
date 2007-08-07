@@ -24,7 +24,7 @@
 LV2_Handle
 zynadd_instantiate(
   const LV2_Descriptor * descriptor,
-  uint32_t sample_rate,
+  double sample_rate,
   const char * bundle_path,
   const LV2_Host_Feature * const * host_features);
 

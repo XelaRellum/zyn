@@ -45,7 +45,7 @@
 LV2_Handle
 zynadd_instantiate(
   const LV2_Descriptor * descriptor,
-  uint32_t sample_rate,
+  double sample_rate,
   const char * bundle_path,
   const LV2_Host_Feature * const * host_features)
 {
@@ -53,7 +53,7 @@ zynadd_instantiate(
   const LV2_Host_Feature * feature_ptr;
 
   LOG_DEBUG("zynadd_create_plugin_instance() called.");
-  LOG_DEBUG("sample_rate = %u", (unsigned int)sample_rate);
+  LOG_DEBUG("sample_rate = %f", sample_rate);
   LOG_DEBUG("bundle_path = \"%s\"", bundle_path);
 
 //  if (host_features != NULL && *host_features != NULL)
