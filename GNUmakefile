@@ -17,9 +17,9 @@ PLUGIN_NAME = zynadd
 VERSION = 0
 LIBRARIES = -DPIC -Wall $(strip $(shell pkg-config --libs fftw3 lv2dynparamplugin-1))
 
-CC = gcc -c -Wall -Werror
+CC = gcc -c
 CXX = g++ -c
-CFLAGS := -g -fPIC -DPIC -Wall $(strip $(shell pkg-config --cflags fftw3 lv2dynparamplugin-1))
+CFLAGS := -g -fPIC -DPIC -Wall -Werror $(strip $(shell pkg-config --cflags fftw3 lv2dynparamplugin-1))
 
 GENDEP_SED_EXPR = "s/^\\(.*\\)\\.o *: /$(subst /,\/,$(@:.d=.o)) $(subst /,\/,$@) : /g"
 GENDEP_C = set -e; $(GCC_PREFIX)gcc -MM $(CFLAGS) $< | sed $(GENDEP_SED_EXPR) > $@; [ -s $@ ] || rm -f $@

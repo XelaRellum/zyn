@@ -39,6 +39,7 @@
 #include "filter.h"
 #include "envelope.h"
 #include "addsynth_internal.h"
+#include "addsynth_voice.h"
 #include "addnote.h"
 
 ADnote::ADnote(
@@ -48,6 +49,28 @@ ADnote::ADnote(
   m_tmpwave = new REALTYPE [SOUND_BUFFER_SIZE];
   m_bypassl = new REALTYPE [SOUND_BUFFER_SIZE];
   m_bypassr = new REALTYPE [SOUND_BUFFER_SIZE];
+
+  m_voices_ptr = (struct addsynth_voice *)malloc(sizeof(struct addsynth_voice) * synth_ptr->voices_count);
+
+  m_osc_pos_hi_ptr = (int *)malloc(sizeof(int) * synth_ptr->voices_count);
+  m_osc_pos_lo_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
+  m_osc_pos_hi_FM_ptr = (unsigned short int *)malloc(sizeof(unsigned short int) * synth_ptr->voices_count);
+  m_osc_pos_lo_FM_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
+
+  m_osc_freq_hi_ptr = (int *)malloc(sizeof(int) * synth_ptr->voices_count);
+  m_osc_freq_lo_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
+  m_osc_freq_hi_FM_ptr = (unsigned short int *)malloc(sizeof(unsigned short int) * synth_ptr->voices_count);
+  m_osc_freq_lo_FM_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
+
+  m_FM_old_smp_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
+
+  m_first_tick_ptr = (bool *)malloc(sizeof(bool) * synth_ptr->voices_count);
+
+  m_old_amplitude_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
+  m_new_amplitude_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
+
+  m_FM_old_amplitude_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
+  m_FM_new_amplitude_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
 
   m_ctl = ctl;
 
@@ -81,8 +104,9 @@ ADnote::note_on(
   bool portamento,
   int midinote)
 {
-  int voice_index;
-  int i;
+  unsigned int voice_index;
+  unsigned int i;
+  int tmp[m_synth_ptr->voices_count];
 
   m_portamento = portamento;
   m_midinote = midinote;
@@ -123,117 +147,120 @@ ADnote::note_on(
     m_punch_enabled = false;
   }
 
-  for (voice_index=0;voice_index<NUM_VOICES;voice_index++)
+  for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
-    m_synth_ptr->voices_params[voice_index].OscilSmp->newrandseed(rand());
-    m_voices[voice_index].OscilSmp=NULL;
-    m_voices[voice_index].FMSmp=NULL;
-    m_voices[voice_index].VoiceOut=NULL;
+    m_synth_ptr->voices_params_ptr[voice_index].OscilSmp->newrandseed(rand());
+    m_voices_ptr[voice_index].OscilSmp=NULL;
+    m_voices_ptr[voice_index].FMSmp=NULL;
+    m_voices_ptr[voice_index].VoiceOut=NULL;
 
-    m_voices[voice_index].FMVoice=-1;
+    m_voices_ptr[voice_index].FMVoice=-1;
 
-    if (m_synth_ptr->voices_params[voice_index].Enabled==0) {
-      m_voices[voice_index].enabled = false;
+    if (!m_synth_ptr->voices_params_ptr[voice_index].enabled)
+    {
+      m_voices_ptr[voice_index].enabled = false;
       continue; //the voice is disabled
     }
 
-    m_voices[voice_index].enabled = true;
-    m_voices[voice_index].fixedfreq=m_synth_ptr->voices_params[voice_index].Pfixedfreq;
-    m_voices[voice_index].fixedfreqET=m_synth_ptr->voices_params[voice_index].PfixedfreqET;
+    m_voices_ptr[voice_index].enabled = true;
+    m_voices_ptr[voice_index].fixedfreq = m_synth_ptr->voices_params_ptr[voice_index].Pfixedfreq;
+    m_voices_ptr[voice_index].fixedfreqET = m_synth_ptr->voices_params_ptr[voice_index].PfixedfreqET;
 
     // use the Globalpars.detunetype if the detunetype is 0
-    if (m_synth_ptr->voices_params[voice_index].PDetuneType != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PDetuneType != 0)
     {
       // coarse detune
-      m_voices[voice_index].Detune =
+      m_voices_ptr[voice_index].Detune =
         getdetune(
-          m_synth_ptr->voices_params[voice_index].PDetuneType,
-          m_synth_ptr->voices_params[voice_index].PCoarseDetune,
+          m_synth_ptr->voices_params_ptr[voice_index].PDetuneType,
+          m_synth_ptr->voices_params_ptr[voice_index].PCoarseDetune,
           8192);
 
       // fine detune
-      m_voices[voice_index].FineDetune =
+      m_voices_ptr[voice_index].FineDetune =
         getdetune(
-          m_synth_ptr->voices_params[voice_index].PDetuneType,
+          m_synth_ptr->voices_params_ptr[voice_index].PDetuneType,
           0,
-          m_synth_ptr->voices_params[voice_index].PDetune);
+          m_synth_ptr->voices_params_ptr[voice_index].PDetune);
     }
     else
     {
-      m_voices[voice_index].Detune=getdetune(m_synth_ptr->GlobalPar.PDetuneType
-                                            ,m_synth_ptr->voices_params[voice_index].PCoarseDetune,8192);//coarse detune
-      m_voices[voice_index].FineDetune=getdetune(m_synth_ptr->GlobalPar.PDetuneType
-                                                ,0,m_synth_ptr->voices_params[voice_index].PDetune);//fine detune
+      m_voices_ptr[voice_index].Detune=getdetune(m_synth_ptr->GlobalPar.PDetuneType
+                                            ,m_synth_ptr->voices_params_ptr[voice_index].PCoarseDetune,8192);//coarse detune
+      m_voices_ptr[voice_index].FineDetune=getdetune(m_synth_ptr->GlobalPar.PDetuneType
+                                                ,0,m_synth_ptr->voices_params_ptr[voice_index].PDetune);//fine detune
     }
 
-    if (m_synth_ptr->voices_params[voice_index].PFMDetuneType!=0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFMDetuneType!=0)
     {
-      m_voices[voice_index].FMDetune = 
+      m_voices_ptr[voice_index].FMDetune = 
         getdetune(
-          m_synth_ptr->voices_params[voice_index].PFMDetuneType,
-          m_synth_ptr->voices_params[voice_index].PFMCoarseDetune,
-          m_synth_ptr->voices_params[voice_index].PFMDetune);
+          m_synth_ptr->voices_params_ptr[voice_index].PFMDetuneType,
+          m_synth_ptr->voices_params_ptr[voice_index].PFMCoarseDetune,
+          m_synth_ptr->voices_params_ptr[voice_index].PFMDetune);
     }
     else
     {
-      m_voices[voice_index].FMDetune = getdetune(
+      m_voices_ptr[voice_index].FMDetune = getdetune(
         m_synth_ptr->GlobalPar.PDetuneType,
-        m_synth_ptr->voices_params[voice_index].PFMCoarseDetune,
-        m_synth_ptr->voices_params[voice_index].PFMDetune);
+        m_synth_ptr->voices_params_ptr[voice_index].PFMCoarseDetune,
+        m_synth_ptr->voices_params_ptr[voice_index].PFMDetune);
     }
 
-    oscposhi[voice_index]=0;oscposlo[voice_index]=0.0;
-    oscposhiFM[voice_index]=0;oscposloFM[voice_index]=0.0;
+    m_osc_pos_hi_ptr[voice_index] = 0;
+    m_osc_pos_lo_ptr[voice_index] = 0.0;
+    m_osc_pos_hi_FM_ptr[voice_index] = 0;
+    m_osc_pos_lo_FM_ptr[voice_index] = 0.0;
 
-    m_voices[voice_index].OscilSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];//the extra points contains the first point
+    m_voices_ptr[voice_index].OscilSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];//the extra points contains the first point
 
     //Get the voice's oscil or external's voice oscil
     int vc=voice_index;
 
-    if (m_synth_ptr->voices_params[voice_index].Pextoscil != -1)
+    if (m_synth_ptr->voices_params_ptr[voice_index].Pextoscil != -1)
     {
-      vc = m_synth_ptr->voices_params[voice_index].Pextoscil;
+      vc = m_synth_ptr->voices_params_ptr[voice_index].Pextoscil;
     }
 
     if (!random_grouping)
     {
-      m_synth_ptr->voices_params[vc].OscilSmp->newrandseed(rand());
+      m_synth_ptr->voices_params_ptr[vc].OscilSmp->newrandseed(rand());
     }
 
-    oscposhi[voice_index] = m_synth_ptr->voices_params[vc].OscilSmp->get(
-      m_voices[voice_index].OscilSmp,
+    m_osc_pos_hi_ptr[voice_index] = m_synth_ptr->voices_params_ptr[vc].OscilSmp->get(
+      m_voices_ptr[voice_index].OscilSmp,
       getvoicebasefreq(voice_index),
-      m_synth_ptr->voices_params[voice_index].Presonance);
+      m_synth_ptr->voices_params_ptr[voice_index].Presonance);
 
     //I store the first elments to the last position for speedups
-    for (i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) m_voices[voice_index].OscilSmp[OSCIL_SIZE+i]=m_voices[voice_index].OscilSmp[i];
+    for (i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) m_voices_ptr[voice_index].OscilSmp[OSCIL_SIZE+i]=m_voices_ptr[voice_index].OscilSmp[i];
 
-    oscposhi[voice_index]+=(int)((m_synth_ptr->voices_params[voice_index].Poscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
-    oscposhi[voice_index]%=OSCIL_SIZE;
+    m_osc_pos_hi_ptr[voice_index] += (int)((m_synth_ptr->voices_params_ptr[voice_index].Poscilphase - 64.0) / 128.0 * OSCIL_SIZE + OSCIL_SIZE * 4);
+    m_osc_pos_hi_ptr[voice_index] %= OSCIL_SIZE;
 
-    m_voices[voice_index].FilterCenterPitch=m_synth_ptr->voices_params[voice_index].m_filter_params.getfreq();
-    m_voices[voice_index].filterbypass=m_synth_ptr->voices_params[voice_index].Pfilterbypass;
+    m_voices_ptr[voice_index].FilterCenterPitch=m_synth_ptr->voices_params_ptr[voice_index].m_filter_params.getfreq();
+    m_voices_ptr[voice_index].filterbypass=m_synth_ptr->voices_params_ptr[voice_index].Pfilterbypass;
 
-    m_voices[voice_index].fm_type = m_synth_ptr->voices_params[voice_index].fm_type;
+    m_voices_ptr[voice_index].fm_type = m_synth_ptr->voices_params_ptr[voice_index].fm_type;
 
-    m_voices[voice_index].FMVoice=m_synth_ptr->voices_params[voice_index].PFMVoice;
+    m_voices_ptr[voice_index].FMVoice=m_synth_ptr->voices_params_ptr[voice_index].PFMVoice;
 
     //Compute the Voice's modulator volume (incl. damping)
-    REALTYPE fmvoldamp=pow(440.0/getvoicebasefreq(voice_index),m_synth_ptr->voices_params[voice_index].PFMVolumeDamp/64.0-1.0);
-    switch (m_voices[voice_index].fm_type)
+    REALTYPE fmvoldamp=pow(440.0/getvoicebasefreq(voice_index),m_synth_ptr->voices_params_ptr[voice_index].PFMVolumeDamp/64.0-1.0);
+    switch (m_voices_ptr[voice_index].fm_type)
     {
     case ZYN_FM_TYPE_PHASE_MOD:
-      fmvoldamp = pow(440.0/getvoicebasefreq(voice_index),m_synth_ptr->voices_params[voice_index].PFMVolumeDamp/64.0);
-      m_voices[voice_index].FMVolume = (exp(m_synth_ptr->voices_params[voice_index].PFMVolume/127.0*FM_AMP_MULTIPLIER)-1.0)*fmvoldamp*4.0;
+      fmvoldamp = pow(440.0/getvoicebasefreq(voice_index),m_synth_ptr->voices_params_ptr[voice_index].PFMVolumeDamp/64.0);
+      m_voices_ptr[voice_index].FMVolume = (exp(m_synth_ptr->voices_params_ptr[voice_index].PFMVolume/127.0*FM_AMP_MULTIPLIER)-1.0)*fmvoldamp*4.0;
       break;
     case ZYN_FM_TYPE_FREQ_MOD:
-      m_voices[voice_index].FMVolume = exp(m_synth_ptr->voices_params[voice_index].PFMVolume / 127.0 * FM_AMP_MULTIPLIER);
-      m_voices[voice_index].FMVolume -= 1.0;
-      m_voices[voice_index].FMVolume *= fmvoldamp * 4.0;
+      m_voices_ptr[voice_index].FMVolume = exp(m_synth_ptr->voices_params_ptr[voice_index].PFMVolume / 127.0 * FM_AMP_MULTIPLIER);
+      m_voices_ptr[voice_index].FMVolume -= 1.0;
+      m_voices_ptr[voice_index].FMVolume *= fmvoldamp * 4.0;
       break;
 #if 0                           // ???????????
     case ZYN_FM_TYPE_PITCH_MOD:
-      m_voices[voice_index].FMVolume=(m_synth_ptr->voices_params[voice_index].PFMVolume/127.0*8.0)*fmvoldamp;
+      m_voices_ptr[voice_index].FMVolume=(m_synth_ptr->voices_params_ptr[voice_index].PFMVolume/127.0*8.0)*fmvoldamp;
       break;
 #endif
     default:
@@ -242,19 +269,17 @@ ADnote::note_on(
         fmvoldamp = 1.0;
       }
 
-      m_voices[voice_index].FMVolume = m_synth_ptr->voices_params[voice_index].PFMVolume / 127.0 * fmvoldamp;
+      m_voices_ptr[voice_index].FMVolume = m_synth_ptr->voices_params_ptr[voice_index].PFMVolume / 127.0 * fmvoldamp;
     }
 
     //Voice's modulator velocity sensing
-    m_voices[voice_index].FMVolume*=VelF(m_velocity,m_synth_ptr->voices_params[voice_index].PFMVelocityScaleFunction);
+    m_voices_ptr[voice_index].FMVolume*=VelF(m_velocity,m_synth_ptr->voices_params_ptr[voice_index].PFMVelocityScaleFunction);
 
-    FMoldsmp[voice_index]=0.0;//this is for FM (integration)
+    m_FM_old_smp_ptr[voice_index] = 0.0; // this is for FM (integration)
 
-    firsttick[voice_index]=1;
-    m_voices[voice_index].DelayTicks=(int)((exp(m_synth_ptr->voices_params[voice_index].PDelay/127.0*log(50.0))-1.0)/SOUND_BUFFER_SIZE/10.0*SAMPLE_RATE);
+    m_first_tick_ptr[voice_index] = true;
+    m_voices_ptr[voice_index].DelayTicks=(int)((exp(m_synth_ptr->voices_params_ptr[voice_index].PDelay/127.0*log(50.0))-1.0)/SOUND_BUFFER_SIZE/10.0*SAMPLE_RATE);
   }
-
-  int nvoice,tmp[NUM_VOICES];
 
   // Global Parameters
   m_frequency_envelope.init(&m_synth_ptr->m_frequency_envelope_params, m_basefreq);
@@ -295,146 +320,153 @@ ADnote::note_on(
   m_filter_frequency_tracking = m_synth_ptr->m_filter_params.getfreqtracking(m_basefreq);
 
   // Forbids the Modulation Voice to be greater or equal than voice
-  for (i=0;i<NUM_VOICES;i++) if (m_voices[i].FMVoice>=i) m_voices[i].FMVoice=-1;
+  for (i = 0 ; i < m_synth_ptr->voices_count ; i++)
+  {
+    if (m_voices_ptr[i].FMVoice >= (int)i)
+    {
+      m_voices_ptr[i].FMVoice = -1;
+    }
+  }
 
   // Voice Parameter init
-  for (nvoice=0;nvoice<NUM_VOICES;nvoice++){
-    if (!m_voices[nvoice].enabled) continue;
+  for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
+  {
+    if (!m_voices_ptr[voice_index].enabled) continue;
 
-    m_voices[nvoice].noisetype=m_synth_ptr->voices_params[nvoice].Type;
+    m_voices_ptr[voice_index].noisetype=m_synth_ptr->voices_params_ptr[voice_index].Type;
     /* Voice Amplitude Parameters Init */
-    m_voices[nvoice].Volume=pow(0.1,3.0*(1.0-m_synth_ptr->voices_params[nvoice].PVolume/127.0)) // -60 dB .. 0 dB
-      *VelF(m_velocity,m_synth_ptr->voices_params[nvoice].PAmpVelocityScaleFunction);//velocity
+    m_voices_ptr[voice_index].Volume=pow(0.1,3.0*(1.0-m_synth_ptr->voices_params_ptr[voice_index].PVolume/127.0)) // -60 dB .. 0 dB
+      *VelF(m_velocity,m_synth_ptr->voices_params_ptr[voice_index].PAmpVelocityScaleFunction);//velocity
 
-    if (m_synth_ptr->voices_params[nvoice].PVolumeminus!=0) m_voices[nvoice].Volume=-m_voices[nvoice].Volume;
+    if (m_synth_ptr->voices_params_ptr[voice_index].PVolumeminus!=0) m_voices_ptr[voice_index].Volume=-m_voices_ptr[voice_index].Volume;
 
-    if (m_synth_ptr->voices_params[nvoice].PPanning==0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PPanning==0)
     {
-      m_voices[nvoice].Panning = zyn_random(); // random panning
+      m_voices_ptr[voice_index].Panning = zyn_random(); // random panning
     }
     else
     {
-      m_voices[nvoice].Panning = m_synth_ptr->voices_params[nvoice].PPanning/128.0;
+      m_voices_ptr[voice_index].Panning = m_synth_ptr->voices_params_ptr[voice_index].PPanning/128.0;
     }
 
-    newamplitude[nvoice]=1.0;
-    if (m_synth_ptr->voices_params[nvoice].PAmpEnvelopeEnabled != 0)
+    m_new_amplitude_ptr[voice_index] = 1.0;
+    if (m_synth_ptr->voices_params_ptr[voice_index].PAmpEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_amplitude_envelope.init(&m_synth_ptr->voices_params[nvoice].m_amplitude_envelope_params, m_basefreq);
-      m_voices[nvoice].m_amplitude_envelope.envout_dB(); // discard the first envelope sample
-      newamplitude[nvoice] *= m_voices[nvoice].m_amplitude_envelope.envout_dB();
+      m_voices_ptr[voice_index].m_amplitude_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_amplitude_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_amplitude_envelope.envout_dB(); // discard the first envelope sample
+      m_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_amplitude_envelope.envout_dB();
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PAmpLfoEnabled != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PAmpLfoEnabled != 0)
     {
-      m_voices[nvoice].m_amplitude_lfo.init(
+      m_voices_ptr[voice_index].m_amplitude_lfo.init(
         m_basefreq,
-        &m_synth_ptr->voices_params[nvoice].amplitude_lfo_params,
+        &m_synth_ptr->voices_params_ptr[voice_index].amplitude_lfo_params,
         ZYN_LFO_TYPE_AMPLITUDE);
 
-      newamplitude[nvoice] *= m_voices[nvoice].m_amplitude_lfo.amplfoout();
+      m_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_amplitude_lfo.amplfoout();
     }
 
     /* Voice Frequency Parameters Init */
-    if (m_synth_ptr->voices_params[nvoice].PFreqEnvelopeEnabled != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFreqEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_frequency_envelope.init(&m_synth_ptr->voices_params[nvoice].m_frequency_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_frequency_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_frequency_envelope_params, m_basefreq);
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PFreqLfoEnabled != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFreqLfoEnabled != 0)
     {
-      m_voices[nvoice].m_frequency_lfo.init(
+      m_voices_ptr[voice_index].m_frequency_lfo.init(
         m_basefreq,
-        &m_synth_ptr->voices_params[nvoice].frequency_lfo_params,
+        &m_synth_ptr->voices_params_ptr[voice_index].frequency_lfo_params,
         ZYN_LFO_TYPE_FREQUENCY);
     }
 
     /* Voice Filter Parameters Init */
-    if (m_synth_ptr->voices_params[nvoice].PFilterEnabled != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFilterEnabled != 0)
     {
-      m_voices[nvoice].m_voice_filter.init(&m_synth_ptr->voices_params[nvoice].m_filter_params);
+      m_voices_ptr[voice_index].m_voice_filter.init(&m_synth_ptr->voices_params_ptr[voice_index].m_filter_params);
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PFilterEnvelopeEnabled != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFilterEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_filter_envelope.init(&m_synth_ptr->voices_params[nvoice].m_filter_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_filter_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_filter_envelope_params, m_basefreq);
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PFilterLfoEnabled != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFilterLfoEnabled != 0)
     {
-      m_voices[nvoice].m_filter_lfo.init(
+      m_voices_ptr[voice_index].m_filter_lfo.init(
         m_basefreq,
-        &m_synth_ptr->voices_params[nvoice].filter_lfo_params,
+        &m_synth_ptr->voices_params_ptr[voice_index].filter_lfo_params,
         ZYN_LFO_TYPE_FILTER);
     }
 
-    m_voices[nvoice].FilterFreqTracking = m_synth_ptr->voices_params[nvoice].m_filter_params.getfreqtracking(m_basefreq);
+    m_voices_ptr[voice_index].FilterFreqTracking = m_synth_ptr->voices_params_ptr[voice_index].m_filter_params.getfreqtracking(m_basefreq);
 
     /* Voice Modulation Parameters Init */
-    if (m_voices[nvoice].fm_type != ZYN_FM_TYPE_NONE && m_voices[nvoice].FMVoice < 0)
+    if (m_voices_ptr[voice_index].fm_type != ZYN_FM_TYPE_NONE && m_voices_ptr[voice_index].FMVoice < 0)
     {
-      m_synth_ptr->voices_params[nvoice].FMSmp->newrandseed(rand());
-      m_voices[nvoice].FMSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];
+      m_synth_ptr->voices_params_ptr[voice_index].FMSmp->newrandseed(rand());
+      m_voices_ptr[voice_index].FMSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];
 
       //Perform Anti-aliasing only on MORPH or RING MODULATION
 
-      int vc=nvoice;
-      if (m_synth_ptr->voices_params[nvoice].PextFMoscil!=-1) vc=m_synth_ptr->voices_params[nvoice].PextFMoscil;
+      int vc=voice_index;
+      if (m_synth_ptr->voices_params_ptr[voice_index].PextFMoscil!=-1) vc=m_synth_ptr->voices_params_ptr[voice_index].PextFMoscil;
 
       REALTYPE tmp=1.0;
-      if ((m_synth_ptr->voices_params[vc].FMSmp->Padaptiveharmonics != 0) ||
-          (m_voices[nvoice].fm_type == ZYN_FM_TYPE_MORPH) ||
-          (m_voices[nvoice].fm_type == ZYN_FM_TYPE_RING_MOD))
+      if ((m_synth_ptr->voices_params_ptr[vc].FMSmp->Padaptiveharmonics != 0) ||
+          (m_voices_ptr[voice_index].fm_type == ZYN_FM_TYPE_MORPH) ||
+          (m_voices_ptr[voice_index].fm_type == ZYN_FM_TYPE_RING_MOD))
       {
-        tmp = getFMvoicebasefreq(nvoice);
+        tmp = getFMvoicebasefreq(voice_index);
       }
 
       if (!random_grouping)
       {
-        m_synth_ptr->voices_params[vc].FMSmp->newrandseed(rand());
+        m_synth_ptr->voices_params_ptr[vc].FMSmp->newrandseed(rand());
       }
 
-      oscposhiFM[nvoice]=(oscposhi[nvoice]+m_synth_ptr->voices_params[vc].FMSmp->get(m_voices[nvoice].FMSmp,tmp)) % OSCIL_SIZE;
-      for (int i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) m_voices[nvoice].FMSmp[OSCIL_SIZE+i]=m_voices[nvoice].FMSmp[i];
-      oscposhiFM[nvoice]+=(int)((m_synth_ptr->voices_params[nvoice].PFMoscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
-      oscposhiFM[nvoice]%=OSCIL_SIZE;
+      m_osc_pos_hi_FM_ptr[voice_index]=(m_osc_pos_hi_ptr[voice_index]+m_synth_ptr->voices_params_ptr[vc].FMSmp->get(m_voices_ptr[voice_index].FMSmp,tmp)) % OSCIL_SIZE;
+      for (int i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) m_voices_ptr[voice_index].FMSmp[OSCIL_SIZE+i]=m_voices_ptr[voice_index].FMSmp[i];
+      m_osc_pos_hi_FM_ptr[voice_index]+=(int)((m_synth_ptr->voices_params_ptr[voice_index].PFMoscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
+      m_osc_pos_hi_FM_ptr[voice_index]%=OSCIL_SIZE;
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PFMFreqEnvelopeEnabled != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFMFreqEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_fm_frequency_envelope.init(&m_synth_ptr->voices_params[nvoice].m_fm_frequency_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_fm_frequency_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_fm_frequency_envelope_params, m_basefreq);
     }
 
-    FMnewamplitude[nvoice] = m_voices[nvoice].FMVolume*m_ctl->fmamp.relamp;
+    m_FM_new_amplitude_ptr[voice_index] = m_voices_ptr[voice_index].FMVolume*m_ctl->fmamp.relamp;
 
-    if (m_synth_ptr->voices_params[nvoice].PFMAmpEnvelopeEnabled != 0)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFMAmpEnvelopeEnabled != 0)
     {
-      m_voices[nvoice].m_fm_amplitude_envelope.init(&m_synth_ptr->voices_params[nvoice].m_fm_amplitude_envelope_params, m_basefreq);
-      FMnewamplitude[nvoice] *= m_voices[nvoice].m_fm_amplitude_envelope.envout_dB();
+      m_voices_ptr[voice_index].m_fm_amplitude_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_fm_amplitude_envelope_params, m_basefreq);
+      m_FM_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_fm_amplitude_envelope.envout_dB();
     }
   }
 
-  for (nvoice = 0 ; nvoice < NUM_VOICES ; nvoice++)
+  for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
-    for (i = nvoice + 1 ; i < NUM_VOICES ; i++)
+    for (i = voice_index + 1 ; i < m_synth_ptr->voices_count ; i++)
     {
       tmp[i] = 0;
     }
 
-    for (i = nvoice + 1 ; i < NUM_VOICES ; i++)
+    for (i = voice_index + 1 ; i < m_synth_ptr->voices_count ; i++)
     {
-      if (m_voices[i].FMVoice == nvoice && tmp[i] == 0)
+      if (m_voices_ptr[i].FMVoice == (int)voice_index && tmp[i] == 0)
       {
-        m_voices[nvoice].VoiceOut = new REALTYPE[SOUND_BUFFER_SIZE];
+        m_voices_ptr[voice_index].VoiceOut = new REALTYPE[SOUND_BUFFER_SIZE];
         tmp[i] = 1;
       }
     }
 
-    if (m_voices[nvoice].VoiceOut != NULL)
+    if (m_voices_ptr[voice_index].VoiceOut != NULL)
     {
       for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
       {
-        m_voices[nvoice].VoiceOut[i] = 0.0;
+        m_voices_ptr[voice_index].VoiceOut[i] = 0.0;
       }
     }
   }
@@ -443,25 +475,25 @@ ADnote::note_on(
 /*
  * Kill a voice of ADnote
  */
-void ADnote::KillVoice(int nvoice)
+void ADnote::KillVoice(unsigned int voice_index)
 {
   int i;
-  delete [] (m_voices[nvoice].OscilSmp);
+  delete [] (m_voices_ptr[voice_index].OscilSmp);
 
-  if ((m_voices[nvoice].fm_type != ZYN_FM_TYPE_NONE) && (m_voices[nvoice].FMVoice < 0))
+  if ((m_voices_ptr[voice_index].fm_type != ZYN_FM_TYPE_NONE) && (m_voices_ptr[voice_index].FMVoice < 0))
   {
-    delete m_voices[nvoice].FMSmp;
+    delete m_voices_ptr[voice_index].FMSmp;
   }
 
-  if (m_voices[nvoice].VoiceOut != NULL)
+  if (m_voices_ptr[voice_index].VoiceOut != NULL)
   {
     for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
     {
-      m_voices[nvoice].VoiceOut[i] = 0.0;//do not delete, yet: perhaps is used by another voice
+      m_voices_ptr[voice_index].VoiceOut[i] = 0.0;//do not delete, yet: perhaps is used by another voice
     }
   }
 
-  m_voices[nvoice].enabled = false;
+  m_voices_ptr[voice_index].enabled = false;
 }
 
 /*
@@ -470,28 +502,55 @@ void ADnote::KillVoice(int nvoice)
 void
 ADnote::KillNote()
 {
-  int nvoice;
+  unsigned int voice_index;
 
-  for (nvoice = 0 ; nvoice < NUM_VOICES ; nvoice++)
+  for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
-    if (m_voices[nvoice].enabled)
+    if (m_voices_ptr[voice_index].enabled)
     {
-      KillVoice(nvoice);
+      KillVoice(voice_index);
     }
 
     // delete VoiceOut
-    if (m_voices[nvoice].VoiceOut != NULL)
+    if (m_voices_ptr[voice_index].VoiceOut != NULL)
     {
-      delete(m_voices[nvoice].VoiceOut);
-      m_voices[nvoice].VoiceOut = NULL;
+      delete(m_voices_ptr[voice_index].VoiceOut);
+      m_voices_ptr[voice_index].VoiceOut = NULL;
     }
   }
 
   m_note_enabled = false;
 }
 
-ADnote::~ADnote(){
-  if (m_note_enabled) KillNote();
+ADnote::~ADnote()
+{
+  if (m_note_enabled)
+  {
+    KillNote();
+  }
+
+  free(m_old_amplitude_ptr);
+  free(m_new_amplitude_ptr);
+
+  free(m_FM_old_amplitude_ptr);
+  free(m_FM_new_amplitude_ptr);
+
+  free(m_first_tick_ptr);
+
+  free(m_FM_old_smp_ptr);
+
+  free(m_osc_freq_hi_ptr);
+  free(m_osc_freq_lo_ptr);
+  free(m_osc_freq_hi_FM_ptr);
+  free(m_osc_freq_lo_FM_ptr);
+
+  free(m_osc_pos_hi_ptr);
+  free(m_osc_pos_lo_ptr);
+  free(m_osc_pos_hi_FM_ptr);
+  free(m_osc_pos_lo_FM_ptr);
+
+  free(m_voices_ptr);
+
   delete [] m_tmpwave;
   delete [] m_bypassl;
   delete [] m_bypassr;
@@ -506,8 +565,8 @@ void ADnote::setfreq(int nvoice,REALTYPE freq){
   speed=freq*REALTYPE(OSCIL_SIZE)/(REALTYPE) SAMPLE_RATE;
   if (speed>OSCIL_SIZE) speed=OSCIL_SIZE;
 
-  F2I(speed,oscfreqhi[nvoice]);
-  oscfreqlo[nvoice]=speed-floor(speed);
+  F2I(speed,m_osc_freq_hi_ptr[nvoice]);
+  m_osc_freq_lo_ptr[nvoice]=speed-floor(speed);
 }
 
 /*
@@ -519,8 +578,8 @@ void ADnote::setfreqFM(int nvoice,REALTYPE freq){
   speed=freq*REALTYPE(OSCIL_SIZE)/(REALTYPE) SAMPLE_RATE;
   if (speed>OSCIL_SIZE) speed=OSCIL_SIZE;
 
-  F2I(speed,oscfreqhiFM[nvoice]);
-  oscfreqloFM[nvoice]=speed-floor(speed);
+  F2I(speed,m_osc_freq_hi_FM_ptr[nvoice]);
+  m_osc_freq_lo_FM_ptr[nvoice]=speed-floor(speed);
 }
 
 /*
@@ -531,11 +590,11 @@ REALTYPE ADnote::getvoicebasefreq(int nvoice)
   REALTYPE detune;
 
   detune =
-    m_voices[nvoice].Detune / 100.0 +
-    m_voices[nvoice].FineDetune / 100.0 * m_ctl->bandwidth.relbw * m_bandwidth_detune_multiplier +
+    m_voices_ptr[nvoice].Detune / 100.0 +
+    m_voices_ptr[nvoice].FineDetune / 100.0 * m_ctl->bandwidth.relbw * m_bandwidth_detune_multiplier +
     m_detune / 100.0;
 
-  if (m_voices[nvoice].fixedfreq == 0)
+  if (m_voices_ptr[nvoice].fixedfreq == 0)
   {
     return m_basefreq * pow(2, detune / 12.0);
   }
@@ -543,7 +602,7 @@ REALTYPE ADnote::getvoicebasefreq(int nvoice)
   {
     // the fixed freq is enabled
     REALTYPE fixedfreq = 440.0;
-    int fixedfreqET = m_voices[nvoice].fixedfreqET;
+    int fixedfreqET = m_voices_ptr[nvoice].fixedfreqET;
     if (fixedfreqET!=0)
     {
       // if the frequency varies according the keyboard note
@@ -566,7 +625,7 @@ REALTYPE ADnote::getvoicebasefreq(int nvoice)
  * Get Voice's Modullator base frequency
  */
 REALTYPE ADnote::getFMvoicebasefreq(int nvoice){
-  REALTYPE detune=m_voices[nvoice].FMDetune/100.0;
+  REALTYPE detune=m_voices_ptr[nvoice].FMDetune/100.0;
   return(getvoicebasefreq(nvoice)*pow(2,detune/12.0));
 }
 
@@ -576,7 +635,7 @@ REALTYPE ADnote::getFMvoicebasefreq(int nvoice){
 void
 ADnote::computecurrentparameters()
 {
-  int nvoice;
+  unsigned int voice_index;
   float voicefreq;
   float voicepitch;
   float filterpitch;
@@ -633,16 +692,16 @@ ADnote::computecurrentparameters()
   }
 
   //compute parameters for all voices
-  for (nvoice = 0 ; nvoice < NUM_VOICES ; nvoice++)
+  for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
-    if (!m_voices[nvoice].enabled)
+    if (!m_voices_ptr[voice_index].enabled)
     {
       continue;
     }
 
-    m_voices[nvoice].DelayTicks -= 1;
+    m_voices_ptr[voice_index].DelayTicks -= 1;
 
-    if (m_voices[nvoice].DelayTicks > 0)
+    if (m_voices_ptr[voice_index].DelayTicks > 0)
     {
       continue;
     }
@@ -650,82 +709,82 @@ ADnote::computecurrentparameters()
     /*******************/
     /* Voice Amplitude */
     /*******************/
-    oldamplitude[nvoice] = newamplitude[nvoice];
-    newamplitude[nvoice] = 1.0;
+    m_old_amplitude_ptr[voice_index] = m_new_amplitude_ptr[voice_index];
+    m_new_amplitude_ptr[voice_index] = 1.0;
 
-    if (m_synth_ptr->voices_params[nvoice].PAmpEnvelopeEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PAmpEnvelopeEnabled)
     {
-      newamplitude[nvoice] *= m_voices[nvoice].m_amplitude_envelope.envout_dB();
+      m_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_amplitude_envelope.envout_dB();
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PAmpLfoEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PAmpLfoEnabled)
     {
-      newamplitude[nvoice] *= m_voices[nvoice].m_amplitude_lfo.amplfoout();
+      m_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_amplitude_lfo.amplfoout();
     }
 
     /****************/
     /* Voice Filter */
     /****************/
-    if (m_synth_ptr->voices_params[nvoice].PFilterEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFilterEnabled)
     {
-      filterpitch = m_voices[nvoice].FilterCenterPitch;
+      filterpitch = m_voices_ptr[voice_index].FilterCenterPitch;
 
-      if (m_synth_ptr->voices_params[nvoice].PFilterEnvelopeEnabled)
+      if (m_synth_ptr->voices_params_ptr[voice_index].PFilterEnvelopeEnabled)
       {
-        filterpitch += m_voices[nvoice].m_filter_envelope.envout();
+        filterpitch += m_voices_ptr[voice_index].m_filter_envelope.envout();
       }
 
-      if (m_synth_ptr->voices_params[nvoice].PFilterLfoEnabled)
+      if (m_synth_ptr->voices_params_ptr[voice_index].PFilterLfoEnabled)
       {
-        filterpitch += m_voices[nvoice].m_filter_lfo.lfoout();
+        filterpitch += m_voices_ptr[voice_index].m_filter_lfo.lfoout();
       }
 
-      filterfreq = filterpitch + m_voices[nvoice].FilterFreqTracking;
-      filterfreq = m_voices[nvoice].m_voice_filter.getrealfreq(filterfreq);
+      filterfreq = filterpitch + m_voices_ptr[voice_index].FilterFreqTracking;
+      filterfreq = m_voices_ptr[voice_index].m_voice_filter.getrealfreq(filterfreq);
 
-      m_voices[nvoice].m_voice_filter.setfreq(filterfreq);
+      m_voices_ptr[voice_index].m_voice_filter.setfreq(filterfreq);
     }
 
     // compute only if the voice isn't noise
-    if (m_voices[nvoice].noisetype == 0)
+    if (m_voices_ptr[voice_index].noisetype == 0)
     {
       /*******************/
       /* Voice Frequency */
       /*******************/
       voicepitch=0.0;
-      if (m_synth_ptr->voices_params[nvoice].PFreqLfoEnabled)
+      if (m_synth_ptr->voices_params_ptr[voice_index].PFreqLfoEnabled)
       {
-        voicepitch += m_voices[nvoice].m_frequency_lfo.lfoout() / 100.0 * m_ctl->bandwidth.relbw;
+        voicepitch += m_voices_ptr[voice_index].m_frequency_lfo.lfoout() / 100.0 * m_ctl->bandwidth.relbw;
       }
 
-      if (m_synth_ptr->voices_params[nvoice].PFreqEnvelopeEnabled)
+      if (m_synth_ptr->voices_params_ptr[voice_index].PFreqEnvelopeEnabled)
       {
-        voicepitch += m_voices[nvoice].m_frequency_envelope.envout() / 100.0;
+        voicepitch += m_voices_ptr[voice_index].m_frequency_envelope.envout() / 100.0;
       }
 
-      voicefreq = getvoicebasefreq(nvoice) * pow(2, (voicepitch + globalpitch) / 12.0); // Hz frequency
+      voicefreq = getvoicebasefreq(voice_index) * pow(2, (voicepitch + globalpitch) / 12.0); // Hz frequency
       voicefreq *= m_ctl->pitchwheel.relfreq; // change the frequency by the controller
-      setfreq(nvoice, voicefreq * portamentofreqrap);
+      setfreq(voice_index, voicefreq * portamentofreqrap);
 
       /***************/
       /*  Modulator */
       /***************/
-      if (m_voices[nvoice].fm_type != ZYN_FM_TYPE_NONE)
+      if (m_voices_ptr[voice_index].fm_type != ZYN_FM_TYPE_NONE)
       {
-        FMrelativepitch = m_voices[nvoice].FMDetune / 100.0;
-        if (m_synth_ptr->voices_params[nvoice].PFMFreqEnvelopeEnabled)
+        FMrelativepitch = m_voices_ptr[voice_index].FMDetune / 100.0;
+        if (m_synth_ptr->voices_params_ptr[voice_index].PFMFreqEnvelopeEnabled)
         {
-          FMrelativepitch += m_voices[nvoice].m_fm_frequency_envelope.envout() / 100;
+          FMrelativepitch += m_voices_ptr[voice_index].m_fm_frequency_envelope.envout() / 100;
         }
 
         FMfreq = pow(2.0, FMrelativepitch / 12.0) * voicefreq * portamentofreqrap;
-        setfreqFM(nvoice, FMfreq);
+        setfreqFM(voice_index, FMfreq);
 
-        FMoldamplitude[nvoice] = FMnewamplitude[nvoice];
-        FMnewamplitude[nvoice] = m_voices[nvoice].FMVolume * m_ctl->fmamp.relamp;
-        if (m_synth_ptr->voices_params[nvoice].PFMAmpEnvelopeEnabled)
+        m_FM_old_amplitude_ptr[voice_index] = m_FM_new_amplitude_ptr[voice_index];
+        m_FM_new_amplitude_ptr[voice_index] = m_voices_ptr[voice_index].FMVolume * m_ctl->fmamp.relamp;
+        if (m_synth_ptr->voices_params_ptr[voice_index].PFMAmpEnvelopeEnabled)
         {
-          FMnewamplitude[nvoice] *= m_voices[nvoice].m_fm_amplitude_envelope.envout_dB();
+          m_FM_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_fm_amplitude_envelope.envout_dB();
         }
       }
     }
@@ -758,25 +817,25 @@ inline void ADnote::fadein(REALTYPE *smps){
 /*
  * Computes the Oscillator (Without Modulation) - LinearInterpolation
  */
-inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice){
+inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int voice_index){
   int i,poshi;
   REALTYPE poslo;
 
-  poshi=oscposhi[nvoice];
-  poslo=oscposlo[nvoice];
-  REALTYPE *smps=m_voices[nvoice].OscilSmp;
+  poshi=m_osc_pos_hi_ptr[voice_index];
+  poslo=m_osc_pos_lo_ptr[voice_index];
+  REALTYPE *smps=m_voices_ptr[voice_index].OscilSmp;
   for (i=0;i<SOUND_BUFFER_SIZE;i++){
     m_tmpwave[i]=smps[poshi]*(1.0-poslo)+smps[poshi+1]*poslo;
-    poslo+=oscfreqlo[nvoice];
+    poslo+=m_osc_freq_lo_ptr[voice_index];
     if (poslo>=1.0) {
       poslo-=1.0;
       poshi++;
     }
-    poshi+=oscfreqhi[nvoice];
+    poshi+=m_osc_freq_hi_ptr[voice_index];
     poshi&=OSCIL_SIZE-1;
   }
-  oscposhi[nvoice]=poshi;
-  oscposlo[nvoice]=poslo;
+  m_osc_pos_hi_ptr[voice_index]=poshi;
+  m_osc_pos_lo_ptr[voice_index]=poslo;
 }
 
 
@@ -785,13 +844,13 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice){
  * Computes the Oscillator (Without Modulation) - CubicInterpolation
  *
  The differences from the Linear are to little to deserve to be used. This is because I am using a large OSCIL_SIZE (>512)
- inline void ADnote::ComputeVoiceOscillator_CubicInterpolation(int nvoice){
+ inline void ADnote::ComputeVoiceOscillator_CubicInterpolation(int voice_index){
  int i,poshi;
  REALTYPE poslo;
 
- poshi=oscposhi[nvoice];
- poslo=oscposlo[nvoice];
- REALTYPE *smps=m_voices[nvoice].OscilSmp;
+ poshi=m_osc_pos_hi_ptr[voice_index];
+ poslo=m_osc_pos_lo_ptr[voice_index];
+ REALTYPE *smps=m_voices_ptr[voice_index].OscilSmp;
  REALTYPE xm1,x0,x1,x2,a,b,c;
  for (i=0;i<SOUND_BUFFER_SIZE;i++){
  xm1=smps[poshi];
@@ -804,97 +863,97 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice){
  m_tmpwave[i]=(((a * poslo) + b) * poslo + c) * poslo + x0;
  printf("a\n");
  //m_tmpwave[i]=smps[poshi]*(1.0-poslo)+smps[poshi+1]*poslo;
- poslo+=oscfreqlo[nvoice];
+ poslo+=m_osc_freq_lo_ptr[voice_index];
  if (poslo>=1.0) {
  poslo-=1.0;
  poshi++;
  }
- poshi+=oscfreqhi[nvoice];
+ poshi+=m_osc_freq_hi_ptr[voice_index];
  poshi&=OSCIL_SIZE-1;
  }
- oscposhi[nvoice]=poshi;
- oscposlo[nvoice]=poslo;
+ m_osc_pos_hi_ptr[voice_index]=poshi;
+ m_osc_pos_lo_ptr[voice_index]=poslo;
  }
 */
 /*
  * Computes the Oscillator (Morphing)
  */
-inline void ADnote::ComputeVoiceOscillatorMorph(int nvoice){
+inline void ADnote::ComputeVoiceOscillatorMorph(int voice_index){
   int i;
   REALTYPE amp;
-  ComputeVoiceOscillator_LinearInterpolation(nvoice);
-  if (FMnewamplitude[nvoice]>1.0) FMnewamplitude[nvoice]=1.0;
-  if (FMoldamplitude[nvoice]>1.0) FMoldamplitude[nvoice]=1.0;
+  ComputeVoiceOscillator_LinearInterpolation(voice_index);
+  if (m_FM_new_amplitude_ptr[voice_index]>1.0) m_FM_new_amplitude_ptr[voice_index]=1.0;
+  if (m_FM_old_amplitude_ptr[voice_index]>1.0) m_FM_old_amplitude_ptr[voice_index]=1.0;
 
-  if (m_voices[nvoice].FMVoice>=0){
+  if (m_voices_ptr[voice_index].FMVoice>=0){
     //if I use VoiceOut[] as modullator
-    int FMVoice=m_voices[nvoice].FMVoice;
+    int FMVoice=m_voices_ptr[voice_index].FMVoice;
     for (i=0;i<SOUND_BUFFER_SIZE;i++) {
-      amp=INTERPOLATE_AMPLITUDE(FMoldamplitude[nvoice]
-                                ,FMnewamplitude[nvoice],i,SOUND_BUFFER_SIZE);
-      m_tmpwave[i]=m_tmpwave[i]*(1.0-amp)+amp*m_voices[FMVoice].VoiceOut[i];
+      amp=INTERPOLATE_AMPLITUDE(m_FM_old_amplitude_ptr[voice_index]
+                                ,m_FM_new_amplitude_ptr[voice_index],i,SOUND_BUFFER_SIZE);
+      m_tmpwave[i]=m_tmpwave[i]*(1.0-amp)+amp*m_voices_ptr[FMVoice].VoiceOut[i];
     }
   } else {
-    int poshiFM=oscposhiFM[nvoice];
-    REALTYPE posloFM=oscposloFM[nvoice];
+    int poshiFM=m_osc_pos_hi_FM_ptr[voice_index];
+    REALTYPE posloFM=m_osc_pos_lo_FM_ptr[voice_index];
 
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
-      amp=INTERPOLATE_AMPLITUDE(FMoldamplitude[nvoice]
-                                ,FMnewamplitude[nvoice],i,SOUND_BUFFER_SIZE);
+      amp=INTERPOLATE_AMPLITUDE(m_FM_old_amplitude_ptr[voice_index]
+                                ,m_FM_new_amplitude_ptr[voice_index],i,SOUND_BUFFER_SIZE);
       m_tmpwave[i]=m_tmpwave[i]*(1.0-amp)+amp
-        *(m_voices[nvoice].FMSmp[poshiFM]*(1-posloFM)
-          +m_voices[nvoice].FMSmp[poshiFM+1]*posloFM);
-      posloFM+=oscfreqloFM[nvoice];
+        *(m_voices_ptr[voice_index].FMSmp[poshiFM]*(1-posloFM)
+          +m_voices_ptr[voice_index].FMSmp[poshiFM+1]*posloFM);
+      posloFM+=m_osc_freq_lo_FM_ptr[voice_index];
       if (posloFM>=1.0) {
         posloFM-=1.0;
         poshiFM++;
       }
-      poshiFM+=oscfreqhiFM[nvoice];
+      poshiFM+=m_osc_freq_hi_FM_ptr[voice_index];
       poshiFM&=OSCIL_SIZE-1;
     }
-    oscposhiFM[nvoice]=poshiFM;
-    oscposloFM[nvoice]=posloFM;
+    m_osc_pos_hi_FM_ptr[voice_index]=poshiFM;
+    m_osc_pos_lo_FM_ptr[voice_index]=posloFM;
   }
 }
 
 /*
  * Computes the Oscillator (Ring Modulation)
  */
-inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice){
+inline void ADnote::ComputeVoiceOscillatorRingModulation(int voice_index){
   int i;
   REALTYPE amp;
-  ComputeVoiceOscillator_LinearInterpolation(nvoice);
-  if (FMnewamplitude[nvoice]>1.0) FMnewamplitude[nvoice]=1.0;
-  if (FMoldamplitude[nvoice]>1.0) FMoldamplitude[nvoice]=1.0;
-  if (m_voices[nvoice].FMVoice>=0){
+  ComputeVoiceOscillator_LinearInterpolation(voice_index);
+  if (m_FM_new_amplitude_ptr[voice_index]>1.0) m_FM_new_amplitude_ptr[voice_index]=1.0;
+  if (m_FM_old_amplitude_ptr[voice_index]>1.0) m_FM_old_amplitude_ptr[voice_index]=1.0;
+  if (m_voices_ptr[voice_index].FMVoice>=0){
     // if I use VoiceOut[] as modullator
     for (i=0;i<SOUND_BUFFER_SIZE;i++) {
-      amp=INTERPOLATE_AMPLITUDE(FMoldamplitude[nvoice]
-                                ,FMnewamplitude[nvoice],i,SOUND_BUFFER_SIZE);
-      int FMVoice=m_voices[nvoice].FMVoice;
+      amp=INTERPOLATE_AMPLITUDE(m_FM_old_amplitude_ptr[voice_index]
+                                ,m_FM_new_amplitude_ptr[voice_index],i,SOUND_BUFFER_SIZE);
+      int FMVoice=m_voices_ptr[voice_index].FMVoice;
       for (i=0;i<SOUND_BUFFER_SIZE;i++)
-        m_tmpwave[i]*=(1.0-amp)+amp*m_voices[FMVoice].VoiceOut[i];
+        m_tmpwave[i]*=(1.0-amp)+amp*m_voices_ptr[FMVoice].VoiceOut[i];
     }
   } else {
-    int poshiFM=oscposhiFM[nvoice];
-    REALTYPE posloFM=oscposloFM[nvoice];
+    int poshiFM=m_osc_pos_hi_FM_ptr[voice_index];
+    REALTYPE posloFM=m_osc_pos_lo_FM_ptr[voice_index];
 
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
-      amp=INTERPOLATE_AMPLITUDE(FMoldamplitude[nvoice]
-                                ,FMnewamplitude[nvoice],i,SOUND_BUFFER_SIZE);
-      m_tmpwave[i]*=( m_voices[nvoice].FMSmp[poshiFM]*(1.0-posloFM)
-                    +m_voices[nvoice].FMSmp[poshiFM+1]*posloFM)*amp
+      amp=INTERPOLATE_AMPLITUDE(m_FM_old_amplitude_ptr[voice_index]
+                                ,m_FM_new_amplitude_ptr[voice_index],i,SOUND_BUFFER_SIZE);
+      m_tmpwave[i]*=( m_voices_ptr[voice_index].FMSmp[poshiFM]*(1.0-posloFM)
+                    +m_voices_ptr[voice_index].FMSmp[poshiFM+1]*posloFM)*amp
         +(1.0-amp);
-      posloFM+=oscfreqloFM[nvoice];
+      posloFM+=m_osc_freq_lo_FM_ptr[voice_index];
       if (posloFM>=1.0) {
         posloFM-=1.0;
         poshiFM++;
       }
-      poshiFM+=oscfreqhiFM[nvoice];
+      poshiFM+=m_osc_freq_hi_FM_ptr[voice_index];
       poshiFM&=OSCIL_SIZE-1;
     }
-    oscposhiFM[nvoice]=poshiFM;
-    oscposloFM[nvoice]=posloFM;
+    m_osc_pos_hi_FM_ptr[voice_index]=poshiFM;
+    m_osc_pos_lo_FM_ptr[voice_index]=posloFM;
   }
 }
 
@@ -903,48 +962,48 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice){
 /*
  * Computes the Oscillator (Phase Modulation or Frequency Modulation)
  */
-inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,int FMmode){
+inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int voice_index,int FMmode){
   int carposhi;
   int i,FMmodfreqhi;
   REALTYPE FMmodfreqlo,carposlo;
 
-  if (m_voices[nvoice].FMVoice>=0){
+  if (m_voices_ptr[voice_index].FMVoice>=0){
     //if I use VoiceOut[] as modulator
-    for (i=0;i<SOUND_BUFFER_SIZE;i++) m_tmpwave[i]=m_voices[m_voices[nvoice].FMVoice].VoiceOut[i];
+    for (i=0;i<SOUND_BUFFER_SIZE;i++) m_tmpwave[i]=m_voices_ptr[m_voices_ptr[voice_index].FMVoice].VoiceOut[i];
   } else {
     //Compute the modulator and store it in m_tmpwave[]
-    int poshiFM=oscposhiFM[nvoice];
-    REALTYPE posloFM=oscposloFM[nvoice];
+    int poshiFM=m_osc_pos_hi_FM_ptr[voice_index];
+    REALTYPE posloFM=m_osc_pos_lo_FM_ptr[voice_index];
 
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
-      m_tmpwave[i]=(m_voices[nvoice].FMSmp[poshiFM]*(1.0-posloFM)
-                  +m_voices[nvoice].FMSmp[poshiFM+1]*posloFM);
-      posloFM+=oscfreqloFM[nvoice];
+      m_tmpwave[i]=(m_voices_ptr[voice_index].FMSmp[poshiFM]*(1.0-posloFM)
+                  +m_voices_ptr[voice_index].FMSmp[poshiFM+1]*posloFM);
+      posloFM+=m_osc_freq_lo_FM_ptr[voice_index];
       if (posloFM>=1.0) {
         posloFM=fmod(posloFM,1.0);
         poshiFM++;
       }
-      poshiFM+=oscfreqhiFM[nvoice];
+      poshiFM+=m_osc_freq_hi_FM_ptr[voice_index];
       poshiFM&=OSCIL_SIZE-1;
     }
-    oscposhiFM[nvoice]=poshiFM;
-    oscposloFM[nvoice]=posloFM;
+    m_osc_pos_hi_FM_ptr[voice_index]=poshiFM;
+    m_osc_pos_lo_FM_ptr[voice_index]=posloFM;
   }
   // Amplitude interpolation
-  if (ABOVE_AMPLITUDE_THRESHOLD(FMoldamplitude[nvoice],FMnewamplitude[nvoice])){
+  if (ABOVE_AMPLITUDE_THRESHOLD(m_FM_old_amplitude_ptr[voice_index],m_FM_new_amplitude_ptr[voice_index])){
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
-      m_tmpwave[i]*=INTERPOLATE_AMPLITUDE(FMoldamplitude[nvoice]
-                                        ,FMnewamplitude[nvoice],i,SOUND_BUFFER_SIZE);
+      m_tmpwave[i]*=INTERPOLATE_AMPLITUDE(m_FM_old_amplitude_ptr[voice_index]
+                                        ,m_FM_new_amplitude_ptr[voice_index],i,SOUND_BUFFER_SIZE);
     }
-  } else for (i=0;i<SOUND_BUFFER_SIZE;i++) m_tmpwave[i]*=FMnewamplitude[nvoice];
+  } else for (i=0;i<SOUND_BUFFER_SIZE;i++) m_tmpwave[i]*=m_FM_new_amplitude_ptr[voice_index];
 
 
   //normalize makes all sample-rates, oscil_sizes toproduce same sound
   if (FMmode!=0){//Frequency modulation
     REALTYPE normalize=OSCIL_SIZE/262144.0*44100.0/(REALTYPE)SAMPLE_RATE;
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
-      FMoldsmp[nvoice]=fmod(FMoldsmp[nvoice]+m_tmpwave[i]*normalize,OSCIL_SIZE);
-      m_tmpwave[i]=FMoldsmp[nvoice];
+      m_FM_old_smp_ptr[voice_index]=fmod(m_FM_old_smp_ptr[voice_index]+m_tmpwave[i]*normalize,OSCIL_SIZE);
+      m_tmpwave[i]=m_FM_old_smp_ptr[voice_index];
     }
   } else {//Phase modulation
     REALTYPE normalize=OSCIL_SIZE/262144.0;
@@ -957,8 +1016,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,int FMm
     if (FMmodfreqhi<0) FMmodfreqlo++;
 
     //carrier
-    carposhi=oscposhi[nvoice]+FMmodfreqhi;
-    carposlo=oscposlo[nvoice]+FMmodfreqlo;
+    carposhi=m_osc_pos_hi_ptr[voice_index]+FMmodfreqhi;
+    carposlo=m_osc_pos_lo_ptr[voice_index]+FMmodfreqlo;
 
     if (carposlo>=1.0) {
       carposhi++;
@@ -966,30 +1025,30 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,int FMm
     }
     carposhi&=(OSCIL_SIZE-1);
 
-    m_tmpwave[i]=m_voices[nvoice].OscilSmp[carposhi]*(1.0-carposlo)
-      +m_voices[nvoice].OscilSmp[carposhi+1]*carposlo;
+    m_tmpwave[i]=m_voices_ptr[voice_index].OscilSmp[carposhi]*(1.0-carposlo)
+      +m_voices_ptr[voice_index].OscilSmp[carposhi+1]*carposlo;
 
-    oscposlo[nvoice]+=oscfreqlo[nvoice];
-    if (oscposlo[nvoice]>=1.0) {
-      oscposlo[nvoice]=fmod(oscposlo[nvoice],1.0);
-      oscposhi[nvoice]++;
+    m_osc_pos_lo_ptr[voice_index]+=m_osc_freq_lo_ptr[voice_index];
+    if (m_osc_pos_lo_ptr[voice_index]>=1.0) {
+      m_osc_pos_lo_ptr[voice_index]=fmod(m_osc_pos_lo_ptr[voice_index],1.0);
+      m_osc_pos_hi_ptr[voice_index]++;
     }
 
-    oscposhi[nvoice]+=oscfreqhi[nvoice];
-    oscposhi[nvoice]&=OSCIL_SIZE-1;
+    m_osc_pos_hi_ptr[voice_index]+=m_osc_freq_hi_ptr[voice_index];
+    m_osc_pos_hi_ptr[voice_index]&=OSCIL_SIZE-1;
   }
 }
 
 
 /*Calculeaza Oscilatorul cu PITCH MODULATION*/
-inline void ADnote::ComputeVoiceOscillatorPitchModulation(int nvoice){
+inline void ADnote::ComputeVoiceOscillatorPitchModulation(int voice_index){
 //TODO
 }
 
 /*
  * Computes the Noise
  */
-inline void ADnote::ComputeVoiceNoise(int nvoice){
+inline void ADnote::ComputeVoiceNoise(int voice_index){
 
   for (int i=0;i<SOUND_BUFFER_SIZE;i++)
   {
@@ -1005,7 +1064,8 @@ ADnote::noteout(
   REALTYPE * outl,
   REALTYPE * outr)
 {
-  int i,nvoice;
+  int i;
+  unsigned int voice_index;
 
   silence_two_buffers(outl, outr, SOUND_BUFFER_SIZE);
 
@@ -1018,79 +1078,79 @@ ADnote::noteout(
 
   computecurrentparameters();
 
-  for (nvoice = 0 ; nvoice < NUM_VOICES ; nvoice++)
+  for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
-    if (!m_voices[nvoice].enabled || m_voices[nvoice].DelayTicks > 0)
+    if (!m_voices_ptr[voice_index].enabled || m_voices_ptr[voice_index].DelayTicks > 0)
     {
       continue;
     }
 
-    if (m_voices[nvoice].noisetype == 0) //voice mode = sound
+    if (m_voices_ptr[voice_index].noisetype == 0) //voice mode = sound
     {
-      switch (m_voices[nvoice].fm_type)
+      switch (m_voices_ptr[voice_index].fm_type)
       {
       case ZYN_FM_TYPE_MORPH:
-        ComputeVoiceOscillatorMorph(nvoice);
+        ComputeVoiceOscillatorMorph(voice_index);
         break;
       case ZYN_FM_TYPE_RING_MOD:
-        ComputeVoiceOscillatorRingModulation(nvoice);
+        ComputeVoiceOscillatorRingModulation(voice_index);
         break;
       case ZYN_FM_TYPE_PHASE_MOD:
-        ComputeVoiceOscillatorFrequencyModulation(nvoice,0);
+        ComputeVoiceOscillatorFrequencyModulation(voice_index,0);
         break;
       case ZYN_FM_TYPE_FREQ_MOD:
-        ComputeVoiceOscillatorFrequencyModulation(nvoice,1);
+        ComputeVoiceOscillatorFrequencyModulation(voice_index,1);
         break;
 #if 0
       case ZYN_FM_TYPE_PITCH_MOD:
-        ComputeVoiceOscillatorPitchModulation(nvoice);
+        ComputeVoiceOscillatorPitchModulation(voice_index);
         break;
 #endif
       default:
-        ComputeVoiceOscillator_LinearInterpolation(nvoice);
-        //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
+        ComputeVoiceOscillator_LinearInterpolation(voice_index);
+        //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(voice_index);
       }
     }
     else
     {
-      ComputeVoiceNoise(nvoice);
+      ComputeVoiceNoise(voice_index);
     }
 
     // Voice Processing
 
     // Amplitude
-    if (ABOVE_AMPLITUDE_THRESHOLD(oldamplitude[nvoice],newamplitude[nvoice])){
+    if (ABOVE_AMPLITUDE_THRESHOLD(m_old_amplitude_ptr[voice_index],m_new_amplitude_ptr[voice_index])){
       int rest=SOUND_BUFFER_SIZE;
       //test if the amplitude if raising and the difference is high
-      if ((newamplitude[nvoice]>oldamplitude[nvoice])&&((newamplitude[nvoice]-oldamplitude[nvoice])>0.25)){
+      if ((m_new_amplitude_ptr[voice_index]>m_old_amplitude_ptr[voice_index])&&((m_new_amplitude_ptr[voice_index]-m_old_amplitude_ptr[voice_index])>0.25)){
         rest=10;
         if (rest>SOUND_BUFFER_SIZE) rest=SOUND_BUFFER_SIZE;
-        for (int i=0;i<SOUND_BUFFER_SIZE-rest;i++) m_tmpwave[i]*=oldamplitude[nvoice];
+        for (int i=0;i<SOUND_BUFFER_SIZE-rest;i++) m_tmpwave[i]*=m_old_amplitude_ptr[voice_index];
       }
       // Amplitude interpolation
       for (i=0;i<rest;i++){
-        m_tmpwave[i+(SOUND_BUFFER_SIZE-rest)]*=INTERPOLATE_AMPLITUDE(oldamplitude[nvoice]
-                                                                   ,newamplitude[nvoice],i,rest);
+        m_tmpwave[i+(SOUND_BUFFER_SIZE-rest)]*=INTERPOLATE_AMPLITUDE(m_old_amplitude_ptr[voice_index]
+                                                                   ,m_new_amplitude_ptr[voice_index],i,rest);
       }
-    } else for (i=0;i<SOUND_BUFFER_SIZE;i++) m_tmpwave[i]*=newamplitude[nvoice];
+    } else for (i=0;i<SOUND_BUFFER_SIZE;i++) m_tmpwave[i]*=m_new_amplitude_ptr[voice_index];
 
     // Fade in
-    if (firsttick[nvoice]!=0){
+    if (m_first_tick_ptr[voice_index])
+    {
       fadein(&m_tmpwave[0]);
-      firsttick[nvoice]=0;
+      m_first_tick_ptr[voice_index] = false;
     }
 
-
     // Filter
-    if (m_synth_ptr->voices_params[nvoice].PFilterEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFilterEnabled)
     {
-      m_voices[nvoice].m_voice_filter.filterout(&m_tmpwave[0]);
+      m_voices_ptr[voice_index].m_voice_filter.filterout(&m_tmpwave[0]);
     }
 
     //check if the amplitude envelope is finished, if yes, the voice will be fadeout
-    if (m_synth_ptr->voices_params[nvoice].PAmpEnvelopeEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PAmpEnvelopeEnabled)
     {
-      if (m_voices[nvoice].m_amplitude_envelope.finished())
+      if (m_voices_ptr[voice_index].m_amplitude_envelope.finished())
       {
         for (i=0 ; i < SOUND_BUFFER_SIZE ; i++)
         {
@@ -1103,16 +1163,16 @@ ADnote::noteout(
 
 
     // Put the ADnote samples in VoiceOut (without appling Global volume, because I wish to use this voice as a modullator)
-    if (m_voices[nvoice].VoiceOut!=NULL)
+    if (m_voices_ptr[voice_index].VoiceOut!=NULL)
     {
       for (i=0;i<SOUND_BUFFER_SIZE;i++)
       {
-        m_voices[nvoice].VoiceOut[i] = m_tmpwave[i];
+        m_voices_ptr[voice_index].VoiceOut[i] = m_tmpwave[i];
       }
     }
 
     // Add the voice that do not bypass the filter to out
-    if (m_voices[nvoice].filterbypass==0)
+    if (m_voices_ptr[voice_index].filterbypass==0)
     {
       // no bypass
 
@@ -1121,14 +1181,14 @@ ADnote::noteout(
         // stereo
         for (i=0;i<SOUND_BUFFER_SIZE;i++)
         {
-          outl[i]+=m_tmpwave[i]*m_voices[nvoice].Volume*m_voices[nvoice].Panning*2.0;
-          outr[i]+=m_tmpwave[i]*m_voices[nvoice].Volume*(1.0-m_voices[nvoice].Panning)*2.0;
+          outl[i]+=m_tmpwave[i]*m_voices_ptr[voice_index].Volume*m_voices_ptr[voice_index].Panning*2.0;
+          outr[i]+=m_tmpwave[i]*m_voices_ptr[voice_index].Volume*(1.0-m_voices_ptr[voice_index].Panning)*2.0;
         }
       }
       else
       {
         // mono
-        for (i=0;i<SOUND_BUFFER_SIZE;i++) outl[i]+=m_tmpwave[i]*m_voices[nvoice].Volume;
+        for (i=0;i<SOUND_BUFFER_SIZE;i++) outl[i]+=m_tmpwave[i]*m_voices_ptr[voice_index].Volume;
       }
     }
     else
@@ -1140,22 +1200,22 @@ ADnote::noteout(
         // stereo
         for (i=0;i<SOUND_BUFFER_SIZE;i++)
         {
-          m_bypassl[i]+=m_tmpwave[i]*m_voices[nvoice].Volume*m_voices[nvoice].Panning*2.0;
-          m_bypassr[i]+=m_tmpwave[i]*m_voices[nvoice].Volume*(1.0-m_voices[nvoice].Panning)*2.0;
+          m_bypassl[i]+=m_tmpwave[i]*m_voices_ptr[voice_index].Volume*m_voices_ptr[voice_index].Panning*2.0;
+          m_bypassr[i]+=m_tmpwave[i]*m_voices_ptr[voice_index].Volume*(1.0-m_voices_ptr[voice_index].Panning)*2.0;
         }
       }
       else
       {
         // mono
-        for (i=0;i<SOUND_BUFFER_SIZE;i++) m_bypassl[i]+=m_tmpwave[i]*m_voices[nvoice].Volume;
+        for (i=0;i<SOUND_BUFFER_SIZE;i++) m_bypassl[i]+=m_tmpwave[i]*m_voices_ptr[voice_index].Volume;
       }
     }
     // check if there is necesary to proces the voice longer (if the Amplitude envelope isn't finished)
-    if (m_synth_ptr->voices_params[nvoice].PAmpEnvelopeEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PAmpEnvelopeEnabled)
     {
-      if (m_voices[nvoice].m_amplitude_envelope.finished())
+      if (m_voices_ptr[voice_index].m_amplitude_envelope.finished())
       {
-        KillVoice(nvoice);
+        KillVoice(voice_index);
       }
     }
   }
@@ -1243,38 +1303,38 @@ ADnote::noteout(
  */
 void ADnote::relasekey()
 {
-  int nvoice;
+  unsigned int voice_index;
 
-  for (nvoice = 0 ; nvoice < NUM_VOICES ; nvoice++)
+  for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
-    if (!m_voices[nvoice].enabled)
+    if (!m_voices_ptr[voice_index].enabled)
     {
       continue;
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PAmpEnvelopeEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PAmpEnvelopeEnabled)
     {
-      m_voices[nvoice].m_amplitude_envelope.relasekey();
+      m_voices_ptr[voice_index].m_amplitude_envelope.relasekey();
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PFreqEnvelopeEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFreqEnvelopeEnabled)
     {
-      m_voices[nvoice].m_frequency_envelope.relasekey();
+      m_voices_ptr[voice_index].m_frequency_envelope.relasekey();
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PFilterEnvelopeEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFilterEnvelopeEnabled)
     {
-      m_voices[nvoice].m_filter_envelope.relasekey();
+      m_voices_ptr[voice_index].m_filter_envelope.relasekey();
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PFMFreqEnvelopeEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFMFreqEnvelopeEnabled)
     {
-      m_voices[nvoice].m_fm_frequency_envelope.relasekey();
+      m_voices_ptr[voice_index].m_fm_frequency_envelope.relasekey();
     }
 
-    if (m_synth_ptr->voices_params[nvoice].PFMAmpEnvelopeEnabled)
+    if (m_synth_ptr->voices_params_ptr[voice_index].PFMAmpEnvelopeEnabled)
     {
-      m_voices[nvoice].m_fm_amplitude_envelope.relasekey();
+      m_voices_ptr[voice_index].m_fm_amplitude_envelope.relasekey();
     }
   }
 

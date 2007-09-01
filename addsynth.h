@@ -32,6 +32,7 @@ typedef void * zyn_addsynth_handle;
 
 bool
 zyn_addsynth_create(
+  unsigned int voices_count,
   zyn_addsynth_handle * handle_ptr);
 
 void

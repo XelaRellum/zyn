@@ -78,8 +78,8 @@ struct ADnoteGlobalParam
 /***********************************************************/
 struct ADnoteVoiceParam
 {
-  /* If the voice is enabled */
-  unsigned char Enabled;
+  /* whether voice is enabled */
+  bool enabled;
 
   /* Type of the voice (0=Sound,1=Noise)*/
   unsigned char Type;
@@ -263,7 +263,9 @@ struct zyn_addsynth
 
   ADnoteGlobalParam GlobalPar;
 
-  ADnoteVoiceParam voices_params[NUM_VOICES];
+  unsigned int voices_count;
+
+  ADnoteVoiceParam * voices_params_ptr; /* array with one entry per voice */
 };
 
 #endif /* #ifndef ADDSYNTH_INTERNAL_H__9870368A_F1C9_4F0D_ADC1_B07ECFF2F9C7__INCLUDED */

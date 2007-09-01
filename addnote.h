@@ -60,7 +60,7 @@ private:
 
   void initparameters(bool random_grouping);
 
-  void KillVoice(int nvoice);
+  void KillVoice(unsigned int voice_index);
   void KillNote();
   inline REALTYPE getvoicebasefreq(int nvoice);
   inline REALTYPE getFMvoicebasefreq(int nvoice);
@@ -89,77 +89,7 @@ private:
   /***********************************************************/
   /*                    VOICE PARAMETERS                     */
   /***********************************************************/
-  struct ADnoteVoice{
-    /* If the voice is enabled */
-    bool enabled; 
-
-    /* Voice Type (sound/noise)*/
-    int noisetype;
-
-    /* Filter Bypass */
-    int filterbypass;
-          
-    /* Delay (ticks) */
-    int DelayTicks;
-    
-    /* Waveform of the Voice */ 
-    REALTYPE *OscilSmp;    
-
-    /************************************
-     *     FREQUENCY PARAMETERS          *
-     ************************************/
-    int fixedfreq;//if the frequency is fixed to 440 Hz
-    int fixedfreqET;//if the "fixed" frequency varies according to the note (ET)
-
-    // cents = basefreq*VoiceDetune
-    REALTYPE Detune,FineDetune;
-    
-    Envelope m_frequency_envelope;
-    LFO m_frequency_lfo;
-
-    /***************************
-     *   AMPLITUDE PARAMETERS   *
-     ***************************/
-
-    /* Panning 0.0=left, 0.5 - center, 1.0 = right */
-    REALTYPE Panning;
-    REALTYPE Volume;// [-1.0 .. 1.0]
-
-    Envelope m_amplitude_envelope;
-    LFO m_amplitude_lfo;
-
-    /*************************
-     *   FILTER PARAMETERS    *
-     *************************/
-    
-    Filter m_voice_filter;
-    
-    REALTYPE FilterCenterPitch;/* Filter center Pitch*/
-    REALTYPE FilterFreqTracking;
-
-    Envelope m_filter_envelope;
-    LFO m_filter_lfo;
-
-    /****************************
-     *   MODULLATOR PARAMETERS   *
-     ****************************/
-
-    unsigned int fm_type;
-
-    int FMVoice;
-
-    // Voice Output used by other voices if use this as modullator
-    REALTYPE *VoiceOut;
-
-    /* Wave of the Voice */ 
-    REALTYPE *FMSmp;    
-
-    REALTYPE FMVolume;
-    REALTYPE FMDetune; //in cents
-    
-    Envelope m_fm_frequency_envelope;
-    Envelope m_fm_amplitude_envelope;
-  } m_voices[NUM_VOICES]; 
+  struct addsynth_voice * m_voices_ptr; // array with one entry per voice
 
   /********************************************************/
   /*    INTERNAL VALUES OF THE NOTE AND OF THE VOICES     */
@@ -168,26 +98,30 @@ private:
   // time from the start of the note
   REALTYPE m_time;
 
-  //fractional part (skip)
-  REALTYPE oscposlo[NUM_VOICES],oscfreqlo[NUM_VOICES];    
+  // fractional part (skip)
+  float * m_osc_pos_lo_ptr;     // array with one entry per voice
+  float * m_osc_freq_lo_ptr;    // array with one entry per voice
 
-  //integer part (skip)
-  int oscposhi[NUM_VOICES],oscfreqhi[NUM_VOICES];
+  // integer part (skip)
+  int * m_osc_pos_hi_ptr;       // array with one entry per voice
+  int * m_osc_freq_hi_ptr;      // array with one entry per voice
 
-  //fractional part (skip) of the Modullator
-  REALTYPE oscposloFM[NUM_VOICES],oscfreqloFM[NUM_VOICES]; 
+  // fractional part (skip) of the Modullator
+  float * m_osc_pos_lo_FM_ptr;  // array with one entry per voice
+  float * m_osc_freq_lo_FM_ptr; // array with one entry per voice
 
-  //integer part (skip) of the Modullator
-  unsigned short int oscposhiFM[NUM_VOICES],oscfreqhiFM[NUM_VOICES];
+  // integer part (skip) of the Modullator
+  unsigned short int * m_osc_pos_hi_FM_ptr; // array with one entry per voice
+  unsigned short int * m_osc_freq_hi_FM_ptr; // array with one entry per voice
 
-  //used to compute and interpolate the amplitudes of voices and modullators
-  REALTYPE oldamplitude[NUM_VOICES],
-    newamplitude[NUM_VOICES],
-    FMoldamplitude[NUM_VOICES],
-    FMnewamplitude[NUM_VOICES];
+  // used to compute and interpolate the amplitudes of voices and modullators
+  float * m_old_amplitude_ptr;  // array with one entry per voice
+  float * m_new_amplitude_ptr;  // array with one entry per voice
+  float * m_FM_old_amplitude_ptr; // array with one entry per voice
+  float * m_FM_new_amplitude_ptr; // array with one entry per voice
 
-  //used by Frequency Modulation (for integration)
-  REALTYPE FMoldsmp[NUM_VOICES];
+  // used by Frequency Modulation (for integration)
+  float * m_FM_old_smp_ptr;     // array with one entry per voice
     
   //temporary buffer
   REALTYPE * m_tmpwave;
@@ -199,8 +133,8 @@ private:
   //interpolate the amplitudes    
   REALTYPE globaloldamplitude,globalnewamplitude;
     
-  //1 - if it is the fitst tick (used to fade in the sound)
-  char firsttick[NUM_VOICES];
+  // whether it is the first tick (used to fade in the sound)
+  bool * m_first_tick_ptr;        // array with one entry per voice
     
   // whether note has portamento 
   bool m_portamento;

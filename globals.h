@@ -65,11 +65,6 @@
 #define NUM_MIDI_CHANNELS 16
 
 /*
- * The number of voices of additive synth for a single note
- */
-#define NUM_VOICES 8
-
-/*
  * Number of system effects
  */
 #define NUM_SYS_EFX 4
