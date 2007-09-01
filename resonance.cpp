@@ -24,6 +24,7 @@
 
 #include "globals.h"
 #include "resonance.h"
+#include "fft_wrapper.h"
 
 Resonance::Resonance()
 {
@@ -56,7 +57,12 @@ void Resonance::setpoint(int n,unsigned char p){
 /*
  * Apply the resonance to FFT data
  */
-void Resonance::applyres(int n,FFTFREQS fftdata,REALTYPE freq){
+void
+Resonance::applyres(
+  int n,
+  struct zyn_fft_freqs fftdata,
+  REALTYPE freq)
+{
     if (Penabled==0) return;//if the resonance is disabled
     REALTYPE sum=0.0,
 	     l1=log(getfreqx(0.0)*ctlcenter),

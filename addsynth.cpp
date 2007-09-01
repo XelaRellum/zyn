@@ -59,7 +59,7 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->notes_array = (struct note_channel *)malloc(ZYN_DEFAULT_POLYPHONY * sizeof(struct note_channel));
 
   zyn_addsynth_ptr->velsns = 64;
-  zyn_addsynth_ptr->fft_ptr = new FFTwrapper(OSCIL_SIZE);
+  zyn_addsynth_ptr->fft = zyn_fft_create(OSCIL_SIZE);
 
   // ADnoteParameters temp begin
   zyn_addsynth_ptr->m_frequency_envelope_params.init_asr(0, false, 64, 50, 64, 60);
@@ -73,8 +73,9 @@ zyn_addsynth_create(
   for (voice_index=0;voice_index<NUM_VOICES;voice_index++)
   {
     zyn_addsynth_ptr->voices_params[voice_index].OscilSmp =
-      new OscilGen(zyn_addsynth_ptr->fft_ptr, zyn_addsynth_ptr->GlobalPar.Reson);
-    zyn_addsynth_ptr->voices_params[voice_index].FMSmp=new OscilGen(zyn_addsynth_ptr->fft_ptr, NULL);
+      new OscilGen(zyn_addsynth_ptr->fft, zyn_addsynth_ptr->GlobalPar.Reson);
+    zyn_addsynth_ptr->voices_params[voice_index].FMSmp =
+      new OscilGen(zyn_addsynth_ptr->fft, NULL);
 
     zyn_addsynth_ptr->voices_params[voice_index].m_amplitude_envelope_params.init_adsr(64, true, 0, 100, 127, 100, false); 
 
@@ -249,8 +250,8 @@ zyn_addsynth_create(
 
   *handle_ptr = (zyn_addsynth_handle)zyn_addsynth_ptr;
 
-  OscilGen::tmpsmps=new REALTYPE[OSCIL_SIZE];
-  newFFTFREQS(&OscilGen::outoscilFFTfreqs,OSCIL_SIZE/2);
+  OscilGen::tmpsmps = new REALTYPE[OSCIL_SIZE];
+  zyn_fft_freqs_init(&OscilGen::outoscilFFTfreqs, OSCIL_SIZE / 2);
 
 //  printf("zyn_addsynth_create(%08X)\n", (unsigned int)*handle_ptr);
 
@@ -371,7 +372,7 @@ zyn_addsynth_destroy(
   unsigned int voice_index;
 
 //  printf("zyn_addsynth_destroy(%08X)\n", (unsigned int)handle);
-  delete zyn_addsynth_ptr->fft_ptr;
+  zyn_fft_destroy(zyn_addsynth_ptr->fft);
 
   // ADnoteParameters temp begin
 

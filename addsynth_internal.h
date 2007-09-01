@@ -222,7 +222,7 @@ struct zyn_addsynth
 {
   unsigned int polyphony;
   struct note_channel * notes_array;
-  FFTwrapper * fft_ptr;
+  zyn_fft_handle fft;
   Controller * ctl_ptr;
   unsigned char velsns;         // velocity sensing (amplitude velocity scale)
   zyn_sample_type oldfreq;      // this is used for portamento

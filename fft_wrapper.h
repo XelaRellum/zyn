@@ -25,35 +25,55 @@
 
 #include "globals.h"
 
-#ifdef FFTW_VERSION_2
+struct zyn_fft_freqs
+{
+  zyn_sample_type *s,*c;               /* sine and cosine components */
+};
 
-#include <fftw.h>
+typedef void * zyn_fft_handle;
 
-/* If you got error messages about rfftw.h, replace the next include  line with "#include <srfftw.h>"
-   or with "#include <drfftw.h> (if one doesn't work try the other). It may be necessary to replace
-   the <fftw.h> with <dfftw.h> or <sfftw.h>. If the neither one doesn't work, 
-   please install latest version of fftw(recomanded from the sources) from www.fftw.org.
-   If you'll install fftw3 you need to change the Makefile.inc
-   Hope all goes right." */
-#include <rfftw.h>
-
-#else
-
-#include <fftw3.h>
-#define fftw_real double
-#define rfftw_plan fftw_plan
+#ifdef __cplusplus
+extern "C" {
+#endif
+#if 0
+} /* Adjust editor indent */
 #endif
 
-class FFTwrapper{
-public:
-  FFTwrapper(int fftsize_);
-  ~FFTwrapper();
-  void smps2freqs(REALTYPE *smps,FFTFREQS freqs);
-  void freqs2smps(FFTFREQS freqs,REALTYPE *smps);
-private:
-  int fftsize;
-  fftw_real *tmpfftdata1,*tmpfftdata2;
-  rfftw_plan planfftw,planfftw_inv;
-};
+void
+zyn_fft_freqs_init(
+  struct zyn_fft_freqs * f,
+  int size);
+
+void
+zyn_fft_freqs_uninit(
+  struct zyn_fft_freqs * f);
+
+zyn_fft_handle
+zyn_fft_create(
+  int fftsize);
+
+void
+zyn_fft_destroy(
+  zyn_fft_handle handle);
+
+void
+zyn_fft_smps2freqs(
+  zyn_fft_handle handle,
+  REALTYPE * smps,
+  struct zyn_fft_freqs freqs);
+
+void
+zyn_fft_freqs2smps(
+  zyn_fft_handle handle,
+  struct zyn_fft_freqs freqs,
+  REALTYPE * smps);
+
+#if 0
+{ /* Adjust editor indent */
+#endif
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 #endif
 

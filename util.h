@@ -39,9 +39,6 @@ zyn_velocity_scale(float velocity, float scaling);
 #define N_DETUNE_TYPES 4 //the number of detune types
 extern REALTYPE getdetune(unsigned char type,unsigned short int coarsedetune,unsigned short int finedetune);
 
-extern void newFFTFREQS(struct FFTFREQS *f, int size);
-extern void deleteFFTFREQS(struct FFTFREQS *f);
-
 void
 silence_two_buffers(
   zyn_sample_type * buffer1,

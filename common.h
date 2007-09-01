@@ -45,11 +45,6 @@
  */
 #define VELOCITY_MAX_SCALE 8.0
 
-struct FFTFREQS
-{
-  zyn_sample_type *s,*c;               /* sine and cosine components */
-};
-
 #define ZYN_LFO_SHAPE_TYPE_SINE        0
 #define ZYN_LFO_SHAPE_TYPE_TRIANGLE    1
 #define ZYN_LFO_SHAPE_TYPE_SQUARE      2

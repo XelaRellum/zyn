@@ -30,7 +30,7 @@ public:
   Resonance();
   ~Resonance();
   void setpoint(int n,unsigned char p);
-  void applyres(int n,FFTFREQS fftdata,REALTYPE freq);
+  void applyres(int n, struct zyn_fft_freqs fftdata, REALTYPE freq);
   void smooth();
   void interpolatepeaks(int type);
   void randomize(int type);

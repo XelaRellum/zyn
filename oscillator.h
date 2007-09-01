@@ -26,7 +26,7 @@
 class OscilGen
 {
 public:
-  OscilGen(FFTwrapper *fft_,Resonance *res_);
+  OscilGen(zyn_fft_handle fft, Resonance *res_);
   ~OscilGen();
 
   //computes the full spectrum of oscil from harmonics,phases and basefunc
@@ -103,13 +103,13 @@ public:
   bool ADvsPAD;//if it is used by ADsynth or by PADsynth
 
   static REALTYPE *tmpsmps;//this array stores some termporary data and it has SOUND_BUFFER_SIZE elements
-  static FFTFREQS outoscilFFTfreqs;
+  static struct zyn_fft_freqs outoscilFFTfreqs;
 
 private:
   
   REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
 //    private:
-  FFTwrapper *fft;
+  zyn_fft_handle m_fft;
   //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
   void changebasefunction();
   //Waveshaping
@@ -128,7 +128,7 @@ private:
   void modulation();
 
   //Do the adaptive harmonic stuff
-  void adaptiveharmonic(FFTFREQS f,REALTYPE freq);
+  void adaptiveharmonic(struct zyn_fft_freqs f, REALTYPE freq);
   
   //Do the adaptive harmonic postprocessing (2n+1,2xS,2xA,etc..)
   //this function is called even for the user interface
@@ -156,9 +156,12 @@ private:
   int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldbasefuncmodulationpar3,oldharmonicshift;
   int oldmodulation,oldmodulationpar1,oldmodulationpar2,oldmodulationpar3;
 
+  // Base Function Frequencies
+  struct zyn_fft_freqs basefuncFFTfreqs;
 
-  FFTFREQS basefuncFFTfreqs;//Base Function Frequencies
-  FFTFREQS oscilFFTfreqs;//Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
+  // Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
+  struct zyn_fft_freqs oscilFFTfreqs;
+
   int oscilprepared;//1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
   
   Resonance *res; 

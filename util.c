@@ -123,28 +123,6 @@ silence_two_buffers(
 }
 
 void
-newFFTFREQS(
-  struct FFTFREQS * f,
-  int size)
-{
-  f->c = malloc(size * sizeof(zyn_sample_type));
-  f->s = malloc(size * sizeof(zyn_sample_type));
-
-  silence_two_buffers(f->c, f->s, size);
-}
-
-void
-deleteFFTFREQS(
-  struct FFTFREQS * f)
-{
-  free(f->c);
-  free(f->s);
-
-  f->c = NULL;
-  f->s = NULL;
-}
-
-void
 mix_add_two_buffers(
   zyn_sample_type * buffer_mix_1,
   zyn_sample_type * buffer_mix_2,
