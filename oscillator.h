@@ -44,9 +44,7 @@ public:
   void getcurrentbasefunction(REALTYPE *smps);
   void useasbase();//convert oscil to base function
 
-//  void add2XML(XMLwrapper *xml);
   void defaults();
-//  void getfromXML(XMLwrapper *xml);
 
   void convert2sine(int magtype);
   

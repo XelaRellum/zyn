@@ -35,9 +35,7 @@ public:
   void interpolatepeaks(int type);
   void randomize(int type);
 
-//  void add2XML(XMLwrapper *xml);
   void defaults();
-//  void getfromXML(XMLwrapper *xml);
 
 
   REALTYPE getfreqpos(REALTYPE freq);

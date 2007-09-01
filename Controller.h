@@ -25,7 +25,6 @@
 #define CONTROLLER_H
 
 #include "globals.h"
-//#include "../Misc/XMLwrapper.h"
 
 class Controller{
 public:
@@ -33,9 +32,7 @@ public:
   ~Controller();
   void resetall();
 
-//  void add2XML(XMLwrapper *xml);
   void defaults();
-//  void getfromXML(XMLwrapper *xml);
 
   //Controllers functions
   void setpitchwheel(int value);
