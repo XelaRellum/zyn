@@ -26,7 +26,7 @@
 #include "addsynth.h"
 #include "globals.h"
 #include "resonance.h"
-#include "fft_wrapper.h"
+#include "fft.h"
 #include "oscillator.h"
 #include "envelope_parameters.h"
 #include "envelope.h"

@@ -24,7 +24,7 @@
 
 #include "globals.h"
 #include "resonance.h"
-#include "fft_wrapper.h"
+#include "fft.h"
 
 Resonance::Resonance()
 {

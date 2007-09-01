@@ -38,7 +38,7 @@
 # define rfftw_plan fftw_plan
 #endif
 
-#include "fft_wrapper.h"
+#include "fft.h"
 
 struct zyn_fft
 {
