@@ -701,6 +701,10 @@ void zynadd_map_initialise()
     }
   }
 
+  LV2DYNPARAM_GROUP_INIT(ROOT, VOICES, "Voices", NULL);
+  {
+  }
+
   /* santity check that we have filled all values */
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
