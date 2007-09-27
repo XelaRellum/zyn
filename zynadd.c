@@ -33,6 +33,7 @@
 #include "addsynth.h"
 #include "lv2dynparam/lv2dynparam.h"
 #include "lv2dynparam/plugin.h"
+#include "list.h"
 #include "zynadd_internal.h"
 //#define LOG_LEVEL LOG_LEVEL_DEBUG
 #include "log.h"

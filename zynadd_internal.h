@@ -153,6 +153,7 @@
 
 struct zynadd_parameter
 {
+  struct list_head siblings;
   struct zynadd * synth_ptr;
   unsigned int addsynth_component; /* one of ZYNADD_COMPONENT_XXX */
   unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
@@ -160,6 +161,12 @@ struct zynadd_parameter
   unsigned int scope_specific;
 
   lv2dynparam_plugin_parameter lv2parameter;
+};
+
+struct zynadd_group
+{
+  struct list_head siblings;
+  lv2dynparam_plugin_group lv2group;
 };
 
 struct zynadd
@@ -177,8 +184,11 @@ struct zynadd
 
   lv2dynparam_plugin_instance dynparams;
 
-  lv2dynparam_plugin_group groups[LV2DYNPARAM_GROUPS_COUNT];
-  struct zynadd_parameter parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+  struct list_head groups;
+  struct list_head parameters;
+
+  struct zynadd_group * static_groups[LV2DYNPARAM_GROUPS_COUNT];
+  struct zynadd_parameter * static_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
 };
 
 bool zynadd_dynparam_init(struct zynadd * zynadd_ptr);
