@@ -134,7 +134,7 @@ zynadd_appear_parameter(
     "Appearing parameter %u (\"%s\") -> %u",
     parameter_index,
     g_map_parameters[parameter_index].name,
-    zynadd_ptr->static_parameters[parameter_index].addsynth_parameter);
+    zynadd_ptr->static_parameters[parameter_index]->addsynth_parameter);
 
   if (g_map_parameters[parameter_index].parent == LV2DYNPARAM_GROUP_ROOT)
   {
@@ -586,7 +586,7 @@ void zynadd_map_initialise()
 
   LV2DYNPARAM_GROUP_INIT(ROOT, FILTER, "Filter", NULL);
   {
-    LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_FILTERS, "Filter parameters", HINT_ONE_SUBGROUP, NULL);
+    LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_FILTERS, "Filter parameters", HINT_ONE_SUBGROUP, NULL, NULL);
     {
       g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].parent = LV2DYNPARAM_GROUP(FILTER_FILTERS);
       g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].name = "Filter category";
@@ -735,7 +735,6 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
   bool tmp_bool;
   struct zynadd_group * group_ptr;
   struct zynadd_parameter * parameter_ptr;
-  struct list_head * node_ptr;
 
   INIT_LIST_HEAD(&zynadd_ptr->groups);
   INIT_LIST_HEAD(&zynadd_ptr->parameters);
@@ -790,6 +789,7 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
     parameter_ptr->addsynth_component = g_map_parameters[i].addsynth_component;
     parameter_ptr->scope = g_map_parameters[i].scope;
     parameter_ptr->scope_specific = g_map_parameters[i].scope_specific;
+    parameter_ptr->lv2parameter = NULL;
   }
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
@@ -843,7 +843,18 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
   return true;
 
 fail_clean_dynparams:
-  lv2dynparam_plugin_cleanup(zynadd_ptr->dynparams);
+  zynadd_dynparam_uninit(zynadd_ptr);
+
+fail:
+  return false;
+}
+
+void
+zynadd_dynparam_uninit(struct zynadd * zynadd_ptr)
+{
+  struct list_head * node_ptr;
+  struct zynadd_group * group_ptr;
+  struct zynadd_parameter * parameter_ptr;
 
   while (!list_empty(&zynadd_ptr->parameters))
   {
@@ -861,6 +872,5 @@ fail_clean_dynparams:
     free(group_ptr);
   }
 
-fail:
-  return false;
+  lv2dynparam_plugin_cleanup(zynadd_ptr->dynparams);
 }

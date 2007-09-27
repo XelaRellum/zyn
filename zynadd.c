@@ -226,6 +226,7 @@ zynadd_cleanup(
   LV2_Handle instance)
 {
 /*   printf("zynadd_cleanup\n"); */
+  zynadd_dynparam_uninit(zynadd_ptr);
   zyn_addsynth_destroy(zynadd_ptr->synth);
   free(zynadd_ptr->ports);
   free(zynadd_ptr->bundle_path);

@@ -193,4 +193,6 @@ struct zynadd
 
 bool zynadd_dynparam_init(struct zynadd * zynadd_ptr);
 
+void zynadd_dynparam_uninit(struct zynadd * zynadd_ptr);
+
 #endif /* #ifndef ZYNADD_INTERNAL_H__A38C6254_E7AD_443E_AA5F_A5AB3FCB8B06__INCLUDED */
