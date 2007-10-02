@@ -34,58 +34,14 @@
 #define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
 
-#define ZYN_MAX_HINTS 10
-
 #define HINT_HIDDEN           "http://home.gna.org/zynjacku/hints#hidden"
 #define HINT_TOGGLE_FLOAT     "http://home.gna.org/zynjacku/hints#togglefloat"
 #define HINT_ONE_SUBGROUP     "http://home.gna.org/zynjacku/hints#onesubgroup"
 
-struct group_descriptor
-{
-  int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
-
-  const char * name;            /* group name */
-
-  struct lv2dynparam_hints hints;
-  const char * hint_names[ZYN_MAX_HINTS];
-  const char * hint_values[ZYN_MAX_HINTS];
-};
-
-struct parameter_descriptor
-{
-  int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
-  const char * name;            /* parameter name */
-
-  struct lv2dynparam_hints hints;
-  const char * hint_names[ZYN_MAX_HINTS];
-  const char * hint_values[ZYN_MAX_HINTS];
-
-  unsigned int type;            /* one of LV2DYNPARAM_PARAMETER_TYPE_XXX */
-
-  unsigned int addsynth_component; /* one of ZYNADD_COMPONENT_XXX */
-  unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
-
-  unsigned int scope;                   /* one of LV2DYNPARAM_PARAMETER_SCOPE_TYPE_XXX */
-  unsigned int scope_specific;
-
-  union
-  {
-    float fpoint;
-    signed int integer;
-  } min;
-
-  union
-  {
-    float fpoint;
-    signed int integer;
-  } max;
-};
-
 /* descriptors containing parent group index */
 /* array elements through child index */
 /* this defines the tree hierarchy */
-struct group_descriptor g_map_groups[LV2DYNPARAM_GROUPS_COUNT];
-struct parameter_descriptor g_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+
 const char * g_shape_names[ZYN_LFO_SHAPES_COUNT];
 const char * g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPES_COUNT];
 const char * g_filter_type_names[ZYN_FILTER_TYPES_COUNT];
@@ -126,6 +82,7 @@ zynadd_analog_filter_type_parameter_changed(
 bool
 zynadd_appear_parameter(
   struct zynadd * zynadd_ptr,
+  struct zyn_forest_initializer * forest_ptr,
   unsigned int parameter_index)
 {
   lv2dynparam_plugin_group parent_group;
@@ -133,33 +90,33 @@ zynadd_appear_parameter(
   LOG_DEBUG(
     "Appearing parameter %u (\"%s\") -> %u",
     parameter_index,
-    g_map_parameters[parameter_index].name,
-    zynadd_ptr->static_parameters[parameter_index]->addsynth_parameter);
+    forest_ptr->parameters_map[parameter_index].name,
+    forest_ptr->parameters[parameter_index]->addsynth_parameter);
 
-  if (g_map_parameters[parameter_index].parent == LV2DYNPARAM_GROUP_ROOT)
+  if (forest_ptr->parameters_map[parameter_index].parent == LV2DYNPARAM_GROUP_ROOT)
   {
     parent_group = NULL;
   }
   else
   {
-    parent_group = zynadd_ptr->static_groups[g_map_parameters[parameter_index].parent]->lv2group;
+    parent_group = forest_ptr->groups[forest_ptr->parameters_map[parameter_index].parent]->lv2group;
   }
 
-  switch (g_map_parameters[parameter_index].type)
+  switch (forest_ptr->parameters_map[parameter_index].type)
   {
   case LV2DYNPARAM_PARAMETER_TYPE_BOOL:
     if (!lv2dynparam_plugin_param_boolean_add(
           zynadd_ptr->dynparams,
           parent_group,
-          g_map_parameters[parameter_index].name,
-          &g_map_parameters[parameter_index].hints,
+          forest_ptr->parameters_map[parameter_index].name,
+          &forest_ptr->parameters_map[parameter_index].hints,
           zyn_addsynth_get_bool_parameter(
             zynadd_ptr->synth,
-            zynadd_ptr->static_parameters[parameter_index]->addsynth_component,
-            zynadd_ptr->static_parameters[parameter_index]->addsynth_parameter),
+            forest_ptr->parameters[parameter_index]->addsynth_component,
+            forest_ptr->parameters[parameter_index]->addsynth_parameter),
           zynadd_bool_parameter_changed,
-          zynadd_ptr->static_parameters[parameter_index],
-          &zynadd_ptr->static_parameters[parameter_index]->lv2parameter))
+          forest_ptr->parameters[parameter_index],
+          &forest_ptr->parameters[parameter_index]->lv2parameter))
     {
       return false;
     }
@@ -170,17 +127,17 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_float_add(
           zynadd_ptr->dynparams,
           parent_group,
-          g_map_parameters[parameter_index].name,
-          &g_map_parameters[parameter_index].hints,
+          forest_ptr->parameters_map[parameter_index].name,
+          &forest_ptr->parameters_map[parameter_index].hints,
           zyn_addsynth_get_float_parameter(
             zynadd_ptr->synth,
-            zynadd_ptr->static_parameters[parameter_index]->addsynth_component,
-            zynadd_ptr->static_parameters[parameter_index]->addsynth_parameter),
-          g_map_parameters[parameter_index].min.fpoint,
-          g_map_parameters[parameter_index].max.fpoint,
+            forest_ptr->parameters[parameter_index]->addsynth_component,
+            forest_ptr->parameters[parameter_index]->addsynth_parameter),
+          forest_ptr->parameters_map[parameter_index].min.fpoint,
+          forest_ptr->parameters_map[parameter_index].max.fpoint,
           zynadd_float_parameter_changed,
-          zynadd_ptr->static_parameters[parameter_index],
-          &zynadd_ptr->static_parameters[parameter_index]->lv2parameter))
+          forest_ptr->parameters[parameter_index],
+          &forest_ptr->parameters[parameter_index]->lv2parameter))
     {
       return false;
     }
@@ -191,17 +148,17 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_int_add(
           zynadd_ptr->dynparams,
           parent_group,
-          g_map_parameters[parameter_index].name,
-          &g_map_parameters[parameter_index].hints,
+          forest_ptr->parameters_map[parameter_index].name,
+          &forest_ptr->parameters_map[parameter_index].hints,
           zyn_addsynth_get_int_parameter(
             zynadd_ptr->synth,
-            zynadd_ptr->static_parameters[parameter_index]->addsynth_component,
-            zynadd_ptr->static_parameters[parameter_index]->addsynth_parameter),
-          g_map_parameters[parameter_index].min.integer,
-          g_map_parameters[parameter_index].max.integer,
+            forest_ptr->parameters[parameter_index]->addsynth_component,
+            forest_ptr->parameters[parameter_index]->addsynth_parameter),
+          forest_ptr->parameters_map[parameter_index].min.integer,
+          forest_ptr->parameters_map[parameter_index].max.integer,
           zynadd_int_parameter_changed,
-          zynadd_ptr->static_parameters[parameter_index],
-          &zynadd_ptr->static_parameters[parameter_index]->lv2parameter))
+          forest_ptr->parameters[parameter_index],
+          &forest_ptr->parameters[parameter_index]->lv2parameter))
     {
       return false;
     }
@@ -212,14 +169,14 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
           parent_group,
-          g_map_parameters[parameter_index].name,
-          &g_map_parameters[parameter_index].hints,
+          forest_ptr->parameters_map[parameter_index].name,
+          &forest_ptr->parameters_map[parameter_index].hints,
           g_shape_names,
           ZYN_LFO_SHAPES_COUNT,
-          zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, zynadd_ptr->static_parameters[parameter_index]->addsynth_component),
+          zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, forest_ptr->parameters[parameter_index]->addsynth_component),
           zynadd_shape_parameter_changed,
-          zynadd_ptr->static_parameters[parameter_index],
-          &zynadd_ptr->static_parameters[parameter_index]->lv2parameter))
+          forest_ptr->parameters[parameter_index],
+          &forest_ptr->parameters[parameter_index]->lv2parameter))
     {
       return false;
     }
@@ -229,14 +186,14 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
           parent_group,
-          g_map_parameters[parameter_index].name,
-          &g_map_parameters[parameter_index].hints,
+          forest_ptr->parameters_map[parameter_index].name,
+          &forest_ptr->parameters_map[parameter_index].hints,
           g_filter_type_names,
           ZYN_FILTER_TYPES_COUNT,
-          zyn_addsynth_get_filter_type_parameter(zynadd_ptr->synth, zynadd_ptr->static_parameters[parameter_index]->addsynth_component),
+          zyn_addsynth_get_filter_type_parameter(zynadd_ptr->synth, forest_ptr->parameters[parameter_index]->addsynth_component),
           zynadd_filter_type_parameter_changed,
-          zynadd_ptr->static_parameters[parameter_index],
-          &zynadd_ptr->static_parameters[parameter_index]->lv2parameter))
+          forest_ptr->parameters[parameter_index],
+          &forest_ptr->parameters[parameter_index]->lv2parameter))
     {
       return false;
     }
@@ -246,14 +203,14 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
           parent_group,
-          g_map_parameters[parameter_index].name,
-          &g_map_parameters[parameter_index].hints,
+          forest_ptr->parameters_map[parameter_index].name,
+          &forest_ptr->parameters_map[parameter_index].hints,
           g_analog_filter_type_names,
           ZYN_FILTER_ANALOG_TYPES_COUNT,
-          zyn_addsynth_get_analog_filter_type_parameter(zynadd_ptr->synth, zynadd_ptr->static_parameters[parameter_index]->addsynth_component),
+          zyn_addsynth_get_analog_filter_type_parameter(zynadd_ptr->synth, forest_ptr->parameters[parameter_index]->addsynth_component),
           zynadd_analog_filter_type_parameter_changed,
-          zynadd_ptr->static_parameters[parameter_index],
-          &zynadd_ptr->static_parameters[parameter_index]->lv2parameter))
+          forest_ptr->parameters[parameter_index],
+          &forest_ptr->parameters[parameter_index]->lv2parameter))
     {
       return false;
     }
@@ -295,14 +252,14 @@ zynadd_bool_parameter_changed(
       /* enabling randomize -> remove panorama parameter */
       if (!lv2dynparam_plugin_param_remove(
             parameter_ptr->synth_ptr->dynparams,
-            parameter_ptr->synth_ptr->static_parameters[parameter_ptr->scope_specific]->lv2parameter))
+            parameter_ptr->synth_ptr->top_forest_initializer.parameters[parameter_ptr->scope_specific]->lv2parameter))
       {
         return false;
       }
     }
     else
     {
-      if (!zynadd_appear_parameter(parameter_ptr->synth_ptr, parameter_ptr->scope_specific))
+      if (!zynadd_appear_parameter(parameter_ptr->synth_ptr, &parameter_ptr->synth_ptr->top_forest_initializer, parameter_ptr->scope_specific))
       {
         return false;
       }
@@ -379,8 +336,14 @@ zynadd_int_parameter_changed(
 #define LV2DYNPARAM_PARAMETER(parameter) LV2DYNPARAM_PARAMETER_ ## parameter
 #define LV2DYNPARAM_PARAMETER_SHAPE(parameter) LV2DYNPARAM_PARAMETER_ ## parameter ## _SHAPE
 
-static void
-lv2dynparam_group_init(unsigned int parent, unsigned int group, const char * name, ...)
+static
+void
+lv2dynparam_group_init(
+  struct zyn_forest_initializer * forest_ptr,
+  unsigned int parent,
+  unsigned int group,
+  const char * name,
+  ...)
 {
   va_list ap;
   const char * hint_name;
@@ -388,18 +351,18 @@ lv2dynparam_group_init(unsigned int parent, unsigned int group, const char * nam
 
   LOG_DEBUG("group \"%s\"", name);
 
-  g_map_groups[group].parent = parent;
-  g_map_groups[group].name = name;
+  forest_ptr->groups_map[group].parent = parent;
+  forest_ptr->groups_map[group].name = name;
 
-  g_map_groups[group].hints.count = 0;
-  g_map_groups[group].hints.names = (char **)g_map_groups[group].hint_names;
-  g_map_groups[group].hints.values = (char **)g_map_groups[group].hint_values;
+  forest_ptr->groups_map[group].hints.count = 0;
+  forest_ptr->groups_map[group].hints.names = (char **)forest_ptr->groups_map[group].hint_names;
+  forest_ptr->groups_map[group].hints.values = (char **)forest_ptr->groups_map[group].hint_values;
 
   va_start(ap, name);
   while ((hint_name = va_arg(ap, const char *)) != NULL)
   {
-    assert(g_map_groups[group].hints.count < ZYN_MAX_HINTS);
-    g_map_groups[group].hint_names[g_map_groups[group].hints.count] = hint_name;
+    assert(forest_ptr->groups_map[group].hints.count < ZYN_MAX_HINTS);
+    forest_ptr->groups_map[group].hint_names[forest_ptr->groups_map[group].hints.count] = hint_name;
 
     hint_value = va_arg(ap, const char *);
     if (hint_value == NULL)
@@ -409,28 +372,28 @@ lv2dynparam_group_init(unsigned int parent, unsigned int group, const char * nam
     else
     {
       LOG_DEBUG("hint \"%s\":\"%s\"", hint_name, hint_value);
-      g_map_groups[group].hint_values[g_map_groups[group].hints.count] = hint_value;
+      forest_ptr->groups_map[group].hint_values[forest_ptr->groups_map[group].hints.count] = hint_value;
     }
 
-    g_map_groups[group].hints.count++;
+    forest_ptr->groups_map[group].hints.count++;
   }
   va_end(ap);
 }
 
 #define LV2DYNPARAM_GROUP_INIT(parent_group, group, name_value, hints...) \
-  lv2dynparam_group_init(LV2DYNPARAM_GROUP(parent_group), LV2DYNPARAM_GROUP(group), name_value, ## hints)
+  lv2dynparam_group_init(forest_ptr, LV2DYNPARAM_GROUP(parent_group), LV2DYNPARAM_GROUP(group), name_value, ## hints)
 
 #define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, lv2parameter, component, zynparameter, name_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") bool -> %u",                       \
             LV2DYNPARAM_PARAMETER(lv2parameter),                        \
             name_value,                                                 \
             ZYNADD_PARAMETER_BOOL_ ## zynparameter);                    \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter;
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter;
 
 #define LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(parent_group, lv2parameter, component, zynparameter, name_value, scope_value, other_parameter, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") bool -> %u; with other %u",        \
@@ -438,13 +401,13 @@ lv2dynparam_group_init(unsigned int parent, unsigned int group, const char * nam
             name_value,                                                 \
             ZYNADD_PARAMETER_BOOL_ ## zynparameter,                     \
             LV2DYNPARAM_PARAMETER(other_parameter));                    \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value ## _OTHER; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope_specific = LV2DYNPARAM_PARAMETER(other_parameter);
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value ## _OTHER; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].scope_specific = LV2DYNPARAM_PARAMETER(other_parameter);
 
 #define LV2DYNPARAM_PARAMETER_INIT_FLOAT(parent_group, lv2parameter, component, zynparameter, name_value, min_value, max_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") float -> %u:%u",                   \
@@ -452,14 +415,14 @@ lv2dynparam_group_init(unsigned int parent, unsigned int group, const char * nam
             name_value,                                                 \
             ZYNADD_COMPONENT_ ## component,                             \
             ZYNADD_PARAMETER_FLOAT_ ## zynparameter);                   \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].min.fpoint = min_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].max.fpoint = max_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## zynparameter;
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].min.fpoint = min_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].max.fpoint = max_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## zynparameter;
 
 #define LV2DYNPARAM_PARAMETER_INIT_INT(parent_group, lv2parameter, component, zynparameter, name_value, min_value, max_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") int -> %u:%u",                     \
@@ -467,27 +430,26 @@ lv2dynparam_group_init(unsigned int parent, unsigned int group, const char * nam
             name_value,                                                 \
             ZYNADD_COMPONENT_ ## component,                             \
             ZYNADD_PARAMETER_INT_ ## zynparameter);                     \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_INT; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].min.integer = min_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].max.integer = max_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_INT_ ## zynparameter;
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_INT; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].min.integer = min_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].max.integer = max_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_INT_ ## zynparameter;
 
 #define LV2DYNPARAM_PARAMETER_INIT_SHAPE(parent_group, lv2parameter, component, name_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") shape -> %u",                      \
             LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter),                  \
             name_value);                                                \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].name = name_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_SHAPE; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  g_map_parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component;
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].name = name_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_SHAPE; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component;
 
-void zynadd_map_initialise() __attribute__((constructor));
-void zynadd_map_initialise()
+void zynadd_init_top_forest_initializator(struct zyn_forest_initializer * forest_ptr)
 {
   int i;
 
@@ -515,12 +477,12 @@ void zynadd_map_initialise()
 
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
-    g_map_groups[i].parent = LV2DYNPARAM_GROUP_INVALID;
+    forest_ptr->groups_map[i].parent = LV2DYNPARAM_GROUP_INVALID;
   }
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
-    g_map_parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
+    forest_ptr->parameters_map[i].parent = LV2DYNPARAM_GROUP_INVALID;
   }
 
   LV2DYNPARAM_GROUP_INIT(ROOT, AMP, "Amplitude", NULL);
@@ -588,19 +550,19 @@ void zynadd_map_initialise()
   {
     LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_FILTERS, "Filter parameters", HINT_ONE_SUBGROUP, NULL, NULL);
     {
-      g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].parent = LV2DYNPARAM_GROUP(FILTER_FILTERS);
-      g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].name = "Filter category";
-      g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].type = LV2DYNPARAM_PARAMETER_TYPE_FILTER_TYPE;
-      g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
-      g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
+      forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].parent = LV2DYNPARAM_GROUP(FILTER_FILTERS);
+      forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].name = "Filter category";
+      forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].type = LV2DYNPARAM_PARAMETER_TYPE_FILTER_TYPE;
+      forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
+      forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
 
       LV2DYNPARAM_GROUP_INIT(FILTER_FILTERS, FILTER_ANALOG, "Analog", NULL);
       {
-        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].parent = LV2DYNPARAM_GROUP(FILTER_ANALOG);
-        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].name = "Filter type";
-        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].type = LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE;
-        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
-        g_map_parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
+        forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].parent = LV2DYNPARAM_GROUP(FILTER_ANALOG);
+        forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].name = "Filter type";
+        forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].type = LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE;
+        forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
+        forest_ptr->parameters_map[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
 
         LV2DYNPARAM_PARAMETER_INIT_INT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_STAGES, FILTER_GLOBALS, STAGES, "Stages", 1, 5, ALWAYS, NULL);
 
@@ -711,21 +673,21 @@ void zynadd_map_initialise()
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
-    LOG_DEBUG("parameter %d with parent %d", i, g_map_parameters[i].parent);
-    assert(g_map_parameters[i].parent != LV2DYNPARAM_GROUP_INVALID);
-    assert(g_map_parameters[i].parent < LV2DYNPARAM_GROUPS_COUNT);
+    LOG_DEBUG("parameter %d with parent %d", i, forest_ptr->parameters_map[i].parent);
+    assert(forest_ptr->parameters_map[i].parent != LV2DYNPARAM_GROUP_INVALID);
+    assert(forest_ptr->parameters_map[i].parent < LV2DYNPARAM_GROUPS_COUNT);
   }
 
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
-    LOG_DEBUG("group %d with parent %d", i, g_map_groups[i].parent);
-    assert(g_map_groups[i].parent != LV2DYNPARAM_GROUP_INVALID);
+    LOG_DEBUG("group %d with parent %d", i, forest_ptr->groups_map[i].parent);
+    assert(forest_ptr->groups_map[i].parent != LV2DYNPARAM_GROUP_INVALID);
 
-    assert(g_map_groups[i].name != NULL);
+    assert(forest_ptr->groups_map[i].name != NULL);
 
     /* check that parents are with smaller indexes than children */
     /* this checks for loops too */
-    assert(g_map_groups[i].parent < i);
+    assert(forest_ptr->groups_map[i].parent < i);
   }
 }
 
@@ -735,6 +697,11 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
   bool tmp_bool;
   struct zynadd_group * group_ptr;
   struct zynadd_parameter * parameter_ptr;
+  struct zyn_forest_initializer * forest_ptr;
+
+  forest_ptr = &zynadd_ptr->top_forest_initializer;
+
+  zynadd_init_top_forest_initializator(forest_ptr);
 
   INIT_LIST_HEAD(&zynadd_ptr->groups);
   INIT_LIST_HEAD(&zynadd_ptr->parameters);
@@ -749,7 +716,7 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
 
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
-    LOG_DEBUG("Adding group \"%s\"", g_map_groups[i].name);
+    LOG_DEBUG("Adding group \"%s\"", forest_ptr->groups_map[i].name);
 
     group_ptr = malloc(sizeof(struct zynadd_group));
     if (group_ptr == NULL)
@@ -759,13 +726,13 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
 
     list_add_tail(&group_ptr->siblings, &zynadd_ptr->groups);
 
-    zynadd_ptr->static_groups[i] = group_ptr;
+    forest_ptr->groups[i] = group_ptr;
 
     if (!lv2dynparam_plugin_group_add(
           zynadd_ptr->dynparams,
-          g_map_groups[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : zynadd_ptr->static_groups[g_map_groups[i].parent]->lv2group,
-          g_map_groups[i].name,
-          &g_map_groups[i].hints,
+          forest_ptr->groups_map[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : forest_ptr->groups[forest_ptr->groups_map[i].parent]->lv2group,
+          forest_ptr->groups_map[i].name,
+          &forest_ptr->groups_map[i].hints,
           &group_ptr->lv2group))
     {
       goto fail_clean_dynparams;
@@ -782,47 +749,47 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
 
     list_add_tail(&parameter_ptr->siblings, &zynadd_ptr->parameters);
 
-    zynadd_ptr->static_parameters[i] = parameter_ptr;
+    forest_ptr->parameters[i] = parameter_ptr;
 
     parameter_ptr->synth_ptr = zynadd_ptr;
-    parameter_ptr->addsynth_parameter = g_map_parameters[i].addsynth_parameter;
-    parameter_ptr->addsynth_component = g_map_parameters[i].addsynth_component;
-    parameter_ptr->scope = g_map_parameters[i].scope;
-    parameter_ptr->scope_specific = g_map_parameters[i].scope_specific;
+    parameter_ptr->addsynth_parameter = forest_ptr->parameters_map[i].addsynth_parameter;
+    parameter_ptr->addsynth_component = forest_ptr->parameters_map[i].addsynth_component;
+    parameter_ptr->scope = forest_ptr->parameters_map[i].scope;
+    parameter_ptr->scope_specific = forest_ptr->parameters_map[i].scope_specific;
     parameter_ptr->lv2parameter = NULL;
   }
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
-    LOG_DEBUG("Adding parameter \"%s\"", g_map_parameters[i].name);
+    LOG_DEBUG("Adding parameter \"%s\"", forest_ptr->parameters_map[i].name);
 
-    if (g_map_parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SEMI)
+    if (forest_ptr->parameters_map[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SEMI)
     {
       continue;
     }
 
-    if (g_map_parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
-        g_map_parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
+    if (forest_ptr->parameters_map[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
+        forest_ptr->parameters_map[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
     {
-      LOG_DEBUG("Apearing show/hide parameter \"%s\"", g_map_parameters[i].name);
-      assert(g_map_parameters[i].type == LV2DYNPARAM_PARAMETER_TYPE_BOOL);
+      LOG_DEBUG("Apearing show/hide parameter \"%s\"", forest_ptr->parameters_map[i].name);
+      assert(forest_ptr->parameters_map[i].type == LV2DYNPARAM_PARAMETER_TYPE_BOOL);
 
       tmp_bool = zyn_addsynth_get_bool_parameter(
         zynadd_ptr->synth,
-        g_map_parameters[i].addsynth_component,
-        g_map_parameters[i].addsynth_parameter);
+        forest_ptr->parameters_map[i].addsynth_component,
+        forest_ptr->parameters_map[i].addsynth_parameter);
 
-      if (!zynadd_appear_parameter(zynadd_ptr, i))
+      if (!zynadd_appear_parameter(zynadd_ptr, forest_ptr, i))
       {
         goto fail_clean_dynparams;
       }
 
-      if ((g_map_parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER && !tmp_bool) ||
-          (g_map_parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER && tmp_bool))
+      if ((forest_ptr->parameters_map[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER && !tmp_bool) ||
+          (forest_ptr->parameters_map[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER && tmp_bool))
       {
-        LOG_DEBUG("Apearing semi parameter %u", g_map_parameters[i].scope_specific);
-        LOG_DEBUG("Apearing semi parameter \"%s\"", g_map_parameters[g_map_parameters[i].scope_specific].name);
-        if (!zynadd_appear_parameter(zynadd_ptr, g_map_parameters[i].scope_specific))
+        LOG_DEBUG("Apearing semi parameter %u", forest_ptr->parameters_map[i].scope_specific);
+        LOG_DEBUG("Apearing semi parameter \"%s\"", forest_ptr->parameters_map[forest_ptr->parameters_map[i].scope_specific].name);
+        if (!zynadd_appear_parameter(zynadd_ptr, forest_ptr, forest_ptr->parameters_map[i].scope_specific))
         {
           goto fail_clean_dynparams;
         }
@@ -831,9 +798,9 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
       continue;
     }
 
-    assert(g_map_parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS);
+    assert(forest_ptr->parameters_map[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS);
 
-    if (!zynadd_appear_parameter(zynadd_ptr, i))
+    if (!zynadd_appear_parameter(zynadd_ptr, forest_ptr, i))
     {
       LOG_ERROR("zynadd_appear_parameter() failed.");
       goto fail_clean_dynparams;

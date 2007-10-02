@@ -151,6 +151,8 @@
 
 #define LV2DYNPARAM_GROUPS_COUNT                                    25
 
+#define ZYN_MAX_HINTS 10
+
 struct zynadd_parameter
 {
   struct list_head siblings;
@@ -167,6 +169,56 @@ struct zynadd_group
 {
   struct list_head siblings;
   lv2dynparam_plugin_group lv2group;
+};
+
+struct group_descriptor
+{
+  int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
+
+  const char * name;            /* group name */
+
+  struct lv2dynparam_hints hints;
+  const char * hint_names[ZYN_MAX_HINTS];
+  const char * hint_values[ZYN_MAX_HINTS];
+};
+
+struct parameter_descriptor
+{
+  int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
+  const char * name;            /* parameter name */
+
+  struct lv2dynparam_hints hints;
+  const char * hint_names[ZYN_MAX_HINTS];
+  const char * hint_values[ZYN_MAX_HINTS];
+
+  unsigned int type;            /* one of LV2DYNPARAM_PARAMETER_TYPE_XXX */
+
+  unsigned int addsynth_component; /* one of ZYNADD_COMPONENT_XXX */
+  unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
+
+  unsigned int scope;                   /* one of LV2DYNPARAM_PARAMETER_SCOPE_TYPE_XXX */
+  unsigned int scope_specific;
+
+  union
+  {
+    float fpoint;
+    signed int integer;
+  } min;
+
+  union
+  {
+    float fpoint;
+    signed int integer;
+  } max;
+};
+
+struct zyn_forest_initializer
+{
+  struct group_descriptor groups_map[LV2DYNPARAM_GROUPS_COUNT];
+  struct parameter_descriptor parameters_map[LV2DYNPARAM_PARAMETERS_COUNT];
+
+  struct zynadd_group * groups[LV2DYNPARAM_GROUPS_COUNT];
+  struct zynadd_parameter * parameters[LV2DYNPARAM_PARAMETERS_COUNT];
 };
 
 struct zynadd
@@ -187,8 +239,7 @@ struct zynadd
   struct list_head groups;
   struct list_head parameters;
 
-  struct zynadd_group * static_groups[LV2DYNPARAM_GROUPS_COUNT];
-  struct zynadd_parameter * static_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+  struct zyn_forest_initializer top_forest_initializer;
 };
 
 bool zynadd_dynparam_init(struct zynadd * zynadd_ptr);
