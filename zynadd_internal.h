@@ -212,10 +212,15 @@ struct parameter_descriptor
   } max;
 };
 
+struct zyn_forest_map
+{
+  struct group_descriptor groups[LV2DYNPARAM_GROUPS_COUNT];
+  struct parameter_descriptor parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+};
+
 struct zyn_forest_initializer
 {
-  struct group_descriptor groups_map[LV2DYNPARAM_GROUPS_COUNT];
-  struct parameter_descriptor parameters_map[LV2DYNPARAM_PARAMETERS_COUNT];
+  struct zyn_forest_map * map_ptr;
 
   struct zynadd_group * groups[LV2DYNPARAM_GROUPS_COUNT];
   struct zynadd_parameter * parameters[LV2DYNPARAM_PARAMETERS_COUNT];
