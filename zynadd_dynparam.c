@@ -84,41 +84,39 @@ zynadd_analog_filter_type_parameter_changed(
 bool
 zynadd_appear_parameter(
   struct zynadd * zynadd_ptr,
-  struct zyn_forest_initializer * forest_ptr,
-  unsigned int parameter_index)
+  struct zynadd_parameter * parameter_ptr)
 {
   lv2dynparam_plugin_group parent_group;
 
   LOG_DEBUG(
-    "Appearing parameter %u (\"%s\") -> %u",
-    parameter_index,
-    forest_ptr->map_ptr->parameters[parameter_index].name,
-    forest_ptr->parameters[parameter_index]->addsynth_parameter);
+    "Appearing parameter \"%s\" -> %u",
+    parameter_ptr->name_ptr,
+    parameter_ptr->addsynth_parameter);
 
-  if (forest_ptr->map_ptr->parameters[parameter_index].parent == LV2DYNPARAM_GROUP_ROOT)
+  if (parameter_ptr->parent_ptr == NULL)
   {
     parent_group = NULL;
   }
   else
   {
-    parent_group = forest_ptr->groups[forest_ptr->map_ptr->parameters[parameter_index].parent]->lv2group;
+    parent_group = parameter_ptr->parent_ptr->lv2group;
   }
 
-  switch (forest_ptr->map_ptr->parameters[parameter_index].type)
+  switch (parameter_ptr->type)
   {
   case LV2DYNPARAM_PARAMETER_TYPE_BOOL:
     if (!lv2dynparam_plugin_param_boolean_add(
           zynadd_ptr->dynparams,
           parent_group,
-          forest_ptr->map_ptr->parameters[parameter_index].name,
-          &forest_ptr->map_ptr->parameters[parameter_index].hints,
+          parameter_ptr->name_ptr,
+          parameter_ptr->hints_ptr,
           zyn_addsynth_get_bool_parameter(
             zynadd_ptr->synth,
-            forest_ptr->parameters[parameter_index]->addsynth_component,
-            forest_ptr->parameters[parameter_index]->addsynth_parameter),
+            parameter_ptr->addsynth_component,
+            parameter_ptr->addsynth_parameter),
           zynadd_bool_parameter_changed,
-          forest_ptr->parameters[parameter_index],
-          &forest_ptr->parameters[parameter_index]->lv2parameter))
+          parameter_ptr,
+          &parameter_ptr->lv2parameter))
     {
       return false;
     }
@@ -129,17 +127,17 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_float_add(
           zynadd_ptr->dynparams,
           parent_group,
-          forest_ptr->map_ptr->parameters[parameter_index].name,
-          &forest_ptr->map_ptr->parameters[parameter_index].hints,
+          parameter_ptr->name_ptr,
+          parameter_ptr->hints_ptr,
           zyn_addsynth_get_float_parameter(
             zynadd_ptr->synth,
-            forest_ptr->parameters[parameter_index]->addsynth_component,
-            forest_ptr->parameters[parameter_index]->addsynth_parameter),
-          forest_ptr->map_ptr->parameters[parameter_index].min.fpoint,
-          forest_ptr->map_ptr->parameters[parameter_index].max.fpoint,
+            parameter_ptr->addsynth_component,
+            parameter_ptr->addsynth_parameter),
+          parameter_ptr->map_element_ptr->min.fpoint,
+          parameter_ptr->map_element_ptr->max.fpoint,
           zynadd_float_parameter_changed,
-          forest_ptr->parameters[parameter_index],
-          &forest_ptr->parameters[parameter_index]->lv2parameter))
+          parameter_ptr,
+          &parameter_ptr->lv2parameter))
     {
       return false;
     }
@@ -150,17 +148,17 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_int_add(
           zynadd_ptr->dynparams,
           parent_group,
-          forest_ptr->map_ptr->parameters[parameter_index].name,
-          &forest_ptr->map_ptr->parameters[parameter_index].hints,
+          parameter_ptr->name_ptr,
+          parameter_ptr->hints_ptr,
           zyn_addsynth_get_int_parameter(
             zynadd_ptr->synth,
-            forest_ptr->parameters[parameter_index]->addsynth_component,
-            forest_ptr->parameters[parameter_index]->addsynth_parameter),
-          forest_ptr->map_ptr->parameters[parameter_index].min.integer,
-          forest_ptr->map_ptr->parameters[parameter_index].max.integer,
+            parameter_ptr->addsynth_component,
+            parameter_ptr->addsynth_parameter),
+          parameter_ptr->map_element_ptr->min.integer,
+          parameter_ptr->map_element_ptr->max.integer,
           zynadd_int_parameter_changed,
-          forest_ptr->parameters[parameter_index],
-          &forest_ptr->parameters[parameter_index]->lv2parameter))
+          parameter_ptr,
+          &parameter_ptr->lv2parameter))
     {
       return false;
     }
@@ -171,14 +169,14 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
           parent_group,
-          forest_ptr->map_ptr->parameters[parameter_index].name,
-          &forest_ptr->map_ptr->parameters[parameter_index].hints,
+          parameter_ptr->name_ptr,
+          parameter_ptr->hints_ptr,
           g_shape_names,
           ZYN_LFO_SHAPES_COUNT,
-          zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, forest_ptr->parameters[parameter_index]->addsynth_component),
+          zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, parameter_ptr->addsynth_component),
           zynadd_shape_parameter_changed,
-          forest_ptr->parameters[parameter_index],
-          &forest_ptr->parameters[parameter_index]->lv2parameter))
+          parameter_ptr,
+          &parameter_ptr->lv2parameter))
     {
       return false;
     }
@@ -188,14 +186,14 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
           parent_group,
-          forest_ptr->map_ptr->parameters[parameter_index].name,
-          &forest_ptr->map_ptr->parameters[parameter_index].hints,
+          parameter_ptr->name_ptr,
+          parameter_ptr->hints_ptr,
           g_filter_type_names,
           ZYN_FILTER_TYPES_COUNT,
-          zyn_addsynth_get_filter_type_parameter(zynadd_ptr->synth, forest_ptr->parameters[parameter_index]->addsynth_component),
+          zyn_addsynth_get_filter_type_parameter(zynadd_ptr->synth, parameter_ptr->addsynth_component),
           zynadd_filter_type_parameter_changed,
-          forest_ptr->parameters[parameter_index],
-          &forest_ptr->parameters[parameter_index]->lv2parameter))
+          parameter_ptr,
+          &parameter_ptr->lv2parameter))
     {
       return false;
     }
@@ -205,14 +203,14 @@ zynadd_appear_parameter(
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
           parent_group,
-          forest_ptr->map_ptr->parameters[parameter_index].name,
-          &forest_ptr->map_ptr->parameters[parameter_index].hints,
+          parameter_ptr->name_ptr,
+          parameter_ptr->hints_ptr,
           g_analog_filter_type_names,
           ZYN_FILTER_ANALOG_TYPES_COUNT,
-          zyn_addsynth_get_analog_filter_type_parameter(zynadd_ptr->synth, forest_ptr->parameters[parameter_index]->addsynth_component),
+          zyn_addsynth_get_analog_filter_type_parameter(zynadd_ptr->synth, parameter_ptr->addsynth_component),
           zynadd_analog_filter_type_parameter_changed,
-          forest_ptr->parameters[parameter_index],
-          &forest_ptr->parameters[parameter_index]->lv2parameter))
+          parameter_ptr,
+          &parameter_ptr->lv2parameter))
     {
       return false;
     }
@@ -232,6 +230,8 @@ zynadd_bool_parameter_changed(
   bool value)
 {
   bool current_value;
+
+  LOG_DEBUG("bool parameter \"%s\" changed to \"%s\"", parameter_ptr->name_ptr, value ? "true" : "false");
 
   if (parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
       parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
@@ -254,14 +254,14 @@ zynadd_bool_parameter_changed(
       /* enabling randomize -> remove panorama parameter */
       if (!lv2dynparam_plugin_param_remove(
             parameter_ptr->synth_ptr->dynparams,
-            parameter_ptr->synth_ptr->top_forest_initializer.parameters[parameter_ptr->scope_specific]->lv2parameter))
+            parameter_ptr->other_parameter->lv2parameter))
       {
         return false;
       }
     }
     else
     {
-      if (!zynadd_appear_parameter(parameter_ptr->synth_ptr, &parameter_ptr->synth_ptr->top_forest_initializer, parameter_ptr->scope_specific))
+      if (!zynadd_appear_parameter(parameter_ptr->synth_ptr, parameter_ptr->other_parameter->lv2parameter))
       {
         return false;
       }
@@ -698,63 +698,64 @@ void zynadd_init_top_forest_map()
 
 #undef map_ptr
 
-bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
+/* create forest groups and parameters without exposing them */
+bool
+zynadd_dynparam_forest_prepare(
+  struct zyn_forest_initializer * forest_ptr,
+  struct zynadd * zynadd_ptr,
+  struct list_head * groups_list_ptr,
+  struct list_head * parameters_list_ptr)
 {
   int i;
-  bool tmp_bool;
   struct zynadd_group * group_ptr;
   struct zynadd_parameter * parameter_ptr;
-  struct zyn_forest_initializer * forest_ptr;
-
-  forest_ptr = &zynadd_ptr->top_forest_initializer;
-
-  forest_ptr->map_ptr = &g_top_forest_map;
-
-  INIT_LIST_HEAD(&zynadd_ptr->groups);
-  INIT_LIST_HEAD(&zynadd_ptr->parameters);
-
-  if (!lv2dynparam_plugin_instantiate(
-        (LV2_Handle)zynadd_ptr,
-        "zynadd",
-        &zynadd_ptr->dynparams))
-  {
-    goto fail;
-  }
 
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
-    LOG_DEBUG("Adding group \"%s\"", forest_ptr->map_ptr->groups[i].name);
+    LOG_DEBUG("Preparing group \"%s\"", forest_ptr->map_ptr->groups[i].name);
 
     group_ptr = malloc(sizeof(struct zynadd_group));
     if (group_ptr == NULL)
     {
-      goto fail_clean_dynparams;
+      return false;
     }
 
-    list_add_tail(&group_ptr->siblings, &zynadd_ptr->groups);
+    group_ptr->name_ptr = forest_ptr->map_ptr->groups[i].name;
+    group_ptr->hints_ptr = &forest_ptr->map_ptr->groups[i].hints;
+    group_ptr->lv2group = NULL;
+
+    if (forest_ptr->map_ptr->groups[i].parent == LV2DYNPARAM_GROUP_ROOT)
+    {
+      group_ptr->parent_ptr = NULL;
+    }
+    else
+    {
+      group_ptr->parent_ptr = forest_ptr->groups[forest_ptr->map_ptr->groups[i].parent];
+    }
 
     forest_ptr->groups[i] = group_ptr;
 
-    if (!lv2dynparam_plugin_group_add(
-          zynadd_ptr->dynparams,
-          forest_ptr->map_ptr->groups[i].parent == LV2DYNPARAM_GROUP_ROOT ? NULL : forest_ptr->groups[forest_ptr->map_ptr->groups[i].parent]->lv2group,
-          forest_ptr->map_ptr->groups[i].name,
-          &forest_ptr->map_ptr->groups[i].hints,
-          &group_ptr->lv2group))
-    {
-      goto fail_clean_dynparams;
-    }
+    list_add_tail(&group_ptr->siblings, groups_list_ptr);
   }
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
+    LOG_DEBUG("Preparing group \"%s\"", forest_ptr->map_ptr->parameters[i].name);
+
     parameter_ptr = malloc(sizeof(struct zynadd_parameter));
     if (parameter_ptr == NULL)
     {
-      goto fail_clean_dynparams;
+      return false;
     }
 
-    list_add_tail(&parameter_ptr->siblings, &zynadd_ptr->parameters);
+    if (forest_ptr->map_ptr->parameters[i].parent == LV2DYNPARAM_GROUP_ROOT)
+    {
+      parameter_ptr->parent_ptr = NULL;
+    }
+    else
+    {
+      parameter_ptr->parent_ptr = forest_ptr->groups[forest_ptr->map_ptr->parameters[i].parent];
+    }
 
     forest_ptr->parameters[i] = parameter_ptr;
 
@@ -762,69 +763,32 @@ bool zynadd_dynparam_init(struct zynadd * zynadd_ptr)
     parameter_ptr->addsynth_parameter = forest_ptr->map_ptr->parameters[i].addsynth_parameter;
     parameter_ptr->addsynth_component = forest_ptr->map_ptr->parameters[i].addsynth_component;
     parameter_ptr->scope = forest_ptr->map_ptr->parameters[i].scope;
-    parameter_ptr->scope_specific = forest_ptr->map_ptr->parameters[i].scope_specific;
+    parameter_ptr->other_parameter = NULL;
     parameter_ptr->lv2parameter = NULL;
+    parameter_ptr->name_ptr = forest_ptr->map_ptr->parameters[i].name;
+    parameter_ptr->type = forest_ptr->map_ptr->parameters[i].type;
+    parameter_ptr->hints_ptr = &forest_ptr->map_ptr->parameters[i].hints;
+    parameter_ptr->map_element_ptr = forest_ptr->map_ptr->parameters + i;
+
+    list_add_tail(&parameter_ptr->siblings, parameters_list_ptr);
   }
 
+  /* set other_parameter when needed */
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
-    LOG_DEBUG("Adding parameter \"%s\"", forest_ptr->map_ptr->parameters[i].name);
-
-    if (forest_ptr->map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SEMI)
-    {
-      continue;
-    }
-
     if (forest_ptr->map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
         forest_ptr->map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
     {
-      LOG_DEBUG("Apearing show/hide parameter \"%s\"", forest_ptr->map_ptr->parameters[i].name);
-      assert(forest_ptr->map_ptr->parameters[i].type == LV2DYNPARAM_PARAMETER_TYPE_BOOL);
-
-      tmp_bool = zyn_addsynth_get_bool_parameter(
-        zynadd_ptr->synth,
-        forest_ptr->map_ptr->parameters[i].addsynth_component,
-        forest_ptr->map_ptr->parameters[i].addsynth_parameter);
-
-      if (!zynadd_appear_parameter(zynadd_ptr, forest_ptr, i))
-      {
-        goto fail_clean_dynparams;
-      }
-
-      if ((forest_ptr->map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER && !tmp_bool) ||
-          (forest_ptr->map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER && tmp_bool))
-      {
-        LOG_DEBUG("Apearing semi parameter %u", forest_ptr->map_ptr->parameters[i].scope_specific);
-        LOG_DEBUG("Apearing semi parameter \"%s\"", forest_ptr->map_ptr->parameters[forest_ptr->map_ptr->parameters[i].scope_specific].name);
-        if (!zynadd_appear_parameter(zynadd_ptr, forest_ptr, forest_ptr->map_ptr->parameters[i].scope_specific))
-        {
-          goto fail_clean_dynparams;
-        }
-      }
-
-      continue;
-    }
-
-    assert(forest_ptr->map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS);
-
-    if (!zynadd_appear_parameter(zynadd_ptr, forest_ptr, i))
-    {
-      LOG_ERROR("zynadd_appear_parameter() failed.");
-      goto fail_clean_dynparams;
+      forest_ptr->parameters[i]->other_parameter = forest_ptr->parameters[forest_ptr->map_ptr->parameters[i].scope_specific];
     }
   }
 
   return true;
-
-fail_clean_dynparams:
-  zynadd_dynparam_uninit(zynadd_ptr);
-
-fail:
-  return false;
 }
 
 void
-zynadd_dynparam_uninit(struct zynadd * zynadd_ptr)
+zynadd_dynparam_destroy_forests(
+  struct zynadd * zynadd_ptr)
 {
   struct list_head * node_ptr;
   struct zynadd_group * group_ptr;
@@ -845,6 +809,123 @@ zynadd_dynparam_uninit(struct zynadd * zynadd_ptr)
     list_del(node_ptr);
     free(group_ptr);
   }
+}
+
+bool
+zynadd_dynparam_init(
+  struct zynadd * zynadd_ptr)
+{
+  bool tmp_bool;
+  struct zynadd_group * group_ptr;
+  struct zynadd_parameter * parameter_ptr;
+  struct zyn_forest_initializer * forest_ptr;
+  struct list_head * node_ptr;
+
+  zynadd_ptr->top_forest_initializer.map_ptr = &g_top_forest_map;
+
+  forest_ptr = &zynadd_ptr->top_forest_initializer;
+
+  INIT_LIST_HEAD(&zynadd_ptr->groups);
+  INIT_LIST_HEAD(&zynadd_ptr->parameters);
+
+  if (!zynadd_dynparam_forest_prepare(
+        forest_ptr,
+        zynadd_ptr,
+        &zynadd_ptr->groups,
+        &zynadd_ptr->parameters))
+  {
+    goto fail_destroy_forests;
+  }
+
+  if (!lv2dynparam_plugin_instantiate(
+        (LV2_Handle)zynadd_ptr,
+        "zynadd",
+        &zynadd_ptr->dynparams))
+  {
+    goto fail_destroy_forests;
+  }
+
+  list_for_each(node_ptr, &zynadd_ptr->groups)
+  {
+    group_ptr = list_entry(node_ptr, struct zynadd_group, siblings);
+
+    LOG_DEBUG("Adding group \"%s\"", group_ptr->name_ptr);
+
+    if (!lv2dynparam_plugin_group_add(
+          zynadd_ptr->dynparams,
+          group_ptr->parent_ptr == NULL ? NULL : group_ptr->parent_ptr->lv2group,
+          group_ptr->name_ptr,
+          group_ptr->hints_ptr,
+          &group_ptr->lv2group))
+    {
+      goto fail_clean_dynparams;
+    }
+  }
+
+  list_for_each(node_ptr, &zynadd_ptr->parameters)
+  {
+    parameter_ptr = list_entry(node_ptr, struct zynadd_parameter, siblings);
+
+    LOG_DEBUG("Adding parameter \"%s\"", parameter_ptr->name_ptr);
+
+    if (parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SEMI)
+    {
+      continue;
+    }
+
+    if (parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
+        parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
+    {
+      LOG_DEBUG("Apearing show/hide parameter \"%s\"", parameter_ptr->name_ptr);
+      assert(parameter_ptr->type == LV2DYNPARAM_PARAMETER_TYPE_BOOL);
+
+      tmp_bool = zyn_addsynth_get_bool_parameter(
+        zynadd_ptr->synth,
+        parameter_ptr->addsynth_component,
+        parameter_ptr->addsynth_parameter);
+
+      if (!zynadd_appear_parameter(zynadd_ptr, parameter_ptr))
+      {
+        goto fail_clean_dynparams;
+      }
+
+      if ((parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER && !tmp_bool) ||
+          (parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER && tmp_bool))
+      {
+        LOG_DEBUG("Apearing semi parameter \"%s\"", parameter_ptr->other_parameter->name_ptr);
+        if (!zynadd_appear_parameter(zynadd_ptr, parameter_ptr->other_parameter))
+        {
+          goto fail_clean_dynparams;
+        }
+      }
+
+      continue;
+    }
+
+    assert(parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS);
+
+    if (!zynadd_appear_parameter(zynadd_ptr, parameter_ptr))
+    {
+      LOG_ERROR("zynadd_appear_parameter() failed.");
+      goto fail_clean_dynparams;
+    }
+  }
+
+  return true;
+
+fail_clean_dynparams:
+  zynadd_dynparam_uninit(zynadd_ptr);
+
+fail_destroy_forests:
+  zynadd_dynparam_destroy_forests(zynadd_ptr);
+
+  return false;
+}
+
+void
+zynadd_dynparam_uninit(struct zynadd * zynadd_ptr)
+{
+  zynadd_dynparam_destroy_forests(zynadd_ptr);
 
   lv2dynparam_plugin_cleanup(zynadd_ptr->dynparams);
 }

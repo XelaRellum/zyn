@@ -160,7 +160,14 @@ struct zynadd_parameter
   unsigned int addsynth_component; /* one of ZYNADD_COMPONENT_XXX */
   unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
   unsigned int scope;           /* one of LV2DYNPARAM_PARAMETER_SCOPE_TYPE_XXX */
-  unsigned int scope_specific;
+  struct zynadd_parameter * other_parameter; /* used for bools controling other parameters appear/disappear */
+
+  struct zynadd_group * parent_ptr; /* NULL for parameters, children of root */
+  const char * name_ptr;            /* parameter name, points to somewhere in forest map */
+  unsigned int type;            /* one of LV2DYNPARAM_PARAMETER_TYPE_XXX */
+  struct lv2dynparam_hints * hints_ptr; /* parameter hints, points to somewhere in forest map */
+
+  struct parameter_descriptor * map_element_ptr;
 
   lv2dynparam_plugin_parameter lv2parameter;
 };
@@ -168,6 +175,9 @@ struct zynadd_parameter
 struct zynadd_group
 {
   struct list_head siblings;
+  struct zynadd_group * parent_ptr; /* NULL for groups, children of root */
+  const char * name_ptr;            /* group name, points to somewhere in forest map */
+  struct lv2dynparam_hints * hints_ptr; /* group hints, points to somewhere in forest map */
   lv2dynparam_plugin_group lv2group;
 };
 
