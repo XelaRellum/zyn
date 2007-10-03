@@ -151,7 +151,11 @@
 
 #define LV2DYNPARAM_GROUPS_COUNT                                    25
 
-#define ZYN_MAX_HINTS 10
+#define HINT_HIDDEN           "http://home.gna.org/zynjacku/hints#hidden"
+#define HINT_TOGGLE_FLOAT     "http://home.gna.org/zynjacku/hints#togglefloat"
+#define HINT_ONE_SUBGROUP     "http://home.gna.org/zynjacku/hints#onesubgroup"
+
+#include "zynadd_dynparam_forest_map.h"
 
 struct zynadd_parameter
 {
@@ -179,53 +183,6 @@ struct zynadd_group
   const char * name_ptr;            /* group name, points to somewhere in forest map */
   struct lv2dynparam_hints * hints_ptr; /* group hints, points to somewhere in forest map */
   lv2dynparam_plugin_group lv2group;
-};
-
-struct group_descriptor
-{
-  int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
-
-  const char * name;            /* group name */
-
-  struct lv2dynparam_hints hints;
-  const char * hint_names[ZYN_MAX_HINTS];
-  const char * hint_values[ZYN_MAX_HINTS];
-};
-
-struct parameter_descriptor
-{
-  int parent;                   /* index of parent, LV2DYNPARAM_GROUP_ROOT for root children */
-  const char * name;            /* parameter name */
-
-  struct lv2dynparam_hints hints;
-  const char * hint_names[ZYN_MAX_HINTS];
-  const char * hint_values[ZYN_MAX_HINTS];
-
-  unsigned int type;            /* one of LV2DYNPARAM_PARAMETER_TYPE_XXX */
-
-  unsigned int addsynth_component; /* one of ZYNADD_COMPONENT_XXX */
-  unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
-
-  unsigned int scope;                   /* one of LV2DYNPARAM_PARAMETER_SCOPE_TYPE_XXX */
-  unsigned int scope_specific;
-
-  union
-  {
-    float fpoint;
-    signed int integer;
-  } min;
-
-  union
-  {
-    float fpoint;
-    signed int integer;
-  } max;
-};
-
-struct zyn_forest_map
-{
-  struct group_descriptor groups[LV2DYNPARAM_GROUPS_COUNT];
-  struct parameter_descriptor parameters[LV2DYNPARAM_PARAMETERS_COUNT];
 };
 
 struct zyn_forest_initializer
