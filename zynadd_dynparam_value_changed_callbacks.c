@@ -27,6 +27,7 @@
 #include "lv2dynparam/lv2dynparam.h"
 #include "lv2dynparam/plugin.h"
 #include "zynadd_internal.h"
+#include "zynadd_dynparam_value_changed_callbacks.h"
 
 #define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"

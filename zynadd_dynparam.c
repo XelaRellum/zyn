@@ -30,42 +30,10 @@
 #include "lv2dynparam/plugin.h"
 #include "list.h"
 #include "zynadd_internal.h"
+#include "zynadd_dynparam_value_changed_callbacks.h"
 
 #define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
-
-bool
-zynadd_bool_parameter_changed(
-  void * context,
-  bool value);
-
-bool
-zynadd_float_parameter_changed(
-  void * context,
-  float value);
-
-bool
-zynadd_int_parameter_changed(
-  void * context,
-  signed int value);
-
-bool
-zynadd_shape_parameter_changed(
-  void * context,
-  const char * value,
-  unsigned int value_index);
-
-bool
-zynadd_filter_type_parameter_changed(
-  void * context,
-  const char * value,
-  unsigned int value_index);
-
-bool
-zynadd_analog_filter_type_parameter_changed(
-  void * context,
-  const char * value,
-  unsigned int value_index);
 
 bool
 zynadd_appear_parameter(
