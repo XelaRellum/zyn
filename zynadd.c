@@ -53,10 +53,10 @@ zynadd_instantiate(
   const LV2_Descriptor * descriptor,
   double sample_rate,
   const char * bundle_path,
-  const LV2_Host_Feature * const * host_features)
+  const LV2_Feature * const * host_features)
 {
   struct zynadd * zynadd_ptr;
-  const LV2_Host_Feature * feature_ptr;
+  const LV2_Feature * feature_ptr;
 
   LOG_DEBUG("zynadd_create_plugin_instance() called.");
   LOG_DEBUG("sample_rate = %f", sample_rate);
@@ -248,7 +248,7 @@ zynadd_connect_port(
   zynadd_ptr->ports[port] = data_location;
 }
 
-void *
+const void *
 zynadd_extension_data(
   const char * URI)
 {

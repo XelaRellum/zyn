@@ -26,7 +26,7 @@ zynadd_instantiate(
   const LV2_Descriptor * descriptor,
   double sample_rate,
   const char * bundle_path,
-  const LV2_Host_Feature * const * host_features);
+  const LV2_Feature * const * features);
 
 void
 zynadd_connect_port(
@@ -43,7 +43,7 @@ void
 zynadd_cleanup(
   LV2_Handle instance);
 
-void *
+const void *
 zynadd_extension_data(
   const char * URI); 
 
