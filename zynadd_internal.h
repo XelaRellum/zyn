@@ -210,8 +210,6 @@ struct zynadd
 
   struct list_head groups;
   struct list_head parameters;
-
-  struct zyn_forest_initializer top_forest_initializer;
 };
 
 bool zynadd_dynparam_init(struct zynadd * zynadd_ptr);

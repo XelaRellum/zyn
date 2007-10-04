@@ -296,18 +296,16 @@ zynadd_dynparam_init(
   bool tmp_bool;
   struct zynadd_group * group_ptr;
   struct zynadd_parameter * parameter_ptr;
-  struct zyn_forest_initializer * forest_ptr;
+  struct zyn_forest_initializer top_forest_initializer;
   struct list_head * node_ptr;
 
-  zynadd_ptr->top_forest_initializer.map_ptr = &g_top_forest_map;
-
-  forest_ptr = &zynadd_ptr->top_forest_initializer;
+  top_forest_initializer.map_ptr = &g_top_forest_map;
 
   INIT_LIST_HEAD(&zynadd_ptr->groups);
   INIT_LIST_HEAD(&zynadd_ptr->parameters);
 
   if (!zynadd_dynparam_forest_prepare(
-        forest_ptr,
+        &top_forest_initializer,
         zynadd_ptr,
         &zynadd_ptr->groups,
         &zynadd_ptr->parameters))
