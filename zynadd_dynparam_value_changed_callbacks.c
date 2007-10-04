@@ -61,6 +61,8 @@ zynadd_bool_parameter_changed(
     if ((parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER && value) ||
         (parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER && !value))
     {
+      LOG_DEBUG("Removing parameter \"%s\" with semi scope", parameter_ptr->other_parameter->name_ptr);
+
       /* enabling randomize -> remove panorama parameter */
       if (!lv2dynparam_plugin_param_remove(
             parameter_ptr->synth_ptr->dynparams,
@@ -71,7 +73,9 @@ zynadd_bool_parameter_changed(
     }
     else
     {
-      if (!zynadd_appear_parameter(parameter_ptr->synth_ptr, parameter_ptr->other_parameter->lv2parameter))
+      LOG_DEBUG("Appearing parameter \"%s\" with semi scope", parameter_ptr->other_parameter->name_ptr);
+
+      if (!zynadd_appear_parameter(parameter_ptr->synth_ptr, parameter_ptr->other_parameter))
       {
         return false;
       }
