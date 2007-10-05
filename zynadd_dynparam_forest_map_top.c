@@ -380,3 +380,9 @@ void zynadd_init_top_forest_map()
     assert(map_ptr->groups[i].parent < i);
   }
 }
+
+unsigned int
+zynadd_top_forest_map_get_voices_group()
+{
+  return LV2DYNPARAM_GROUP_VOICES;
+}

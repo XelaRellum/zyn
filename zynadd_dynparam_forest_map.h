@@ -158,6 +158,4 @@ lv2dynparam_group_init(
   const char * name,
   ...);
 
-extern struct zyn_forest_map g_top_forest_map;
-
 #endif /* #ifndef ZYNADD_DYNPARAM_FOREST_MAP_H__3ED30D71_513B_4B84_9A9B_1C9C62EE0A87__INCLUDED */

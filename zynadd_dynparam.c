@@ -31,8 +31,10 @@
 #include "list.h"
 #include "zynadd_internal.h"
 #include "zynadd_dynparam_value_changed_callbacks.h"
+#include "zynadd_dynparam_forest_map_top.h"
+#include "zynadd_dynparam_forest_map_voice.h"
 
-#define LOG_LEVEL LOG_LEVEL_ERROR
+#define LOG_LEVEL LOG_LEVEL_DEBUG
 #include "log.h"
 
 bool
@@ -326,36 +328,13 @@ zynadd_dynparam_destroy_forests(
 }
 
 bool
-zynadd_dynparam_init(
+zynadd_dynparam_forests_appear(
   struct zynadd * zynadd_ptr)
 {
   bool tmp_bool;
   struct zynadd_group * group_ptr;
   struct zynadd_parameter * parameter_ptr;
-  struct zyn_forest_initializer top_forest_initializer;
   struct list_head * node_ptr;
-
-  INIT_LIST_HEAD(&zynadd_ptr->groups);
-  INIT_LIST_HEAD(&zynadd_ptr->parameters);
-
-  if (!zynadd_dynparam_forest_initializer_prepare(
-        &top_forest_initializer,
-        &g_top_forest_map,
-        NULL,
-        zynadd_ptr,
-        &zynadd_ptr->groups,
-        &zynadd_ptr->parameters))
-  {
-    goto fail_destroy_forests;
-  }
-
-  if (!lv2dynparam_plugin_instantiate(
-        (LV2_Handle)zynadd_ptr,
-        "zynadd",
-        &zynadd_ptr->dynparams))
-  {
-    goto fail_clear_forest_initializer;
-  }
 
   list_for_each(node_ptr, &zynadd_ptr->groups)
   {
@@ -370,7 +349,7 @@ zynadd_dynparam_init(
           group_ptr->hints_ptr,
           &group_ptr->lv2group))
     {
-      goto fail_clean_dynparams;
+      return false;
     }
   }
 
@@ -398,7 +377,7 @@ zynadd_dynparam_init(
 
       if (!zynadd_appear_parameter(zynadd_ptr, parameter_ptr))
       {
-        goto fail_clean_dynparams;
+        return false;
       }
 
       if ((parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER && !tmp_bool) ||
@@ -407,7 +386,7 @@ zynadd_dynparam_init(
         LOG_DEBUG("Apearing semi parameter \"%s\"", parameter_ptr->other_parameter->name_ptr);
         if (!zynadd_appear_parameter(zynadd_ptr, parameter_ptr->other_parameter))
         {
-          goto fail_clean_dynparams;
+          return false;
         }
       }
 
@@ -419,10 +398,63 @@ zynadd_dynparam_init(
     if (!zynadd_appear_parameter(zynadd_ptr, parameter_ptr))
     {
       LOG_ERROR("zynadd_appear_parameter() failed.");
-      goto fail_clean_dynparams;
+      return false;
     }
   }
 
+  return true;
+}
+
+bool
+zynadd_dynparam_init(
+  struct zynadd * zynadd_ptr)
+{
+  struct zyn_forest_initializer top_forest_initializer;
+  struct zyn_forest_initializer voice_forest_initializer;
+
+  INIT_LIST_HEAD(&zynadd_ptr->groups);
+  INIT_LIST_HEAD(&zynadd_ptr->parameters);
+
+  LOG_DEBUG("Preparing top forest...");
+
+  if (!zynadd_dynparam_forest_initializer_prepare(
+        &top_forest_initializer,
+        &g_top_forest_map,
+        NULL,
+        zynadd_ptr,
+        &zynadd_ptr->groups,
+        &zynadd_ptr->parameters))
+  {
+    goto fail_destroy_forests;
+  }
+
+  LOG_DEBUG("Preparing voice forest...");
+
+  if (!zynadd_dynparam_forest_initializer_prepare(
+        &voice_forest_initializer,
+        &g_voice_forest_map,
+        top_forest_initializer.groups[zynadd_top_forest_map_get_voices_group()],
+        zynadd_ptr,
+        &zynadd_ptr->groups,
+        &zynadd_ptr->parameters))
+  {
+    goto fail_clear_top_forest_initializer;
+  }
+
+  if (!lv2dynparam_plugin_instantiate(
+        (LV2_Handle)zynadd_ptr,
+        "zynadd",
+        &zynadd_ptr->dynparams))
+  {
+    goto fail_clear_voice_forest_initializer;
+  }
+
+  if (!zynadd_dynparam_forests_appear(zynadd_ptr))
+  {
+    goto fail_clean_dynparams;
+  }
+
+  zynadd_dynparam_forest_initializer_clear(&voice_forest_initializer);
   zynadd_dynparam_forest_initializer_clear(&top_forest_initializer);
 
   return true;
@@ -430,7 +462,10 @@ zynadd_dynparam_init(
 fail_clean_dynparams:
   zynadd_dynparam_uninit(zynadd_ptr);
 
-fail_clear_forest_initializer:
+fail_clear_voice_forest_initializer:
+  zynadd_dynparam_forest_initializer_clear(&voice_forest_initializer);
+
+fail_clear_top_forest_initializer:
   zynadd_dynparam_forest_initializer_clear(&top_forest_initializer);
 
 fail_destroy_forests:

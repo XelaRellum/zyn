@@ -917,6 +917,17 @@ zyn_addsynth_get_bool_parameter(
       assert(0);
     }
   }
+  else if (component == ZYNADD_COMPONENT_VOICE_GLOBALS)
+  {
+    switch (parameter)
+    {
+    case ZYNADD_PARAMETER_BOOL_VOICE_RESONANCE:
+      return true;
+    default:
+      LOG_ERROR("Unknown bool voice global parameter %u", parameter);
+      assert(0);
+    }
+  }
   else
   {
     LOG_ERROR("Unknown component %u", component);
@@ -1022,6 +1033,17 @@ zyn_addsynth_set_bool_parameter(
       return;
     default:
       LOG_ERROR("Unknown bool frequency envelope parameter %u", parameter);
+      assert(0);
+    }
+  }
+  else if (component == ZYNADD_COMPONENT_VOICE_GLOBALS)
+  {
+    switch (parameter)
+    {
+    case ZYNADD_PARAMETER_BOOL_VOICE_RESONANCE:
+      return;
+    default:
+      LOG_ERROR("Unknown bool voice global parameter %u", parameter);
       assert(0);
     }
   }

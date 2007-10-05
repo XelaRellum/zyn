@@ -64,6 +64,7 @@ zyn_addsynth_destroy(
 #define ZYNADD_COMPONENT_FREQUENCY_GLOBALS        6
 #define ZYNADD_COMPONENT_FREQUENCY_ENV            7
 #define ZYNADD_COMPONENT_FREQUENCY_LFO            8
+#define ZYNADD_COMPONENT_VOICE_GLOBALS            9
 
 /* float - globals */
 #define ZYNADD_PARAMETER_FLOAT_PANORAMA                    0 /* -1 .. 1 */
@@ -112,6 +113,9 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_START_PHASE            5
 #define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_DEPTH                  6
 #define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_FREQUENCY              7
+
+/* bool - voice */
+#define ZYNADD_PARAMETER_BOOL_VOICE_RESONANCE                   8
 
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
 
