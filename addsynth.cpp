@@ -157,7 +157,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params_ptr[voice_index].Type=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].Pfixedfreq=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PfixedfreqET=0;
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].Presonance=1;
+    zyn_addsynth_ptr->voices_params_ptr[voice_index].resonance = true;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].Pfilterbypass=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].Pextoscil=-1;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PextFMoscil=-1;

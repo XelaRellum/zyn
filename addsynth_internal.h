@@ -87,8 +87,8 @@ struct ADnoteVoiceParam
   /* Voice Delay */
   unsigned char PDelay;
 
-  /* If the resonance is enabled for this voice */
-  unsigned char Presonance;
+  /* whether resonance is enabled for this voice */
+  bool resonance;
 
   // What external oscil should I use, -1 for internal OscilSmp&FMSmp
   short int Pextoscil,PextFMoscil;

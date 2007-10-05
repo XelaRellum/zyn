@@ -230,7 +230,7 @@ ADnote::note_on(
     m_osc_pos_hi_ptr[voice_index] = m_synth_ptr->voices_params_ptr[vc].OscilSmp->get(
       m_voices_ptr[voice_index].OscilSmp,
       getvoicebasefreq(voice_index),
-      m_synth_ptr->voices_params_ptr[voice_index].Presonance);
+      m_synth_ptr->voices_params_ptr[voice_index].resonance);
 
     //I store the first elments to the last position for speedups
     for (i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) m_voices_ptr[voice_index].OscilSmp[OSCIL_SIZE+i]=m_voices_ptr[voice_index].OscilSmp[i];

@@ -994,7 +994,7 @@ void OscilGen::newrandseed(unsigned int randseed){
 /* 
  * Get the oscillator function
  */
-short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
+short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz, bool resonance){
   int i;
   int nyquist,outpos;
     
@@ -1103,7 +1103,10 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     srand(realrnd+1);
   };
 
-  if ((freqHz>0.1)&&(resonance!=0)) res->applyres(nyquist-1,outoscilFFTfreqs,freqHz);
+  if (freqHz > 0.1 && resonance)
+  {
+    res->applyres(nyquist - 1, outoscilFFTfreqs, freqHz);
+  }
 
   //Full RMS normalize
   REALTYPE sum=0;

@@ -34,7 +34,7 @@ public:
 
   //do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT
   short get(REALTYPE *smps,REALTYPE freqHz);//returns where should I start getting samples, used in block type randomness
-  short get(REALTYPE *smps,REALTYPE freqHz,int resonance);
+  short get(REALTYPE *smps,REALTYPE freqHz, bool resonance);
   //if freqHz is smaller than 0, return the "un-randomized" sample for UI
   
   void getbasefunction(REALTYPE *smps);
