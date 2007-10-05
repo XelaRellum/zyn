@@ -40,28 +40,6 @@ void zynadd_init_top_forest_map()
 {
   int i;
 
-  g_shape_names[ZYN_LFO_SHAPE_TYPE_SINE] = "Sine";
-  g_shape_names[ZYN_LFO_SHAPE_TYPE_TRIANGLE] = "Triangle";
-  g_shape_names[ZYN_LFO_SHAPE_TYPE_SQUARE] = "Square";
-  g_shape_names[ZYN_LFO_SHAPE_TYPE_RAMP_UP] = "Ramp Up";
-  g_shape_names[ZYN_LFO_SHAPE_TYPE_RAMP_DOWN] = "Ramp Down";
-  g_shape_names[ZYN_LFO_SHAPE_TYPE_EXP_DOWN_1] = "E1Down";
-  g_shape_names[ZYN_LFO_SHAPE_TYPE_EXP_DOWN_2] = "E2Down";
-
-  g_filter_type_names[ZYN_FILTER_TYPE_ANALOG] = "Analog";
-  g_filter_type_names[ZYN_FILTER_TYPE_FORMANT] = "Formant";
-  g_filter_type_names[ZYN_FILTER_TYPE_STATE_VARIABLE] = "State variable";
-
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LPF1] = "LPF 1 pole";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HPF1] = "HPF 1 pole";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LPF2] = "LPF 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HPF2] = "HPF 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_BPF2] = "BPF 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_NF2] = "NOTCH 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_PKF2] = "PEAK (2 poles)";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LSH2] = "Low Shelf - 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HSH2] = "High Shelf - 2 poles";
-
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
     map_ptr->groups[i].parent = LV2DYNPARAM_GROUP_INVALID;
