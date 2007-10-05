@@ -143,8 +143,11 @@ struct parameter_descriptor
 
 struct zyn_forest_map
 {
-  struct group_descriptor groups[LV2DYNPARAM_GROUPS_COUNT];
-  struct parameter_descriptor parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+  size_t groups_count;
+  size_t parameters_count;
+
+  struct group_descriptor * groups;
+  struct parameter_descriptor * parameters;
 };
 
 void

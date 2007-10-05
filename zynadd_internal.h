@@ -33,123 +33,8 @@
 #define LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER      2 /* always visible bool, when true, other param disappearing */
 #define LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SEMI            3 /* sometimes visible parameter */
 
-#define LV2DYNPARAM_PARAMETER_STEREO                                 0
-#define LV2DYNPARAM_PARAMETER_RANDOM_GROUPING                        1
-#define LV2DYNPARAM_PARAMETER_VOLUME                                 2
-#define LV2DYNPARAM_PARAMETER_VELOCITY_SENSING                       3
-#define LV2DYNPARAM_PARAMETER_RANDOM_PANORAMA                        4
-#define LV2DYNPARAM_PARAMETER_PANORAMA                               5
-#define LV2DYNPARAM_PARAMETER_PUNCH_STRENGTH                         6
-#define LV2DYNPARAM_PARAMETER_PUNCH_TIME                             7
-#define LV2DYNPARAM_PARAMETER_PUNCH_STRETCH                          8
-#define LV2DYNPARAM_PARAMETER_PUNCH_VELOCITY_SENSING                 9
-
-#define LV2DYNPARAM_PARAMETER_AMP_ENV_ATTACK                        10
-#define LV2DYNPARAM_PARAMETER_AMP_ENV_DECAY                         11
-#define LV2DYNPARAM_PARAMETER_AMP_ENV_SUSTAIN                       12
-#define LV2DYNPARAM_PARAMETER_AMP_ENV_RELEASE                       13
-#define LV2DYNPARAM_PARAMETER_AMP_ENV_STRETCH                       14
-#define LV2DYNPARAM_PARAMETER_AMP_ENV_FORCED_RELEASE                15
-#define LV2DYNPARAM_PARAMETER_AMP_ENV_LINEAR                        16
-
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_SHAPE                         17
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_FREQUENCY                     18
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_DEPTH                         19
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_RANDOM_START_PHASE            20
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_START_PHASE                   21
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_DELAY                         22
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_STRETCH                       23
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_RANDOM_DEPTH                  24
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_DEPTH_RANDOMNESS              25
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_RANDOM_FREQUENCY              26
-#define LV2DYNPARAM_PARAMETER_AMP_LFO_FREQUENCY_RANDOMNESS          27
-
-#define LV2DYNPARAM_PARAMETER_FILTER_ENV_ATTACK_VALUE               28
-#define LV2DYNPARAM_PARAMETER_FILTER_ENV_ATTACK_DURATION            29
-#define LV2DYNPARAM_PARAMETER_FILTER_ENV_DECAY_VALUE                30
-#define LV2DYNPARAM_PARAMETER_FILTER_ENV_DECAY_DURATION             31
-#define LV2DYNPARAM_PARAMETER_FILTER_ENV_RELEASE_VALUE              32
-#define LV2DYNPARAM_PARAMETER_FILTER_ENV_RELEASE_DURATION           33
-#define LV2DYNPARAM_PARAMETER_FILTER_ENV_STRETCH                    34
-#define LV2DYNPARAM_PARAMETER_FILTER_ENV_FORCED_RELEASE             35
-
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_SHAPE                      36
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_FREQUENCY                  37
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_DEPTH                      38
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_RANDOM_START_PHASE         39
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_START_PHASE                40
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_DELAY                      41
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_STRETCH                    42
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_RANDOM_DEPTH               43
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_DEPTH_RANDOMNESS           44
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_RANDOM_FREQUENCY           45
-#define LV2DYNPARAM_PARAMETER_FILTER_LFO_FREQUENCY_RANDOMNESS       46
-
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_ENV_ATTACK_VALUE            47
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_ENV_ATTACK_DURATION         48
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_ENV_RELEASE_DURATION        49
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_ENV_RELEASE_VALUE           50
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_ENV_STRETCH                 51
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_ENV_FORCED_RELEASE          52
-
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_SHAPE                   53
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_FREQUENCY               54
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_DEPTH                   55
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_RANDOM_START_PHASE      56
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_START_PHASE             57
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_DELAY                   58
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_STRETCH                 59
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_RANDOM_DEPTH            60
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_DEPTH_RANDOMNESS        61
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_RANDOM_FREQUENCY        62
-#define LV2DYNPARAM_PARAMETER_FREQUENCY_LFO_FREQUENCY_RANDOMNESS    63
-
-#define LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE                    64
-
-#define LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE             65
-#define LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_FREQUENCY        66
-#define LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_Q_FACTOR         67
-#define LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_VELOCITY_SENSING_AMOUNT    68
-#define LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_VELOCITY_SENSING_FUNCTION  69
-#define LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_FREQUENCY_TRACKING         70
-#define LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_GAIN             71
-#define LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_STAGES           72
-
-#define LV2DYNPARAM_PARAMETERS_COUNT                                73
-
 #define LV2DYNPARAM_GROUP_INVALID                                   -2
 #define LV2DYNPARAM_GROUP_ROOT                                      -1
-
-#define LV2DYNPARAM_GROUP_AMP                                        0
-#define LV2DYNPARAM_GROUP_FILTER                                     1
-#define LV2DYNPARAM_GROUP_FREQUENCY                                  2
-#define LV2DYNPARAM_GROUP_VOICES                                     3
-
-#define LV2DYNPARAM_GROUP_AMP_PANORAMA                               4
-#define LV2DYNPARAM_GROUP_AMP_PUNCH                                  5
-#define LV2DYNPARAM_GROUP_AMP_ENV                                    6
-#define LV2DYNPARAM_GROUP_AMP_LFO                                    7
-#define LV2DYNPARAM_GROUP_AMP_LFO_START_PHASE                        8
-#define LV2DYNPARAM_GROUP_AMP_LFO_DEPTH_RANDOMNESS                   9
-#define LV2DYNPARAM_GROUP_AMP_LFO_FREQUENCY_RANDOMNESS              10
-
-#define LV2DYNPARAM_GROUP_FILTER_FILTERS                            11
-#define LV2DYNPARAM_GROUP_FILTER_ANALOG                             12
-#define LV2DYNPARAM_GROUP_FILTER_FORMANT                            13
-#define LV2DYNPARAM_GROUP_FILTER_SVF                                14
-#define LV2DYNPARAM_GROUP_FILTER_ENV                                15
-#define LV2DYNPARAM_GROUP_FILTER_LFO                                16
-#define LV2DYNPARAM_GROUP_FILTER_LFO_START_PHASE                    17
-#define LV2DYNPARAM_GROUP_FILTER_LFO_DEPTH_RANDOMNESS               18
-#define LV2DYNPARAM_GROUP_FILTER_LFO_FREQUENCY_RANDOMNESS           19
- 
-#define LV2DYNPARAM_GROUP_FREQUENCY_ENV                             20
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO                             21
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_START_PHASE                 22
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_DEPTH_RANDOMNESS            23
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_FREQUENCY_RANDOMNESS        24
-
-#define LV2DYNPARAM_GROUPS_COUNT                                    25
 
 #define HINT_HIDDEN           "http://home.gna.org/zynjacku/hints#hidden"
 #define HINT_TOGGLE_FLOAT     "http://home.gna.org/zynjacku/hints#togglefloat"
@@ -189,8 +74,11 @@ struct zyn_forest_initializer
 {
   struct zyn_forest_map * map_ptr;
 
-  struct zynadd_group * groups[LV2DYNPARAM_GROUPS_COUNT];
-  struct zynadd_parameter * parameters[LV2DYNPARAM_PARAMETERS_COUNT];
+  size_t groups_count;
+  size_t parameters_count;
+
+  struct zynadd_group ** groups;
+  struct zynadd_parameter ** parameters;
 };
 
 struct zynadd

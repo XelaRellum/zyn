@@ -178,8 +178,10 @@ zynadd_appear_parameter(
 
 /* create forest groups and parameters without exposing them */
 bool
-zynadd_dynparam_forest_prepare(
+zynadd_dynparam_forest_initializer_prepare(
   struct zyn_forest_initializer * forest_ptr,
+  struct zyn_forest_map * map_ptr,
+  struct zynadd_group * root_group_ptr,
   struct zynadd * zynadd_ptr,
   struct list_head * groups_list_ptr,
   struct list_head * parameters_list_ptr)
@@ -188,14 +190,31 @@ zynadd_dynparam_forest_prepare(
   struct zynadd_group * group_ptr;
   struct zynadd_parameter * parameter_ptr;
 
-  for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
+  forest_ptr->map_ptr = map_ptr;
+
+  forest_ptr->groups_count = map_ptr->groups_count;
+  forest_ptr->parameters_count = map_ptr->parameters_count;
+
+  forest_ptr->groups = malloc(sizeof(struct zynadd_group *) * forest_ptr->groups_count);
+  if (forest_ptr->groups == NULL)
+  {
+    goto fail;
+  }
+
+  forest_ptr->parameters = malloc(sizeof(struct zynadd_parameter *) * forest_ptr->parameters_count);
+  if (forest_ptr->parameters == NULL)
+  {
+    goto fail_free_groups_array;
+  }
+
+  for (i = 0 ; i < forest_ptr->groups_count ; i++)
   {
     LOG_DEBUG("Preparing group \"%s\"", forest_ptr->map_ptr->groups[i].name);
 
     group_ptr = malloc(sizeof(struct zynadd_group));
     if (group_ptr == NULL)
     {
-      return false;
+      goto fail_free_parameters_array;
     }
 
     group_ptr->name_ptr = forest_ptr->map_ptr->groups[i].name;
@@ -204,7 +223,7 @@ zynadd_dynparam_forest_prepare(
 
     if (forest_ptr->map_ptr->groups[i].parent == LV2DYNPARAM_GROUP_ROOT)
     {
-      group_ptr->parent_ptr = NULL;
+      group_ptr->parent_ptr = root_group_ptr;
     }
     else
     {
@@ -216,19 +235,19 @@ zynadd_dynparam_forest_prepare(
     list_add_tail(&group_ptr->siblings, groups_list_ptr);
   }
 
-  for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
+  for (i = 0 ; i < forest_ptr->parameters_count ; i++)
   {
     LOG_DEBUG("Preparing group \"%s\"", forest_ptr->map_ptr->parameters[i].name);
 
     parameter_ptr = malloc(sizeof(struct zynadd_parameter));
     if (parameter_ptr == NULL)
     {
-      return false;
+      goto fail_free_parameters_array;
     }
 
     if (forest_ptr->map_ptr->parameters[i].parent == LV2DYNPARAM_GROUP_ROOT)
     {
-      parameter_ptr->parent_ptr = NULL;
+      parameter_ptr->parent_ptr = root_group_ptr;
     }
     else
     {
@@ -252,7 +271,7 @@ zynadd_dynparam_forest_prepare(
   }
 
   /* set other_parameter when needed */
-  for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
+  for (i = 0 ; i < forest_ptr->parameters_count ; i++)
   {
     if (forest_ptr->map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
         forest_ptr->map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
@@ -262,6 +281,23 @@ zynadd_dynparam_forest_prepare(
   }
 
   return true;
+
+fail_free_parameters_array:
+  free(forest_ptr->parameters);
+
+fail_free_groups_array:
+  free(forest_ptr->groups);
+
+fail:
+  return false;
+}
+
+void
+zynadd_dynparam_forest_initializer_clear(
+  struct zyn_forest_initializer * forest_ptr)
+{
+  free(forest_ptr->groups);
+  free(forest_ptr->parameters);
 }
 
 void
@@ -299,13 +335,13 @@ zynadd_dynparam_init(
   struct zyn_forest_initializer top_forest_initializer;
   struct list_head * node_ptr;
 
-  top_forest_initializer.map_ptr = &g_top_forest_map;
-
   INIT_LIST_HEAD(&zynadd_ptr->groups);
   INIT_LIST_HEAD(&zynadd_ptr->parameters);
 
-  if (!zynadd_dynparam_forest_prepare(
+  if (!zynadd_dynparam_forest_initializer_prepare(
         &top_forest_initializer,
+        &g_top_forest_map,
+        NULL,
         zynadd_ptr,
         &zynadd_ptr->groups,
         &zynadd_ptr->parameters))
@@ -318,7 +354,7 @@ zynadd_dynparam_init(
         "zynadd",
         &zynadd_ptr->dynparams))
   {
-    goto fail_destroy_forests;
+    goto fail_clear_forest_initializer;
   }
 
   list_for_each(node_ptr, &zynadd_ptr->groups)
@@ -387,10 +423,15 @@ zynadd_dynparam_init(
     }
   }
 
+  zynadd_dynparam_forest_initializer_clear(&top_forest_initializer);
+
   return true;
 
 fail_clean_dynparams:
   zynadd_dynparam_uninit(zynadd_ptr);
+
+fail_clear_forest_initializer:
+  zynadd_dynparam_forest_initializer_clear(&top_forest_initializer);
 
 fail_destroy_forests:
   zynadd_dynparam_destroy_forests(zynadd_ptr);
