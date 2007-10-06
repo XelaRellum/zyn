@@ -30,6 +30,8 @@ extern "C" {
 
 typedef void * zyn_addsynth_handle;
 
+typedef void * zyn_addsynth_component;
+
 bool
 zyn_addsynth_create(
   unsigned int voices_count,
@@ -64,7 +66,12 @@ zyn_addsynth_destroy(
 #define ZYNADD_COMPONENT_FREQUENCY_GLOBALS        6
 #define ZYNADD_COMPONENT_FREQUENCY_ENV            7
 #define ZYNADD_COMPONENT_FREQUENCY_LFO            8
-#define ZYNADD_COMPONENT_VOICE_GLOBALS            9
+
+#define ZYNADD_GLOBAL_COMPONENTS_COUNT            9
+
+#define ZYNADD_COMPONENT_VOICE_GLOBALS            0
+
+#define ZYNADD_VOICE_COMPONENTS_COUNT             1
 
 /* float - globals */
 #define ZYNADD_PARAMETER_FLOAT_PANORAMA                    0 /* -1 .. 1 */
@@ -119,76 +126,74 @@ zyn_addsynth_destroy(
 
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
 
+zyn_addsynth_component
+zyn_addsynth_get_global_component(
+  zyn_addsynth_handle handle,
+  unsigned int component);
+
+zyn_addsynth_component
+zyn_addsynth_get_voice_component(
+  zyn_addsynth_handle handle,
+  unsigned int component);
+
 float
 zyn_addsynth_get_float_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int parameter);
 
 void
 zyn_addsynth_set_float_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int parameter,
   float value);
 
 signed int
 zyn_addsynth_get_int_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int parameter);
 
 void
 zyn_addsynth_set_int_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int parameter,
   signed int value);
 
 bool
 zyn_addsynth_get_bool_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int parameter);
 
 void
 zyn_addsynth_set_bool_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int parameter,
   bool value);
 
 unsigned int
 zyn_addsynth_get_shape_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component);
+  zyn_addsynth_component component);
 
 void
 zyn_addsynth_set_shape_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int value);
 
 unsigned int
 zyn_addsynth_get_filter_type_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component);
+  zyn_addsynth_component component);
 
 void
 zyn_addsynth_set_filter_type_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int value);
 
 unsigned int
 zyn_addsynth_get_analog_filter_type_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component);
+  zyn_addsynth_component component);
 
 void
 zyn_addsynth_set_analog_filter_type_parameter(
-  zyn_addsynth_handle handle,
-  unsigned int component,
+  zyn_addsynth_component component,
   unsigned int value);
 
 #if 0

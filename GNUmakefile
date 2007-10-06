@@ -43,6 +43,14 @@ PLUGIN_SOURCES_CXX += oscillator.cpp
 PLUGIN_SOURCES_CXX += sv_filter.cpp
 PLUGIN_SOURCES_CXX += resonance.cpp
 PLUGIN_SOURCES_CXX += Controller.cpp
+PLUGIN_SOURCES_CXX += addsynth_component_amp_globals.cpp
+PLUGIN_SOURCES_CXX += addsynth_component_amp_envelope.cpp
+PLUGIN_SOURCES_CXX += addsynth_component_lfo.cpp
+PLUGIN_SOURCES_CXX += addsynth_component_filter_globals.cpp
+PLUGIN_SOURCES_CXX += addsynth_component_filter_envelope.cpp
+PLUGIN_SOURCES_CXX += addsynth_component_frequency_globals.cpp
+PLUGIN_SOURCES_CXX += addsynth_component_frequency_envelope.cpp
+PLUGIN_SOURCES_CXX += addsynth_component_voice_globals.cpp
 
 PLUGIN_SOURCES_C = lv2plugin.c zynadd.c util.c zynadd_dynparam.c log.c
 PLUGIN_SOURCES_C += fft.c

@@ -34,7 +34,7 @@
 #include "zynadd_dynparam_forest_map_top.h"
 #include "zynadd_dynparam_forest_map_voice.h"
 
-#define LOG_LEVEL LOG_LEVEL_DEBUG
+#define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
 
 bool
@@ -67,7 +67,6 @@ zynadd_appear_parameter(
           parameter_ptr->name_ptr,
           parameter_ptr->hints_ptr,
           zyn_addsynth_get_bool_parameter(
-            zynadd_ptr->synth,
             parameter_ptr->addsynth_component,
             parameter_ptr->addsynth_parameter),
           zynadd_bool_parameter_changed,
@@ -86,7 +85,6 @@ zynadd_appear_parameter(
           parameter_ptr->name_ptr,
           parameter_ptr->hints_ptr,
           zyn_addsynth_get_float_parameter(
-            zynadd_ptr->synth,
             parameter_ptr->addsynth_component,
             parameter_ptr->addsynth_parameter),
           parameter_ptr->map_element_ptr->min.fpoint,
@@ -107,7 +105,6 @@ zynadd_appear_parameter(
           parameter_ptr->name_ptr,
           parameter_ptr->hints_ptr,
           zyn_addsynth_get_int_parameter(
-            zynadd_ptr->synth,
             parameter_ptr->addsynth_component,
             parameter_ptr->addsynth_parameter),
           parameter_ptr->map_element_ptr->min.integer,
@@ -129,7 +126,7 @@ zynadd_appear_parameter(
           parameter_ptr->hints_ptr,
           g_shape_names,
           ZYN_LFO_SHAPES_COUNT,
-          zyn_addsynth_get_shape_parameter(zynadd_ptr->synth, parameter_ptr->addsynth_component),
+          zyn_addsynth_get_shape_parameter(parameter_ptr->addsynth_component),
           zynadd_shape_parameter_changed,
           parameter_ptr,
           &parameter_ptr->lv2parameter))
@@ -146,7 +143,7 @@ zynadd_appear_parameter(
           parameter_ptr->hints_ptr,
           g_filter_type_names,
           ZYN_FILTER_TYPES_COUNT,
-          zyn_addsynth_get_filter_type_parameter(zynadd_ptr->synth, parameter_ptr->addsynth_component),
+          zyn_addsynth_get_filter_type_parameter(parameter_ptr->addsynth_component),
           zynadd_filter_type_parameter_changed,
           parameter_ptr,
           &parameter_ptr->lv2parameter))
@@ -163,7 +160,7 @@ zynadd_appear_parameter(
           parameter_ptr->hints_ptr,
           g_analog_filter_type_names,
           ZYN_FILTER_ANALOG_TYPES_COUNT,
-          zyn_addsynth_get_analog_filter_type_parameter(zynadd_ptr->synth, parameter_ptr->addsynth_component),
+          zyn_addsynth_get_analog_filter_type_parameter(parameter_ptr->addsynth_component),
           zynadd_analog_filter_type_parameter_changed,
           parameter_ptr,
           &parameter_ptr->lv2parameter))
@@ -184,6 +181,7 @@ zynadd_dynparam_forest_initializer_prepare(
   struct zyn_forest_initializer * forest_ptr,
   struct zyn_forest_map * map_ptr,
   struct zynadd_group * root_group_ptr,
+  zyn_addsynth_component * forest_components_array,
   struct zynadd * zynadd_ptr,
   struct list_head * groups_list_ptr,
   struct list_head * parameters_list_ptr)
@@ -260,7 +258,7 @@ zynadd_dynparam_forest_initializer_prepare(
 
     parameter_ptr->synth_ptr = zynadd_ptr;
     parameter_ptr->addsynth_parameter = forest_ptr->map_ptr->parameters[i].addsynth_parameter;
-    parameter_ptr->addsynth_component = forest_ptr->map_ptr->parameters[i].addsynth_component;
+    parameter_ptr->addsynth_component = forest_components_array[forest_ptr->map_ptr->parameters[i].addsynth_component];
     parameter_ptr->scope = forest_ptr->map_ptr->parameters[i].scope;
     parameter_ptr->other_parameter = NULL;
     parameter_ptr->lv2parameter = NULL;
@@ -371,7 +369,6 @@ zynadd_dynparam_forests_appear(
       assert(parameter_ptr->type == LV2DYNPARAM_PARAMETER_TYPE_BOOL);
 
       tmp_bool = zyn_addsynth_get_bool_parameter(
-        zynadd_ptr->synth,
         parameter_ptr->addsynth_component,
         parameter_ptr->addsynth_parameter);
 
@@ -411,9 +408,20 @@ zynadd_dynparam_init(
 {
   struct zyn_forest_initializer top_forest_initializer;
   struct zyn_forest_initializer voice_forest_initializer;
+  unsigned int i;
 
   INIT_LIST_HEAD(&zynadd_ptr->groups);
   INIT_LIST_HEAD(&zynadd_ptr->parameters);
+
+  for (i = 0 ; i < ZYNADD_GLOBAL_COMPONENTS_COUNT ; i++)
+  {
+    zynadd_ptr->synth_global_components[i] = zyn_addsynth_get_global_component(zynadd_ptr->synth, i);
+  }
+
+  for (i = 0 ; i < ZYNADD_VOICE_COMPONENTS_COUNT ; i++)
+  {
+    zynadd_ptr->synth_voice0_components[i] = zyn_addsynth_get_voice_component(zynadd_ptr->synth, i);
+  }
 
   LOG_DEBUG("Preparing top forest...");
 
@@ -421,6 +429,7 @@ zynadd_dynparam_init(
         &top_forest_initializer,
         &g_top_forest_map,
         NULL,
+        zynadd_ptr->synth_global_components,
         zynadd_ptr,
         &zynadd_ptr->groups,
         &zynadd_ptr->parameters))
@@ -434,6 +443,7 @@ zynadd_dynparam_init(
         &voice_forest_initializer,
         &g_voice_forest_map,
         top_forest_initializer.groups[zynadd_top_forest_map_get_voices_group()],
+        zynadd_ptr->synth_voice0_components,
         zynadd_ptr,
         &zynadd_ptr->groups,
         &zynadd_ptr->parameters))

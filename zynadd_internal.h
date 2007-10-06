@@ -46,7 +46,7 @@ struct zynadd_parameter
 {
   struct list_head siblings;
   struct zynadd * synth_ptr;
-  unsigned int addsynth_component; /* one of ZYNADD_COMPONENT_XXX */
+  zyn_addsynth_component addsynth_component;
   unsigned int addsynth_parameter; /* one of ZYNADD_PARAMETER_XXX */
   unsigned int scope;           /* one of LV2DYNPARAM_PARAMETER_SCOPE_TYPE_XXX */
   struct zynadd_parameter * other_parameter; /* used for bools controling other parameters appear/disappear */
@@ -88,6 +88,8 @@ struct zynadd
   void ** ports;
 
   zyn_addsynth_handle synth;
+  zyn_addsynth_component synth_global_components[ZYNADD_GLOBAL_COMPONENTS_COUNT];
+  zyn_addsynth_component synth_voice0_components[ZYNADD_VOICE_COMPONENTS_COUNT];
 
   zyn_sample_type synth_output_left[SOUND_BUFFER_SIZE];
   zyn_sample_type synth_output_right[SOUND_BUFFER_SIZE];

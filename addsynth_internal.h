@@ -218,6 +218,8 @@ struct ADnoteVoiceParam
   EnvelopeParams m_fm_amplitude_envelope_params;
 };
 
+#include "addsynth_component.h"
+
 struct zyn_addsynth
 {
   unsigned int polyphony;
@@ -266,6 +268,27 @@ struct zyn_addsynth
   unsigned int voices_count;
 
   ADnoteVoiceParam * voices_params_ptr; /* array with one entry per voice */
+
+  struct zyn_component_descriptor global_components[ZYNADD_GLOBAL_COMPONENTS_COUNT];
+
+  struct zyn_component_descriptor * voices_components;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#if 0
+} /* Adjust editor indent */
+#endif
+
+float percent_from_0_127(unsigned char value);
+unsigned char percent_to_0_127(float value);
+
+#if 0
+{ /* Adjust editor indent */
+#endif
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* #ifndef ADDSYNTH_INTERNAL_H__9870368A_F1C9_4F0D_ADC1_B07ECFF2F9C7__INCLUDED */

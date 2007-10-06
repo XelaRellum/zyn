@@ -29,7 +29,7 @@
 #include "lv2dynparam/plugin.h"
 #include "zynadd_internal.h"
 
-#define LOG_LEVEL LOG_LEVEL_DEBUG
+#define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
 
 #define LV2DYNPARAM_PARAMETER_RESONANCE                             0

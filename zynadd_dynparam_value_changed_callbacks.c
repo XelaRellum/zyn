@@ -47,7 +47,6 @@ zynadd_bool_parameter_changed(
       parameter_ptr->scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
   {
     current_value = zyn_addsynth_get_bool_parameter(
-      parameter_ptr->synth_ptr->synth,
       parameter_ptr->addsynth_component,
       parameter_ptr->addsynth_parameter);
 
@@ -83,7 +82,6 @@ zynadd_bool_parameter_changed(
   }
 
   zyn_addsynth_set_bool_parameter(
-    parameter_ptr->synth_ptr->synth,
     parameter_ptr->addsynth_component,
     parameter_ptr->addsynth_parameter,
     value);
@@ -97,7 +95,6 @@ zynadd_float_parameter_changed(
   float value)
 {
   zyn_addsynth_set_float_parameter(
-    parameter_ptr->synth_ptr->synth,
     parameter_ptr->addsynth_component,
     parameter_ptr->addsynth_parameter,
     value);
@@ -112,7 +109,6 @@ zynadd_shape_parameter_changed(
   unsigned int value_index)
 {
   zyn_addsynth_set_shape_parameter(
-    parameter_ptr->synth_ptr->synth,
     parameter_ptr->addsynth_component,
     value_index);
 

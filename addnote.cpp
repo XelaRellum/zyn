@@ -38,6 +38,7 @@
 #include "analog_filter.h"
 #include "filter.h"
 #include "envelope.h"
+#include "addsynth.h"
 #include "addsynth_internal.h"
 #include "addsynth_voice.h"
 #include "addnote.h"
