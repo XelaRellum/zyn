@@ -95,8 +95,10 @@ zyn_component_voice_globals_get_bool(
 {
   switch (parameter)
   {
-  case ZYNADD_PARAMETER_BOOL_VOICE_RESONANCE:
+  case ZYNADD_PARAMETER_BOOL_RESONANCE:
     return voice_params_ptr->resonance;
+  case ZYNADD_PARAMETER_BOOL_WHITE_NOISE:
+    return voice_params_ptr->white_noise;
   default:
     LOG_ERROR("Unknown bool voice global parameter %u", parameter);
     assert(0);
@@ -111,9 +113,13 @@ zyn_component_voice_globals_set_bool(
 {
   switch (parameter)
   {
-  case ZYNADD_PARAMETER_BOOL_VOICE_RESONANCE:
-    LOG_DEBUG("voice resonance -> %s", value ? "on" : "off");
+  case ZYNADD_PARAMETER_BOOL_RESONANCE:
+    LOG_DEBUG("voice resonance -> %s (%p)", value ? "on" : "off", voice_params_ptr);
     voice_params_ptr->resonance = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_WHITE_NOISE:
+    LOG_DEBUG("voice white noise -> %s (%p)", value ? "on" : "off", voice_params_ptr);
+    voice_params_ptr->white_noise = value;
     return;
   default:
     LOG_ERROR("Unknown bool voice global parameter %u", parameter);
@@ -176,5 +182,6 @@ zyn_addsynth_component_init_voice_globals(
   struct zyn_component_descriptor * component_ptr,
   struct ADnoteVoiceParam * voice_params_ptr)
 {
+  //LOG_DEBUG("voice globals init (%p, %p)", component_ptr, voice_params_ptr);
   ZYN_INIT_COMPONENT(component_ptr, voice_params_ptr, zyn_component_voice_globals_);
 }

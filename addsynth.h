@@ -122,7 +122,8 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_FREQUENCY              7
 
 /* bool - voice */
-#define ZYNADD_PARAMETER_BOOL_VOICE_RESONANCE                   8
+#define ZYNADD_PARAMETER_BOOL_RESONANCE                         8
+#define ZYNADD_PARAMETER_BOOL_WHITE_NOISE                       9
 
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
 

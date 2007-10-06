@@ -81,8 +81,8 @@ struct ADnoteVoiceParam
   /* whether voice is enabled */
   bool enabled;
 
-  /* Type of the voice (0=Sound,1=Noise)*/
-  unsigned char Type;
+  /* Type of the voice (false = Sound, true = White Noise)*/
+  bool white_noise;
 
   /* Voice Delay */
   unsigned char PDelay;

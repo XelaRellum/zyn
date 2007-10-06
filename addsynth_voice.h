@@ -21,7 +21,7 @@ struct addsynth_voice
   bool enabled; 
 
   /* Voice Type (sound/noise)*/
-  int noisetype;
+  bool white_noise;
 
   /* Filter Bypass */
   int filterbypass;

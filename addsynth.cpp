@@ -41,6 +41,8 @@
 #include "addsynth_voice.h"
 #include "addnote.h"
 #include "util.h"
+
+#define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
 
 #define ZYN_DEFAULT_POLYPHONY 60
@@ -154,7 +156,7 @@ zyn_addsynth_create(
   for (voice_index = 0 ; voice_index < voices_count ; voice_index++)
   {
     zyn_addsynth_ptr->voices_params_ptr[voice_index].enabled = false;
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].Type=0;
+    zyn_addsynth_ptr->voices_params_ptr[voice_index].white_noise = false;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].Pfixedfreq=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PfixedfreqET=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].resonance = true;
@@ -306,7 +308,7 @@ zyn_addsynth_create(
   for (voice_index = 0 ; voice_index < voices_count ; voice_index++)
   {
     zyn_addsynth_component_init_voice_globals(
-      zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_COMPONENT_VOICE_GLOBALS,
+      zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_VOICE_COMPONENTS_COUNT + ZYNADD_COMPONENT_VOICE_GLOBALS,
       zyn_addsynth_ptr->voices_params_ptr + voice_index);
   }
 
@@ -516,6 +518,7 @@ zyn_addsynth_get_bool_parameter(
   zyn_addsynth_component component,
   unsigned int parameter)
 {
+  //LOG_DEBUG("component %p, context %p", component_ptr, component_ptr->context);
   return component_ptr->get_bool(component_ptr->context, parameter);
 }
 

@@ -421,6 +421,7 @@ zynadd_dynparam_init(
   for (i = 0 ; i < ZYNADD_VOICE_COMPONENTS_COUNT ; i++)
   {
     zynadd_ptr->synth_voice0_components[i] = zyn_addsynth_get_voice_component(zynadd_ptr->synth, i);
+    //LOG_DEBUG("Voice component %p", zynadd_ptr->synth_voice0_components[i]);
   }
 
   LOG_DEBUG("Preparing top forest...");

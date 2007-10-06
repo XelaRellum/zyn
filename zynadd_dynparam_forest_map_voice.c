@@ -33,8 +33,9 @@
 #include "log.h"
 
 #define LV2DYNPARAM_PARAMETER_RESONANCE                             0
+#define LV2DYNPARAM_PARAMETER_WHITE_NOISE                           1
 
-#define LV2DYNPARAM_PARAMETERS_COUNT                                1
+#define LV2DYNPARAM_PARAMETERS_COUNT                                2
 
 #define LV2DYNPARAM_GROUPS_COUNT                                    0
 
@@ -66,7 +67,8 @@ void zynadd_init_voice_forest_map()
     map_ptr->parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
   }
 
-  LV2DYNPARAM_PARAMETER_INIT_BOOL(ROOT, RESONANCE, VOICE_GLOBALS, VOICE_RESONANCE, "Resonance", ALWAYS, NULL);
+  LV2DYNPARAM_PARAMETER_INIT_BOOL(ROOT, RESONANCE, VOICE_GLOBALS, RESONANCE, "Resonance", ALWAYS, NULL);
+  LV2DYNPARAM_PARAMETER_INIT_BOOL(ROOT, WHITE_NOISE, VOICE_GLOBALS, WHITE_NOISE, "White Noise", ALWAYS, NULL);
 
   /* santity check that we have filled all values */
 

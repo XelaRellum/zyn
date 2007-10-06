@@ -43,6 +43,9 @@
 #include "addsynth_voice.h"
 #include "addnote.h"
 
+#define LOG_LEVEL LOG_LEVEL_ERROR
+#include "log.h"
+
 ADnote::ADnote(
   struct zyn_addsynth * synth_ptr,
   Controller * ctl)
@@ -332,9 +335,14 @@ ADnote::note_on(
   // Voice Parameter init
   for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
-    if (!m_voices_ptr[voice_index].enabled) continue;
+    if (!m_voices_ptr[voice_index].enabled)
+    {
+      continue;
+    }
 
-    m_voices_ptr[voice_index].noisetype=m_synth_ptr->voices_params_ptr[voice_index].Type;
+    LOG_DEBUG("Starting %s voice (%u, %p)", m_synth_ptr->voices_params_ptr[voice_index].white_noise ? "white noise" : "signal", voice_index, m_synth_ptr->voices_params_ptr + voice_index);
+
+    m_voices_ptr[voice_index].white_noise = m_synth_ptr->voices_params_ptr[voice_index].white_noise;
     /* Voice Amplitude Parameters Init */
     m_voices_ptr[voice_index].Volume=pow(0.1,3.0*(1.0-m_synth_ptr->voices_params_ptr[voice_index].PVolume/127.0)) // -60 dB .. 0 dB
       *VelF(m_velocity,m_synth_ptr->voices_params_ptr[voice_index].PAmpVelocityScaleFunction);//velocity
@@ -747,7 +755,7 @@ ADnote::computecurrentparameters()
     }
 
     // compute only if the voice isn't noise
-    if (m_voices_ptr[voice_index].noisetype == 0)
+    if (!m_voices_ptr[voice_index].white_noise)
     {
       /*******************/
       /* Voice Frequency */
@@ -1086,7 +1094,7 @@ ADnote::noteout(
       continue;
     }
 
-    if (m_voices_ptr[voice_index].noisetype == 0) //voice mode = sound
+    if (!m_voices_ptr[voice_index].white_noise) //voice mode = sound
     {
       switch (m_voices_ptr[voice_index].fm_type)
       {
