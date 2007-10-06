@@ -158,7 +158,7 @@ zyn_addsynth_component_init_frequency_envelope(
 void
 zyn_addsynth_component_init_voice_globals(
   struct zyn_component_descriptor * component_ptr,
-  struct ADnoteVoiceParam * voice_params_ptr);
+  struct zyn_addnote_voice_parameters * voice_params_ptr);
 
 #if 0
 { /* Adjust editor indent */

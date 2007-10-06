@@ -76,7 +76,7 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->GlobalPar.Reson=new Resonance();
 
   zyn_addsynth_ptr->voices_count = voices_count;
-  zyn_addsynth_ptr->voices_params_ptr = (struct ADnoteVoiceParam *)malloc(sizeof(struct ADnoteVoiceParam) * voices_count);
+  zyn_addsynth_ptr->voices_params_ptr = (struct zyn_addnote_voice_parameters *)malloc(sizeof(struct zyn_addnote_voice_parameters) * voices_count);
 
   for (voice_index = 0 ; voice_index < voices_count ; voice_index++)
   {

@@ -76,7 +76,7 @@ struct ADnoteGlobalParam
 /***********************************************************/
 /*                    VOICE PARAMETERS                     */
 /***********************************************************/
-struct ADnoteVoiceParam
+struct zyn_addnote_voice_parameters
 {
   /* whether voice is enabled */
   bool enabled;
@@ -267,7 +267,7 @@ struct zyn_addsynth
 
   unsigned int voices_count;
 
-  ADnoteVoiceParam * voices_params_ptr; /* array with one entry per voice */
+  struct zyn_addnote_voice_parameters * voices_params_ptr; /* array with one entry per voice */
 
   struct zyn_component_descriptor global_components[ZYNADD_GLOBAL_COMPONENTS_COUNT];
 

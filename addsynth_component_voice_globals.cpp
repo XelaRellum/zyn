@@ -41,7 +41,7 @@
 #define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
 
-#define voice_params_ptr ((struct ADnoteVoiceParam * )context)
+#define voice_params_ptr ((struct zyn_addnote_voice_parameters * )context)
 
 float
 zyn_component_voice_globals_get_float(
@@ -180,7 +180,7 @@ zyn_component_voice_globals_set_analog_filter_type(
 void
 zyn_addsynth_component_init_voice_globals(
   struct zyn_component_descriptor * component_ptr,
-  struct ADnoteVoiceParam * voice_params_ptr)
+  struct zyn_addnote_voice_parameters * voice_params_ptr)
 {
   //LOG_DEBUG("voice globals init (%p, %p)", component_ptr, voice_params_ptr);
   ZYN_INIT_COMPONENT(component_ptr, voice_params_ptr, zyn_component_voice_globals_);
