@@ -303,6 +303,10 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_FREQUENCY_LFO,
     &zyn_addsynth_ptr->frequency_lfo_params);
 
+  zyn_addsynth_component_init_portamento(
+    zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_PORTAMENTO,
+    &zyn_addsynth_ptr->portamento);
+
   // init voices components
 
   zyn_addsynth_ptr->voices_components =

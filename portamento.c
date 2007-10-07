@@ -21,9 +21,12 @@
 
 #include <stdbool.h>
 #include <math.h>
+#include <assert.h>
 
 #include "globals.h"
 #include "portamento.h"
+#include "addsynth.h"
+#include "addsynth_component.h"
 
 //#define LOG_LEVEL LOG_LEVEL_DEBUG
 #include "log.h"
@@ -148,4 +151,141 @@ zyn_portamento_update(
   }
 
   portamento_ptr->freqrap = (1.0 - portamento_ptr->x) * portamento_ptr->origfreqrap + portamento_ptr->x;
+}
+
+#define portamento_ptr ((struct zyn_portamento * )context)
+
+float
+zyn_component_portamento_get_float(
+  void * context,
+  unsigned int parameter)
+{
+  switch (parameter)
+  {
+  default:
+    LOG_ERROR("Unknown portamento float parameter %u", parameter);
+    assert(0);
+  }
+}
+
+void
+zyn_component_portamento_set_float(
+  void * context,
+  unsigned int parameter,
+  float value)
+{
+  switch (parameter)
+  {
+  default:
+    LOG_ERROR("Unknown portamento float parameter %u", parameter);
+    assert(0);
+  }
+}
+
+signed int
+zyn_component_portamento_get_int(
+  void * context,
+  unsigned int parameter)
+{
+  assert(0);
+  return 0;
+}
+
+void
+zyn_component_portamento_set_int(
+  void * context,
+  unsigned int parameter,
+  signed int value)
+{
+  assert(0);
+}
+
+bool
+zyn_component_portamento_get_bool(
+  void * context,
+  unsigned int parameter)
+{
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_BOOL_PORTAMENTO_ENABLED:
+    return portamento_ptr->enabled;
+  default:
+    LOG_ERROR("Unknown bool portamento parameter %u", parameter);
+    assert(0);
+  }
+}
+
+void
+zyn_component_portamento_set_bool(
+  void * context,
+  unsigned int parameter,
+  bool value)
+{
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_BOOL_PORTAMENTO_ENABLED:
+    portamento_ptr->enabled = value;
+    return;
+  default:
+    LOG_ERROR("Unknown bool portamento parameter %u", parameter);
+    assert(0);
+  }
+}
+
+unsigned int
+zyn_component_portamento_get_shape(
+  void * context)
+{
+  assert(0);
+  return 0;
+}
+
+void
+zyn_component_portamento_set_shape(
+  void * context,
+  unsigned int value)
+{
+  assert(0);
+}
+
+unsigned int
+zyn_component_portamento_get_filter_type(
+  void * context)
+{
+  assert(0);
+  return 0;
+}
+
+void
+zyn_component_portamento_set_filter_type(
+  void * context,
+  unsigned int value)
+{
+  assert(0);
+}
+
+unsigned int
+zyn_component_portamento_get_analog_filter_type(
+  void * context)
+{
+  assert(0);
+  return 0;
+}
+
+void
+zyn_component_portamento_set_analog_filter_type(
+  void * context,
+  unsigned int value)
+{
+  assert(0);
+}
+
+#undef portamento_ptr
+
+void
+zyn_addsynth_component_init_portamento(
+  struct zyn_component_descriptor * component_ptr,
+  struct zyn_portamento * portamento_ptr)
+{
+  ZYN_INIT_COMPONENT(component_ptr, portamento_ptr, zyn_component_portamento_);
 }

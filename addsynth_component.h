@@ -121,6 +121,7 @@ extern "C" {
 } /* Adjust editor indent */
 #endif
 
+#ifdef __cplusplus
 void
 zyn_addsynth_component_init_amp_globals(
   struct zyn_component_descriptor * component_ptr,
@@ -159,6 +160,12 @@ void
 zyn_addsynth_component_init_voice_globals(
   struct zyn_component_descriptor * component_ptr,
   struct zyn_addnote_voice_parameters * voice_params_ptr);
+#endif
+
+void
+zyn_addsynth_component_init_portamento(
+  struct zyn_component_descriptor * component_ptr,
+  struct zyn_portamento * portamento_ptr);
 
 #if 0
 { /* Adjust editor indent */
