@@ -52,9 +52,6 @@ public:
   void setparameternumber(unsigned int type,int value);//used for RPN and NRPN's
   int getnrpn(int *parhi, int *parlo, int *valhi, int *vallo);
 
-  bool initportamento(float oldfreq, float newfreq); // returns true if the portamento's conditions are true, else returns false
-  void updateportamento(); // update portamento values 
-
   // Controllers values 
   struct {//Pitch Wheel
     int data;
@@ -118,32 +115,6 @@ public:
     unsigned char receive;
   } sustain;
 
-  struct
-  {
-    bool portamento;            // whether portamento is enabled
-  
-    // pitchthresh is the threshold of enabling protamento
-    // pitchthreshtype -> enable the portamento only below(0) / above(1) the threshold
-    unsigned char receive, time, pitchthresh, pitchthreshtype;
-
-    //'up portanemto' means when the frequency is rising (eg: the portamento is from 200Hz to 300 Hz)
-    //'down portanemto' means when the frequency is lowering (eg: the portamento is from 300Hz to 200 Hz)
-
-    unsigned char updowntimestretch; // this value represent how the portamento time is reduced
-    // 0 - for down portamento, 1..63 - the up portamento's time is smaller than the down portamento
-    // 64 - the portamento time is always the same
-    // 64-126 - the down portamento's time is smaller than the up portamento
-    // 127 - for upper portamento
-
-    float freqrap; // this value is used to compute the actual portamento
-    int noteusing; // this is used by the Part:: for knowing which note uses the portamento
-    bool used; // if a the portamento is used by a note
-
-    // internal data
-    float x, dx; // x is from 0.0 (start portamento) to 1.0 (finished portamento), dx is x increment
-    float origfreqrap; // this is used for computing oldfreq value from x
-  } portamento;
-    
   struct{//Resonance Center Frequency
     int data;
     REALTYPE relcenter;

@@ -36,6 +36,7 @@
 #include "resonance.h"
 #include "fft.h"
 #include "oscillator.h"
+#include "portamento.h"
 #include "addsynth_internal.h"
 #include "log.h"
 

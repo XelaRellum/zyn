@@ -265,6 +265,8 @@ struct zyn_addsynth
 
   ADnoteGlobalParam GlobalPar;
 
+  zyn_portamento portamento;
+
   unsigned int voices_count;
 
   struct zyn_addnote_voice_parameters * voices_params_ptr; /* array with one entry per voice */

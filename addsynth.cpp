@@ -37,6 +37,7 @@
 #include "analog_filter.h"
 #include "filter.h"
 #include "Controller.h"
+#include "portamento.h"
 #include "addsynth_internal.h"
 #include "addsynth_voice.h"
 #include "addnote.h"
@@ -206,6 +207,9 @@ zyn_addsynth_create(
 
   zyn_addsynth_ptr->ctl_ptr = new Controller;
   zyn_addsynth_ptr->ctl_ptr->defaults();
+
+  zyn_portamento_init(&zyn_addsynth_ptr->portamento);
+
   zyn_addsynth_ptr->oldfreq = -1.0;
 
   zyn_addsynth_ptr->random_panorama = false;
@@ -353,7 +357,7 @@ zyn_addsynth_get_audio_output(
     }
   }
 
-  zyn_addsynth_ptr->ctl_ptr->updateportamento();
+  zyn_portamento_update(&zyn_addsynth_ptr->portamento);
 }
 
 void
@@ -394,7 +398,7 @@ unused_note_channel_found:
     zyn_addsynth_ptr->oldfreq = notebasefreq;
   }
       
-  bool portamento = zyn_addsynth_ptr->ctl_ptr->initportamento(zyn_addsynth_ptr->oldfreq, notebasefreq);
+  bool portamento = zyn_portamento_start(&zyn_addsynth_ptr->portamento, zyn_addsynth_ptr->oldfreq, notebasefreq);
       
   zyn_addsynth_ptr->oldfreq = notebasefreq;
 

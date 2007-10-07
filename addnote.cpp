@@ -39,6 +39,7 @@
 #include "filter.h"
 #include "envelope.h"
 #include "addsynth.h"
+#include "portamento.h"
 #include "addsynth_internal.h"
 #include "addsynth_voice.h"
 #include "addnote.h"
@@ -692,9 +693,9 @@ ADnote::computecurrentparameters()
   if (m_portamento)
   {
     // this voice use portamento
-    portamentofreqrap = m_ctl->portamento.freqrap;
+    portamentofreqrap = m_synth_ptr->portamento.freqrap;
 
-    if (!m_ctl->portamento.used)
+    if (!m_synth_ptr->portamento.used)
     {
       // the portamento has finished
       m_portamento = false;     // this note is no longer "portamented"
