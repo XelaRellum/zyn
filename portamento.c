@@ -38,7 +38,7 @@ zyn_portamento_init(
   portamento_ptr->enabled = false;
   portamento_ptr->used = false;
   portamento_ptr->time = 0.5;
-  portamento_ptr->updowntimestretch = 64;
+  portamento_ptr->up_down_time_stretch = 0.0;
   portamento_ptr->pitch_threshold = 3; /* 3 equally tempered semitones */
   portamento_ptr->pitch_threshold_above = true;
 
@@ -72,28 +72,28 @@ zyn_portamento_start(
 
   portamentotime = powf(100.0, portamento_ptr->time) / 50.0; // portamento time in seconds
 
-  if (portamento_ptr->updowntimestretch >= 64 &&
+  if (portamento_ptr->up_down_time_stretch >= 0.0 &&
       newfreq < oldfreq)
   {
-    if (portamento_ptr->updowntimestretch == 127)
+    if (portamento_ptr->up_down_time_stretch == 1.0)
     {
       LOG_DEBUG("Not using portamento down portamento because of time stretch value");
       return false;
     }
 
-    portamentotime *= pow(0.1, (portamento_ptr->updowntimestretch - 64) / 63.0);
+    portamentotime *= pow(0.1, portamento_ptr->up_down_time_stretch);
   } 
 
-  if (portamento_ptr->updowntimestretch < 64 &&
+  if (portamento_ptr->up_down_time_stretch < 0.0 &&
       newfreq > oldfreq)
   {
-    if (portamento_ptr->updowntimestretch == 0)
+    if (portamento_ptr->up_down_time_stretch == -1.0)
     {
       LOG_DEBUG("Not using portamento up portamento because of time stretch value");
       return false;
     }
 
-    portamentotime *= pow(0.1, (64.0 - portamento_ptr->updowntimestretch) / 64.0);
+    portamentotime *= pow(0.1, -portamento_ptr->up_down_time_stretch);
   }
     
   portamento_ptr->dx = SOUND_BUFFER_SIZE / (portamentotime * SAMPLE_RATE);
@@ -164,6 +164,8 @@ zyn_component_portamento_get_float(
   {
   case ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME:
     return portamento_ptr->time;
+  case ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME_STRETCH:
+    return portamento_ptr->up_down_time_stretch;
   default:
     LOG_ERROR("Unknown portamento float parameter %u", parameter);
     assert(0);
@@ -180,6 +182,9 @@ zyn_component_portamento_set_float(
   {
   case ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME:
     portamento_ptr->time = value;
+    return;
+  case ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME_STRETCH:
+    portamento_ptr->up_down_time_stretch = value;
     return;
   default:
     LOG_ERROR("Unknown portamento float parameter %u", parameter);

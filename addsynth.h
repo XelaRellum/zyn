@@ -110,6 +110,7 @@ zyn_addsynth_destroy(
 
 /* float - portamento */
 #define ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME             0 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME_STRETCH     1 /* -1 .. 1 */
 
 /* bool - globals */
 #define ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA                       0

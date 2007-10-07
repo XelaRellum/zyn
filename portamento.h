@@ -40,11 +40,12 @@ struct zyn_portamento
 
   // Portamento time stretch (up/down)
   // this value represent how the portamento time is reduced
-  // 0 - for down portamento, 1..63 - the up portamento's time is smaller than the down portamento
-  // 64 - the portamento time is always the same
-  // 64-126 - the down portamento's time is smaller than the up portamento
-  // 127 - for upper portamento
-  unsigned char updowntimestretch;
+  // -1.0 - for down portamento
+  // (-1.0,0) - the up portamento's time is smaller than the down portamento
+  // 0 - the portamento time is always the same
+  // (0,1.0) - the down portamento's time is smaller than the up portamento
+  // 1.0 - for upper portamento
+  float up_down_time_stretch;
 
   // this value is used to compute the actual portamento
   float freqrap;
