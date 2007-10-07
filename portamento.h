@@ -30,7 +30,7 @@ struct zyn_portamento
 
   // the threshold of enabling protamento
   // Minimum or max. difference of the notes in order to do the portamento (x 100 cents)
-  unsigned char pitchthresh;
+  float pitch_threshold;
 
   // whether to enable the portamento only below (false) or above (true) the threshold
   bool pitch_threshold_above;

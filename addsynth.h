@@ -127,12 +127,15 @@ zyn_addsynth_destroy(
 
 /* bool - portamento */
 #define ZYNADD_PARAMETER_BOOL_PORTAMENTO_ENABLED                0
+#define ZYNADD_PARAMETER_BOOL_PORTAMENTO_PITCH_THRESHOLD_ABOVE  1
 
 /* bool - voice */
 #define ZYNADD_PARAMETER_BOOL_RESONANCE                         8
 #define ZYNADD_PARAMETER_BOOL_WHITE_NOISE                       9
 
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
+
+#define ZYNADD_PARAMETER_INT_PORTAMENTO_PITCH_THRESHOLD  1 /* 0 .. 127 */
 
 zyn_addsynth_component
 zyn_addsynth_get_global_component(

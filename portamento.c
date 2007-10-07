@@ -39,7 +39,7 @@ zyn_portamento_init(
   portamento_ptr->used = false;
   portamento_ptr->time = 0.5;
   portamento_ptr->updowntimestretch = 64;
-  portamento_ptr->pitchthresh = 3;
+  portamento_ptr->pitch_threshold = 3; /* 3 equally tempered semitones */
   portamento_ptr->pitch_threshold_above = true;
 
   zyn_portamento_start(portamento_ptr, 440.0, 440.0);
@@ -108,7 +108,7 @@ zyn_portamento_start(
     tmprap = 1.0 / portamento_ptr->origfreqrap;
   }
 
-  thresholdrap = pow(2.0, portamento_ptr->pitchthresh / 12.0);
+  thresholdrap = pow(2.0, portamento_ptr->pitch_threshold / 12.0);
 
   if (!portamento_ptr->pitch_threshold_above &&
       tmprap - 0.00001 > thresholdrap)
@@ -192,8 +192,14 @@ zyn_component_portamento_get_int(
   void * context,
   unsigned int parameter)
 {
-  assert(0);
-  return 0;
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_INT_PORTAMENTO_PITCH_THRESHOLD:
+    return portamento_ptr->pitch_threshold;
+  default:
+    LOG_ERROR("Unknown portamento int parameter %u", parameter);
+    assert(0);
+  }
 }
 
 void
@@ -202,7 +208,15 @@ zyn_component_portamento_set_int(
   unsigned int parameter,
   signed int value)
 {
-  assert(0);
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_INT_PORTAMENTO_PITCH_THRESHOLD:
+    portamento_ptr->pitch_threshold = value;
+    return;
+  default:
+    LOG_ERROR("Unknown portamento int parameter %u", parameter);
+    assert(0);
+  }
 }
 
 bool
@@ -214,6 +228,8 @@ zyn_component_portamento_get_bool(
   {
   case ZYNADD_PARAMETER_BOOL_PORTAMENTO_ENABLED:
     return portamento_ptr->enabled;
+  case ZYNADD_PARAMETER_BOOL_PORTAMENTO_PITCH_THRESHOLD_ABOVE:
+    return portamento_ptr->pitch_threshold_above;
   default:
     LOG_ERROR("Unknown bool portamento parameter %u", parameter);
     assert(0);
@@ -230,6 +246,9 @@ zyn_component_portamento_set_bool(
   {
   case ZYNADD_PARAMETER_BOOL_PORTAMENTO_ENABLED:
     portamento_ptr->enabled = value;
+    return;
+  case ZYNADD_PARAMETER_BOOL_PORTAMENTO_PITCH_THRESHOLD_ABOVE:
+    portamento_ptr->pitch_threshold_above = value;
     return;
   default:
     LOG_ERROR("Unknown bool portamento parameter %u", parameter);
