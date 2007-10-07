@@ -40,7 +40,7 @@ zyn_portamento_init(
   portamento_ptr->time = 64;
   portamento_ptr->updowntimestretch = 64;
   portamento_ptr->pitchthresh = 3;
-  portamento_ptr->pitch_threshold_type = ZYN_PORTAMENTO_PITCH_THRESHOLD_TYPE_MAX;
+  portamento_ptr->pitch_threshold_above = true;
 
   zyn_portamento_start(portamento_ptr, 440.0, 440.0);
 }
@@ -77,7 +77,7 @@ zyn_portamento_start(
   {
     if (portamento_ptr->updowntimestretch == 127)
     {
-      LOG_DEBUG("Not using portamento 2");
+      LOG_DEBUG("Not using portamento down portamento because of time stretch value");
       return false;
     }
 
@@ -89,7 +89,7 @@ zyn_portamento_start(
   {
     if (portamento_ptr->updowntimestretch == 0)
     {
-      LOG_DEBUG("Not using portamento 3");
+      LOG_DEBUG("Not using portamento up portamento because of time stretch value");
       return false;
     }
 
@@ -110,17 +110,17 @@ zyn_portamento_start(
 
   thresholdrap = pow(2.0, portamento_ptr->pitchthresh / 12.0);
 
-  if (portamento_ptr->pitch_threshold_type == ZYN_PORTAMENTO_PITCH_THRESHOLD_TYPE_MIN &&
+  if (!portamento_ptr->pitch_threshold_above &&
       tmprap - 0.00001 > thresholdrap)
   {
-    LOG_DEBUG("Not using portamento 4");
+    LOG_DEBUG("Not using portamento because it is not below threshold");
     return false;
   }
 
-  if (portamento_ptr->pitch_threshold_type == ZYN_PORTAMENTO_PITCH_THRESHOLD_TYPE_MAX &&
+  if (portamento_ptr->pitch_threshold_above &&
       tmprap + 0.00001 < thresholdrap)
   {
-    LOG_DEBUG("Not using portamento 5");
+    LOG_DEBUG("Not using portamento because it is not above threshold");
     return false;
   }
 

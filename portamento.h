@@ -22,9 +22,6 @@
 #ifndef PORTAMENTO_H__83CC72B6_3F89_4791_ACEF_098A31CB368A__INCLUDED
 #define PORTAMENTO_H__83CC72B6_3F89_4791_ACEF_098A31CB368A__INCLUDED
 
-#define ZYN_PORTAMENTO_PITCH_THRESHOLD_TYPE_MIN 0
-#define ZYN_PORTAMENTO_PITCH_THRESHOLD_TYPE_MAX 1
-
 struct zyn_portamento
 {
   bool enabled;                 // whether portamento is enabled
@@ -35,9 +32,8 @@ struct zyn_portamento
   // Minimum or max. difference of the notes in order to do the portamento (x 100 cents)
   unsigned char pitchthresh;
 
-  // enable the portamento only below / above the threshold
-  // Threshold type (min/max)
-  unsigned int pitch_threshold_type;
+  // whether to enable the portamento only below (false) or above (true) the threshold
+  bool pitch_threshold_above;
 
   // 'up portanemto' means when the frequency is rising (eg: the portamento is from 200Hz to 300 Hz)
   // 'down portanemto' means when the frequency is lowering (eg: the portamento is from 300Hz to 200 Hz)
