@@ -352,6 +352,8 @@ zyn_addsynth_get_audio_output(
       }
     }
   }
+
+  zyn_addsynth_ptr->ctl_ptr->updateportamento();
 }
 
 void

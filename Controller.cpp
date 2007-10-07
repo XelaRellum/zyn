@@ -24,6 +24,9 @@
 #include <math.h>
 #include <stdio.h>
 
+//#define LOG_LEVEL LOG_LEVEL_DEBUG
+#include "log.h"
+
 Controller::Controller(){
   defaults();
   resetall();
@@ -47,8 +50,8 @@ void Controller::defaults(){
   sustain.receive=1;
   NRPN.receive=1;
 
-  portamento.portamento=0;
-  portamento.used=0;
+  portamento.portamento = false;
+  portamento.used = false;
   portamento.receive=1;
   portamento.time=64;
   portamento.updowntimestretch=64;
@@ -59,9 +62,7 @@ void Controller::defaults(){
   resonancebandwidth.depth=64;
 
   initportamento(440.0,440.0);
-  setportamento(0);
-
-};
+}
 
 void Controller::resetall(){
   setpitchwheel(0);//center
@@ -158,51 +159,105 @@ void Controller::setsustain(int value){
   else sustain.sustain=0;
 };
 
-void Controller::setportamento(int value){
-  portamento.data=value;
-  if (portamento.receive!=0) portamento.portamento=((value<64) ? 0 : 1 );
-};
+bool Controller::initportamento(float oldfreq, float newfreq)
+{
+  float portamentotime;
+  float tmprap;
+  float thresholdrap;
 
-int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq){
-  portamento.x=0.0;
-  if ((portamento.used!=0) || (portamento.portamento==0)) return(0);
-  REALTYPE portamentotime=pow(100.0,portamento.time/127.0)/50.0;//portamento time in seconds
+  portamento.x = 0.0;
 
-  if ((portamento.updowntimestretch>=64)&&(newfreq<oldfreq)){
-    if (portamento.updowntimestretch==127) return(0);
-    portamentotime*=pow(0.1,(portamento.updowntimestretch-64)/63.0);
+  if (portamento.used)
+  {
+    LOG_DEBUG("Not using portamento, already used");
+    return false;
+  }
+
+  if (!portamento.portamento)
+  {
+    LOG_DEBUG("Not using portamento, disabled");
+    return false;
+  }
+
+  portamentotime = pow(100.0, portamento.time / 127.0) / 50.0; // portamento time in seconds
+
+  if (portamento.updowntimestretch >= 64 &&
+      newfreq < oldfreq)
+  {
+    if (portamento.updowntimestretch == 127)
+    {
+      LOG_DEBUG("Not using portamento 2");
+      return false;
+    }
+
+    portamentotime *= pow(0.1, (portamento.updowntimestretch - 64) / 63.0);
   } 
-  if ((portamento.updowntimestretch<64)&&(newfreq>oldfreq)){
-    if (portamento.updowntimestretch==0) return(0);
-    portamentotime*=pow(0.1,(64.0-portamento.updowntimestretch)/64.0);
-  };
-    
-  portamento.dx=SOUND_BUFFER_SIZE/(portamentotime*SAMPLE_RATE);
-  portamento.origfreqrap=oldfreq/newfreq;
-    
-  REALTYPE tmprap=( (portamento.origfreqrap>1.0) ? 
-                    (portamento.origfreqrap) : 
-                    (1.0/portamento.origfreqrap) );
-    
-  REALTYPE thresholdrap=pow(2.0,portamento.pitchthresh/12.0);
-  if ((portamento.pitchthreshtype==0) && (tmprap-0.00001>thresholdrap) ) return(0);
-  if ((portamento.pitchthreshtype==1) && (tmprap+0.00001<thresholdrap) ) return(0);
 
-  portamento.used=1;
+  if (portamento.updowntimestretch < 64 &&
+      newfreq > oldfreq)
+  {
+    if (portamento.updowntimestretch == 0)
+    {
+      LOG_DEBUG("Not using portamento 3");
+      return false;
+    }
+
+    portamentotime *= pow(0.1, (64.0 - portamento.updowntimestretch) / 64.0);
+  }
+    
+  portamento.dx = SOUND_BUFFER_SIZE / (portamentotime * SAMPLE_RATE);
+  portamento.origfreqrap = oldfreq / newfreq;
+
+  if (portamento.origfreqrap > 1.0)
+  {
+    tmprap = portamento.origfreqrap;
+  }
+  else
+  {
+    tmprap = 1.0 / portamento.origfreqrap;
+  }
+
+  thresholdrap = pow(2.0, portamento.pitchthresh / 12.0);
+
+  if (portamento.pitchthreshtype == 0 &&
+      tmprap - 0.00001 > thresholdrap)
+  {
+    LOG_DEBUG("Not using portamento 4");
+    return false;
+  }
+
+  if (portamento.pitchthreshtype == 1 &&
+      tmprap + 0.00001 < thresholdrap)
+  {
+    LOG_DEBUG("Not using portamento 5");
+    return false;
+  }
+
+  LOG_DEBUG("Using portamento");
+
+  portamento.used = true;
   portamento.freqrap=portamento.origfreqrap;
-  return (1);
-};
 
-void Controller::updateportamento(){
-  if (portamento.used==0) return;
+  return true;
+}
+
+void Controller::updateportamento()
+{
+  if (!portamento.used)
+  {
+    return;
+  }
     
-  portamento.x+=portamento.dx;
-  if (portamento.x>1.0) {
-    portamento.x=1.0;
-    portamento.used=0;
-  };
-  portamento.freqrap=(1.0-portamento.x)*portamento.origfreqrap+portamento.x;
-};
+  portamento.x += portamento.dx;
+
+  if (portamento.x > 1.0)
+  {
+    portamento.x = 1.0;
+    portamento.used = false;
+  }
+
+  portamento.freqrap = (1.0 - portamento.x) * portamento.origfreqrap + portamento.x;
+}
 
 
 void Controller::setresonancecenter(int value){

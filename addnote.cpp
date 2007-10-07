@@ -693,7 +693,8 @@ ADnote::computecurrentparameters()
   {
     // this voice use portamento
     portamentofreqrap = m_ctl->portamento.freqrap;
-    if (m_ctl->portamento.used == 0)
+
+    if (!m_ctl->portamento.used)
     {
       // the portamento has finished
       m_portamento = false;     // this note is no longer "portamented"
