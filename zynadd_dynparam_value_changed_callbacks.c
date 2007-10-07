@@ -139,5 +139,11 @@ zynadd_int_parameter_changed(
   signed int value)
 {
 //  LOG_ERROR("int parameter changed to value %d", value);
+
+  zyn_addsynth_set_int_parameter(
+    parameter_ptr->addsynth_component,
+    parameter_ptr->addsynth_parameter,
+    value);
+
   return true;
 }
