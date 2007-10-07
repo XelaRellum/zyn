@@ -26,7 +26,7 @@ struct zyn_portamento
 {
   bool enabled;                 // whether portamento is enabled
   
-  unsigned char time;
+  float time;
 
   // the threshold of enabling protamento
   // Minimum or max. difference of the notes in order to do the portamento (x 100 cents)

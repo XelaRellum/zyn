@@ -37,7 +37,7 @@ zyn_portamento_init(
 {
   portamento_ptr->enabled = false;
   portamento_ptr->used = false;
-  portamento_ptr->time = 64;
+  portamento_ptr->time = 0.5;
   portamento_ptr->updowntimestretch = 64;
   portamento_ptr->pitchthresh = 3;
   portamento_ptr->pitch_threshold_above = true;
@@ -70,7 +70,7 @@ zyn_portamento_start(
     return false;
   }
 
-  portamentotime = pow(100.0, portamento_ptr->time / 127.0) / 50.0; // portamento time in seconds
+  portamentotime = powf(100.0, portamento_ptr->time) / 50.0; // portamento time in seconds
 
   if (portamento_ptr->updowntimestretch >= 64 &&
       newfreq < oldfreq)
@@ -162,6 +162,8 @@ zyn_component_portamento_get_float(
 {
   switch (parameter)
   {
+  case ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME:
+    return portamento_ptr->time;
   default:
     LOG_ERROR("Unknown portamento float parameter %u", parameter);
     assert(0);
@@ -176,6 +178,9 @@ zyn_component_portamento_set_float(
 {
   switch (parameter)
   {
+  case ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME:
+    portamento_ptr->time = value;
+    return;
   default:
     LOG_ERROR("Unknown portamento float parameter %u", parameter);
     assert(0);

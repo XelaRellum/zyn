@@ -108,6 +108,9 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION  25 /* -1 .. 1 */
 #define ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING         26 /* -1 .. 1 */
 
+/* float - portamento */
+#define ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME             0 /* 0 .. 1 */
+
 /* bool - globals */
 #define ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA                       0
 #define ZYNADD_PARAMETER_BOOL_STEREO                                1
