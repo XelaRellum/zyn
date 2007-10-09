@@ -74,39 +74,45 @@ zyn_addsynth_destroy(
 
 #define ZYNADD_VOICE_COMPONENTS_COUNT             1
 
+/* float - reused */
+#define ZYNADD_PARAMETER_REUSED_OFFSET                   100
+#define ZYNADD_PARAMETER_FLOAT_VOLUME           (ZYNADD_PARAMETER_REUSED_OFFSET + 0) /* 0 .. 100 */
+
 /* float - globals */
 #define ZYNADD_PARAMETER_FLOAT_PANORAMA                    0 /* -1 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_VOLUME                      1 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING            2 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH              3 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_TIME                  4 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH               5 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING      6 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING            1 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH              2 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_TIME                  3 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH               4 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING      5 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_PITCH_BEND_RANGE            6 /* -6400 .. 6400, in cents */
+#define ZYNADD_PARAMETER_FLOAT_PITCH_BEND                  7 /* -1 .. 1 */
 
 /* float - envelope */
-#define ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_VALUE            7 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_DURATION         8 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_ENV_DECAY_VALUE             9 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_ENV_DECAY_DURATION         10 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_ENV_SUSTAIN_VALUE          11 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_ENV_RELEASE_VALUE          12 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_ENV_RELEASE_DURATION       13 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_ENV_STRETCH                14 /* 0 .. 200 */
+#define ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_VALUE            0 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_DURATION         1 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_ENV_DECAY_VALUE             2 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_ENV_DECAY_DURATION          3 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_ENV_SUSTAIN_VALUE           4 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_ENV_RELEASE_VALUE           5 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_ENV_RELEASE_DURATION        6 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_ENV_STRETCH                 7 /* 0 .. 200 */
 
 /* float - lfo */
-#define ZYNADD_PARAMETER_FLOAT_LFO_FREQUENCY              15 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_LFO_DEPTH                  16 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_LFO_START_PHASE            17 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_LFO_DELAY                  18 /* 0 .. 4?, seconds */
-#define ZYNADD_PARAMETER_FLOAT_LFO_STRETCH                19 /* -1 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_LFO_DEPTH_RANDOMNESS       20 /* 0 .. 100 */
-#define ZYNADD_PARAMETER_FLOAT_LFO_FREQUENCY_RANDOMNESS   21 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_LFO_FREQUENCY               0 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_LFO_DEPTH                   1 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_LFO_START_PHASE             2 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_LFO_DELAY                   3 /* 0 .. 4?, seconds */
+#define ZYNADD_PARAMETER_FLOAT_LFO_STRETCH                 4 /* -1 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_LFO_DEPTH_RANDOMNESS        5 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_LFO_FREQUENCY_RANDOMNESS    6 /* 0 .. 100 */
 
-#define ZYNADD_PARAMETER_FLOAT_FREQUNECY                  22 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_Q_FACTOR                   23 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT    24 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION  25 /* -1 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING         26 /* -1 .. 1 */
+/* float filter */
+#define ZYNADD_PARAMETER_FLOAT_FREQUNECY                   0 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_Q_FACTOR                    1 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT     2 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION   3 /* -1 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING          4 /* -1 .. 1 */
 
 /* float - portamento */
 #define ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME             0 /* 0 .. 1 */
@@ -118,21 +124,21 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_BOOL_RANDOM_GROUPING                       2
 
 /* bool - envelope */
-#define ZYNADD_PARAMETER_BOOL_ENV_FORCED_RELEASE                3
-#define ZYNADD_PARAMETER_BOOL_ENV_LINEAR                        4
+#define ZYNADD_PARAMETER_BOOL_ENV_FORCED_RELEASE                0
+#define ZYNADD_PARAMETER_BOOL_ENV_LINEAR                        1
 
 /* bool - lfo */
-#define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_START_PHASE            5
-#define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_DEPTH                  6
-#define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_FREQUENCY              7
+#define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_START_PHASE            0
+#define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_DEPTH                  1
+#define ZYNADD_PARAMETER_BOOL_LFO_RANDOM_FREQUENCY              2
 
 /* bool - portamento */
 #define ZYNADD_PARAMETER_BOOL_PORTAMENTO_ENABLED                0
 #define ZYNADD_PARAMETER_BOOL_PORTAMENTO_PITCH_THRESHOLD_ABOVE  1
 
 /* bool - voice */
-#define ZYNADD_PARAMETER_BOOL_RESONANCE                         8
-#define ZYNADD_PARAMETER_BOOL_WHITE_NOISE                       9
+#define ZYNADD_PARAMETER_BOOL_RESONANCE                         0
+#define ZYNADD_PARAMETER_BOOL_WHITE_NOISE                       1
 
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
 

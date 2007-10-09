@@ -267,6 +267,10 @@ struct zyn_addsynth
 
   zyn_portamento portamento;
 
+  float pitch_bend_range;
+  float pitch_bend;
+  float pitch_bend_relative_frequency;
+
   unsigned int voices_count;
 
   struct zyn_addnote_voice_parameters * voices_params_ptr; /* array with one entry per voice */
@@ -292,5 +296,11 @@ unsigned char percent_to_0_127(float value);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
+#define ZYN_UPDATE_PITCH_BEND(zyn_addsynth_ptr)       \
+  (zyn_addsynth_ptr)->pitch_bend_relative_frequency = \
+    pow(2, (zyn_addsynth_ptr)->pitch_bend *           \
+        (zyn_addsynth_ptr)->pitch_bend_range /        \
+        1200.0);
 
 #endif /* #ifndef ADDSYNTH_INTERNAL_H__9870368A_F1C9_4F0D_ADC1_B07ECFF2F9C7__INCLUDED */

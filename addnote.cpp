@@ -774,7 +774,7 @@ ADnote::computecurrentparameters()
       }
 
       voicefreq = getvoicebasefreq(voice_index) * pow(2, (voicepitch + globalpitch) / 12.0); // Hz frequency
-      voicefreq *= m_ctl->pitchwheel.relfreq; // change the frequency by the controller
+      voicefreq *= m_synth_ptr->pitch_bend_relative_frequency; // change the frequency by the controller
       setfreq(voice_index, voicefreq * portamentofreqrap);
 
       /***************/

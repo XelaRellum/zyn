@@ -35,42 +35,17 @@ public:
   void defaults();
 
   //Controllers functions
-  void setpitchwheel(int value);
-  void setpitchwheelbendrange(unsigned short int value);
-  void setexpression(int value);
-  void setpanning(int value);
   void setfiltercutoff(int value);
   void setfilterq(int value);
   void setbandwidth(int value);
   void setmodwheel(int value);
   void setfmamp(int value);
-  void setvolume(int value);
   void setsustain(int value);
   void setresonancecenter(int value);
   void setresonancebw(int value);
 
   void setparameternumber(unsigned int type,int value);//used for RPN and NRPN's
   int getnrpn(int *parhi, int *parlo, int *valhi, int *vallo);
-
-  // Controllers values 
-  struct {//Pitch Wheel
-    int data;
-    short int bendrange;//bendrange is in cents
-    REALTYPE relfreq;//the relative frequency (default is 1.0)
-  } pitchwheel;
-    
-  struct{//Expression
-    int data;
-    REALTYPE relvolume;
-    unsigned char receive;
-  } expression;
-
-  struct{//Panning
-    int data;
-    REALTYPE pan;
-    unsigned char depth;
-  } panning;
-      
 
   struct{//Filter cutoff
     int data;
@@ -103,12 +78,6 @@ public:
     REALTYPE relamp;
     unsigned char receive;
   } fmamp;
-
-  struct{//Volume
-    int data;
-    REALTYPE volume;
-    unsigned char receive;
-  } volume;
 
   struct{//Sustain
     int data,sustain;

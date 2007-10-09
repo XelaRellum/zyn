@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <math.h>
 
 #include "common.h"
 #include "addsynth.h"
@@ -63,6 +64,10 @@ zyn_component_amp_globals_get_float(
     return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.PPunchStretch);
   case ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING:
     return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.PPunchVelocitySensing);
+  case ZYNADD_PARAMETER_FLOAT_PITCH_BEND_RANGE:
+    return zyn_addsynth_ptr->pitch_bend_range;
+  case ZYNADD_PARAMETER_FLOAT_PITCH_BEND:
+    return zyn_addsynth_ptr->pitch_bend;
   default:
     LOG_ERROR("Unknown float amplitude global parameter %u", parameter);
     assert(0);
@@ -97,6 +102,14 @@ zyn_component_amp_globals_set_float(
     return;
   case ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING:
     zyn_addsynth_ptr->GlobalPar.PPunchVelocitySensing = percent_to_0_127(value);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_PITCH_BEND_RANGE:
+    zyn_addsynth_ptr->pitch_bend_range = value;
+    ZYN_UPDATE_PITCH_BEND(zyn_addsynth_ptr);
+    return;
+  case ZYNADD_PARAMETER_FLOAT_PITCH_BEND:
+    zyn_addsynth_ptr->pitch_bend = value;
+    ZYN_UPDATE_PITCH_BEND(zyn_addsynth_ptr);
     return;
   default:
     LOG_ERROR("Unknown float amplitude global parameter %u", parameter);

@@ -120,39 +120,43 @@
 #define LV2DYNPARAM_PARAMETER_PORTAMENTO_PITCH_THRESHOLD            76
 #define LV2DYNPARAM_PARAMETER_PORTAMENTO_PITCH_THRESHOLD_ABOVE      77
 
-#define LV2DYNPARAM_PARAMETERS_COUNT                                78
+#define LV2DYNPARAM_PARAMETER_PITCH_BEND_RANGE                      78
+#define LV2DYNPARAM_PARAMETER_PITCH_BEND                            79
+
+#define LV2DYNPARAM_PARAMETERS_COUNT                                80
 
 #define LV2DYNPARAM_GROUP_AMP                                        0
 #define LV2DYNPARAM_GROUP_FILTER                                     1
 #define LV2DYNPARAM_GROUP_FREQUENCY                                  2
 #define LV2DYNPARAM_GROUP_PORTAMENTO                                 3
-#define LV2DYNPARAM_GROUP_VOICES                                     4
+#define LV2DYNPARAM_GROUP_PITCH_BEND                                 4
+#define LV2DYNPARAM_GROUP_VOICES                                     5
 
-#define LV2DYNPARAM_GROUP_AMP_PANORAMA                               5
-#define LV2DYNPARAM_GROUP_AMP_PUNCH                                  6
-#define LV2DYNPARAM_GROUP_AMP_ENV                                    7
-#define LV2DYNPARAM_GROUP_AMP_LFO                                    8
-#define LV2DYNPARAM_GROUP_AMP_LFO_START_PHASE                        9
-#define LV2DYNPARAM_GROUP_AMP_LFO_DEPTH_RANDOMNESS                  10
-#define LV2DYNPARAM_GROUP_AMP_LFO_FREQUENCY_RANDOMNESS              11
+#define LV2DYNPARAM_GROUP_AMP_PANORAMA                               6
+#define LV2DYNPARAM_GROUP_AMP_PUNCH                                  7
+#define LV2DYNPARAM_GROUP_AMP_ENV                                    8
+#define LV2DYNPARAM_GROUP_AMP_LFO                                    9
+#define LV2DYNPARAM_GROUP_AMP_LFO_START_PHASE                       10
+#define LV2DYNPARAM_GROUP_AMP_LFO_DEPTH_RANDOMNESS                  11
+#define LV2DYNPARAM_GROUP_AMP_LFO_FREQUENCY_RANDOMNESS              12
 
-#define LV2DYNPARAM_GROUP_FILTER_FILTERS                            12
-#define LV2DYNPARAM_GROUP_FILTER_ANALOG                             13
-#define LV2DYNPARAM_GROUP_FILTER_FORMANT                            14
-#define LV2DYNPARAM_GROUP_FILTER_SVF                                15
-#define LV2DYNPARAM_GROUP_FILTER_ENV                                16
-#define LV2DYNPARAM_GROUP_FILTER_LFO                                17
-#define LV2DYNPARAM_GROUP_FILTER_LFO_START_PHASE                    18
-#define LV2DYNPARAM_GROUP_FILTER_LFO_DEPTH_RANDOMNESS               19
-#define LV2DYNPARAM_GROUP_FILTER_LFO_FREQUENCY_RANDOMNESS           20
+#define LV2DYNPARAM_GROUP_FILTER_FILTERS                            13
+#define LV2DYNPARAM_GROUP_FILTER_ANALOG                             14
+#define LV2DYNPARAM_GROUP_FILTER_FORMANT                            15
+#define LV2DYNPARAM_GROUP_FILTER_SVF                                16
+#define LV2DYNPARAM_GROUP_FILTER_ENV                                17
+#define LV2DYNPARAM_GROUP_FILTER_LFO                                18
+#define LV2DYNPARAM_GROUP_FILTER_LFO_START_PHASE                    19
+#define LV2DYNPARAM_GROUP_FILTER_LFO_DEPTH_RANDOMNESS               20
+#define LV2DYNPARAM_GROUP_FILTER_LFO_FREQUENCY_RANDOMNESS           21
  
-#define LV2DYNPARAM_GROUP_FREQUENCY_ENV                             21
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO                             22
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_START_PHASE                 23
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_DEPTH_RANDOMNESS            24
-#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_FREQUENCY_RANDOMNESS        25
+#define LV2DYNPARAM_GROUP_FREQUENCY_ENV                             22
+#define LV2DYNPARAM_GROUP_FREQUENCY_LFO                             23
+#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_START_PHASE                 24
+#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_DEPTH_RANDOMNESS            25
+#define LV2DYNPARAM_GROUP_FREQUENCY_LFO_FREQUENCY_RANDOMNESS        26
 
-#define LV2DYNPARAM_GROUPS_COUNT                                    26
+#define LV2DYNPARAM_GROUPS_COUNT                                    27
 
 struct group_descriptor g_top_forest_map_groups[LV2DYNPARAM_GROUPS_COUNT];
 struct parameter_descriptor g_top_forest_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
@@ -369,6 +373,12 @@ void zynadd_init_top_forest_map()
     LV2DYNPARAM_PARAMETER_INIT_FLOAT(PORTAMENTO, PORTAMENTO_TIME_STRETCH, PORTAMENTO, PORTAMENTO_TIME_STRETCH, "Time stretch", -1, 1, ALWAYS, NULL);
     LV2DYNPARAM_PARAMETER_INIT_INT(PORTAMENTO, PORTAMENTO_PITCH_THRESHOLD, PORTAMENTO, PORTAMENTO_PITCH_THRESHOLD, "Threshold", 0, 127, ALWAYS, NULL);
     LV2DYNPARAM_PARAMETER_INIT_BOOL(PORTAMENTO, PORTAMENTO_PITCH_THRESHOLD_ABOVE, PORTAMENTO, PORTAMENTO_PITCH_THRESHOLD_ABOVE, "Threshold above", ALWAYS, NULL);
+  }
+
+  LV2DYNPARAM_GROUP_INIT(ROOT, PITCH_BEND, "Pitch bend", NULL);
+  {
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(PITCH_BEND, PITCH_BEND_RANGE, AMP_GLOBALS, PITCH_BEND_RANGE, "Range", -6400.0, 6400.0, ALWAYS, NULL);
+    LV2DYNPARAM_PARAMETER_INIT_FLOAT(PITCH_BEND, PITCH_BEND, AMP_GLOBALS, PITCH_BEND, "Bend", -1.0, 1.0, ALWAYS, NULL);
   }
 
   LV2DYNPARAM_GROUP_INIT(ROOT, VOICES, "Voices", NULL);

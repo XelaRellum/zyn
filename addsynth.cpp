@@ -210,6 +210,10 @@ zyn_addsynth_create(
 
   zyn_portamento_init(&zyn_addsynth_ptr->portamento);
 
+  zyn_addsynth_ptr->pitch_bend_range = 200.0; // 200 cents = 2 halftones
+  zyn_addsynth_ptr->pitch_bend = 0; // center
+  ZYN_UPDATE_PITCH_BEND(zyn_addsynth_ptr);
+
   zyn_addsynth_ptr->oldfreq = -1.0;
 
   zyn_addsynth_ptr->random_panorama = false;

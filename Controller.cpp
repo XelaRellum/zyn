@@ -36,9 +36,6 @@ Controller::~Controller(){
 };
 
 void Controller::defaults(){
-  setpitchwheelbendrange(200);//2 halftones
-  expression.receive=1;
-  panning.depth=64;
   filtercutoff.depth=64;
   filterq.depth=64;
   bandwidth.depth=64;
@@ -46,7 +43,6 @@ void Controller::defaults(){
   modwheel.depth=80;
   modwheel.exponential=0;
   fmamp.receive=1;
-  volume.receive=0;
   sustain.receive=1;
   NRPN.receive=1;
 
@@ -55,15 +51,11 @@ void Controller::defaults(){
 }
 
 void Controller::resetall(){
-  setpitchwheel(0);//center
-  setexpression(127);
-  setpanning(64);
   setfiltercutoff(64);
   setfilterq(64);
   setbandwidth(64);
   setmodwheel(64);
   setfmamp(127);
-  setvolume(127);
   setsustain(0);
   setresonancecenter(64);
   setresonancebw(64);
@@ -73,29 +65,6 @@ void Controller::resetall(){
   NRPN.parlo=-1;
   NRPN.valhi=-1;
   NRPN.vallo=-1;
-};
-
-void Controller::setpitchwheel(int value){
-  pitchwheel.data=value;
-  REALTYPE cents=value/8192.0;
-  cents*=pitchwheel.bendrange;
-  pitchwheel.relfreq=pow(2,cents/1200.0);
-  //fprintf(stderr,"%ld %ld -> %.3f\n",pitchwheel.bendrange,pitchwheel.data,pitchwheel.relfreq);fflush(stderr);
-};
-
-void Controller::setpitchwheelbendrange(unsigned short int value){
-  pitchwheel.bendrange=value;
-};
-
-void Controller::setexpression(int value){
-  expression.data=value;
-  if (expression.receive!=0) expression.relvolume=value/127.0;
-  else expression.relvolume=1.0;
-};
-
-void Controller::setpanning(int value){
-  panning.data=value;
-  panning.pan=(value/128.0-0.5)*(panning.depth/64.0);
 };
 
 void Controller::setfiltercutoff(int value){
@@ -135,12 +104,6 @@ void Controller::setfmamp(int value){
   fmamp.relamp=value/127.0;
   if (fmamp.receive!=0) fmamp.relamp=value/127.0;
   else fmamp.relamp=1.0;
-};
-
-void Controller::setvolume(int value){
-  volume.data=value;
-  if (volume.receive!=0) volume.volume=pow(0.1,(127-value)/127.0*2.0);
-  else volume.volume=1.0;
 };
 
 void Controller::setsustain(int value){
