@@ -70,24 +70,5 @@ void zynadd_init_voice_forest_map()
   LV2DYNPARAM_PARAMETER_INIT_BOOL(ROOT, RESONANCE, VOICE_GLOBALS, RESONANCE, "Resonance", ALWAYS, NULL);
   LV2DYNPARAM_PARAMETER_INIT_BOOL(ROOT, WHITE_NOISE, VOICE_GLOBALS, WHITE_NOISE, "White Noise", ALWAYS, NULL);
 
-  /* santity check that we have filled all values */
-
-  for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
-  {
-    LOG_DEBUG("parameter %d with parent %d", i, map_ptr->parameters[i].parent);
-    assert(map_ptr->parameters[i].parent != LV2DYNPARAM_GROUP_INVALID);
-    assert(map_ptr->parameters[i].parent < LV2DYNPARAM_GROUPS_COUNT);
-  }
-
-  for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
-  {
-    LOG_DEBUG("group %d with parent %d", i, map_ptr->groups[i].parent);
-    assert(map_ptr->groups[i].parent != LV2DYNPARAM_GROUP_INVALID);
-
-    assert(map_ptr->groups[i].name != NULL);
-
-    /* check that parents are with smaller indexes than children */
-    /* this checks for loops too */
-    assert(map_ptr->groups[i].parent < i);
-  }
+  LV2DYNPARAM_FOREST_MAP_ASSERT_VALID;
 }
