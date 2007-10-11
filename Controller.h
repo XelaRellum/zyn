@@ -40,7 +40,6 @@ public:
   void setbandwidth(int value);
   void setmodwheel(int value);
   void setfmamp(int value);
-  void setsustain(int value);
   void setresonancecenter(int value);
   void setresonancebw(int value);
 
@@ -75,11 +74,6 @@ public:
     REALTYPE relamp;
     unsigned char receive;
   } fmamp;
-
-  struct{//Sustain
-    int data,sustain;
-    unsigned char receive;
-  } sustain;
 
   struct{//Resonance Center Frequency
     int data;
