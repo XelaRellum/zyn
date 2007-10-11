@@ -167,36 +167,9 @@ int g_top_forest_map_voices_group_index;
 void zynadd_init_top_forest_map() __attribute__((constructor));
 void zynadd_init_top_forest_map()
 {
-  int i;
-  int group_index;
-  int param_index;
-  int groups_map[LV2DYNPARAM_GROUPS_COUNT + 2];
-  int params_map[LV2DYNPARAM_PARAMETERS_COUNT];
+  LV2DYNPARAM_FOREST_MAP_BEGIN(LV2DYNPARAM_GROUPS_COUNT, LV2DYNPARAM_PARAMETERS_COUNT, g_top_forest_map_groups, g_top_forest_map_parameters);
 
   LOG_DEBUG("zynadd_init_top_forest_map() called");
-
-  map_ptr->groups_count = LV2DYNPARAM_GROUPS_COUNT;
-  map_ptr->parameters_count = LV2DYNPARAM_PARAMETERS_COUNT;
-
-  map_ptr->groups = g_top_forest_map_groups;
-  map_ptr->parameters = g_top_forest_map_parameters;
-
-  groups_map[0] = LV2DYNPARAM_GROUP_INVALID;
-  groups_map[1] = LV2DYNPARAM_GROUP_ROOT;
-  group_index = 0;
-  param_index = 0;
-
-  for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
-  {
-    map_ptr->groups[i].parent = LV2DYNPARAM_GROUP_INVALID;
-    groups_map[i + 2] = LV2DYNPARAM_GROUP_INVALID;
-  }
-
-  for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
-  {
-    map_ptr->parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
-    params_map[i] = -1;
-  }
 
   LV2DYNPARAM_GROUP_INIT(ROOT, AMP, "Amplitude", NULL);
   {
@@ -402,17 +375,7 @@ void zynadd_init_top_forest_map()
   {
   }
 
-  /* updated scope_specific when needed */
-  for (i = 0 ; i < map_ptr->parameters_count ; i++)
-  {
-    if (map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
-        map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
-    {
-      map_ptr->parameters[i].scope_specific = params_map[map_ptr->parameters[i].scope_specific];
-    }
-  }
-
-  LV2DYNPARAM_FOREST_MAP_ASSERT_VALID;
+  LV2DYNPARAM_FOREST_MAP_END;
 }
 
 unsigned int

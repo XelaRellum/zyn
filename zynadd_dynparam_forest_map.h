@@ -112,6 +112,49 @@ extern const char * g_filter_type_names[];
   map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_ ## component; \
   param_index++;
 
+#define LV2DYNPARAM_FOREST_MAP_BEGIN(_groups_count, _params_count, _groups, _params) \
+  int i;                                                                \
+  int group_index;                                                      \
+  int param_index;                                                      \
+  int groups_map[_groups_count + 2];                                    \
+  int params_map[_params_count];                                        \
+                                                                        \
+  map_ptr->groups_count = _groups_count;                                \
+  map_ptr->parameters_count = _params_count;                            \
+                                                                        \
+  map_ptr->groups = _groups;                                            \
+  map_ptr->parameters = _params;                                        \
+                                                                        \
+  groups_map[0] = LV2DYNPARAM_GROUP_INVALID;                            \
+  groups_map[1] = LV2DYNPARAM_GROUP_ROOT;                               \
+  group_index = 0;                                                      \
+  param_index = 0;                                                      \
+                                                                        \
+  for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)                      \
+  {                                                                     \
+    map_ptr->groups[i].parent = LV2DYNPARAM_GROUP_INVALID;              \
+    groups_map[i + 2] = LV2DYNPARAM_GROUP_INVALID;                      \
+  }                                                                     \
+                                                                        \
+  for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)                  \
+  {                                                                     \
+    map_ptr->parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;          \
+    params_map[i] = -1;                                                 \
+  }
+
+#define LV2DYNPARAM_FOREST_MAP_END                                      \
+  /* updated scope_specific when needed */                              \
+  for (i = 0 ; i < map_ptr->parameters_count ; i++)                     \
+  {                                                                     \
+    if (map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER || \
+        map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER) \
+    {                                                                   \
+      map_ptr->parameters[i].scope_specific = params_map[map_ptr->parameters[i].scope_specific]; \
+    }                                                                   \
+  }                                                                     \
+                                                                        \
+  LV2DYNPARAM_FOREST_MAP_ASSERT_VALID;
+
 #define LV2DYNPARAM_FOREST_MAP_ASSERT_VALID                             \
   /* santity check that we have filled all values */                    \
                                                                         \
