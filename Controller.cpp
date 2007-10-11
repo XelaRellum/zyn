@@ -36,31 +36,15 @@ Controller::~Controller(){
 };
 
 void Controller::defaults(){
-  filtercutoff.depth=64;
-  filterq.depth=64;
   bandwidth.depth=64;
   bandwidth.exponential=0;
   modwheel.depth=80;
   modwheel.exponential=0;
-  fmamp.receive=1;
 }
 
 void Controller::resetall(){
-  setfiltercutoff(64);
-  setfilterq(64);
   setbandwidth(64);
   setmodwheel(64);
-  setfmamp(127);
-};
-
-void Controller::setfiltercutoff(int value){
-  filtercutoff.data=value;
-  filtercutoff.relfreq=(value-64.0)*filtercutoff.depth/4096.0*3.321928;//3.3219..=ln2(10)
-};
-
-void Controller::setfilterq(int value){
-  filterq.data=value;
-  filterq.relq=pow(30.0,(value-64.0)/64.0*(filterq.depth/64.0));
 };
 
 void Controller::setbandwidth(int value){
@@ -83,11 +67,4 @@ void Controller::setmodwheel(int value){
     modwheel.relmod=(value/64.0-1.0)*tmp+1.0;
     if (modwheel.relmod<0.0) modwheel.relmod=0.0;
   } else modwheel.relmod=pow(25.0,(value-64.0)/64.0*(modwheel.depth/80.0));
-};
-
-void Controller::setfmamp(int value){
-  fmamp.data=value;
-  fmamp.relamp=value/127.0;
-  if (fmamp.receive!=0) fmamp.relamp=value/127.0;
-  else fmamp.relamp=1.0;
 };
