@@ -44,7 +44,6 @@ void Controller::defaults(){
   modwheel.exponential=0;
   fmamp.receive=1;
   sustain.receive=1;
-  NRPN.receive=1;
 
   resonancecenter.depth=64;
   resonancebandwidth.depth=64;
@@ -59,12 +58,6 @@ void Controller::resetall(){
   setsustain(0);
   setresonancecenter(64);
   setresonancebw(64);
-    
-  //reset the NRPN
-  NRPN.parhi=-1;
-  NRPN.parlo=-1;
-  NRPN.valhi=-1;
-  NRPN.vallo=-1;
 };
 
 void Controller::setfiltercutoff(int value){
@@ -120,34 +113,3 @@ void Controller::setresonancebw(int value){
   resonancebandwidth.data=value;
   resonancebandwidth.relbw=pow(1.5,(value-64.0)/64.0*(resonancebandwidth.depth/127.0));
 };
-
-
-//Returns 0 if there is NRPN or 1 if there is not
-int Controller::getnrpn(int *parhi, int *parlo, int *valhi, int *vallo){
-  if (NRPN.receive==0) return(1);
-  if ((NRPN.parhi<0)||(NRPN.parlo<0)||(NRPN.valhi<0)||(NRPN.vallo<0)) 
-    return(1);
-        
-  *parhi=NRPN.parhi;
-  *parlo=NRPN.parlo;
-  *valhi=NRPN.valhi;
-  *vallo=NRPN.vallo;
-  return(0);
-};
-
-
-void Controller::setparameternumber(unsigned int type,int value){
-  switch(type){
-  case C_nrpnhi:NRPN.parhi=value;
-    NRPN.valhi=-1;NRPN.vallo=-1;//clear the values
-    break;
-  case C_nrpnlo:NRPN.parlo=value;
-    NRPN.valhi=-1;NRPN.vallo=-1;//clear the values
-    break;
-  case C_dataentryhi:if ((NRPN.parhi>=0)&&(NRPN.parlo>=0)) NRPN.valhi=value;
-    break;
-  case C_dataentrylo:if ((NRPN.parhi>=0)&&(NRPN.parlo>=0)) NRPN.vallo=value;
-    break;
-  };
-};
-

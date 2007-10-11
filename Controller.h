@@ -44,9 +44,6 @@ public:
   void setresonancecenter(int value);
   void setresonancebw(int value);
 
-  void setparameternumber(unsigned int type,int value);//used for RPN and NRPN's
-  int getnrpn(int *parhi, int *parlo, int *valhi, int *vallo);
-
   struct{//Filter cutoff
     int data;
     REALTYPE relfreq;
@@ -95,21 +92,7 @@ public:
     REALTYPE relbw;
     unsigned char depth;
   } resonancebandwidth;
-    
-
-  /* RPN and NPRPN */
-  struct{//nrpn
-    int parhi,parlo;
-    int valhi,vallo;
-    unsigned char receive;//this is saved to disk by Master
-  } NRPN;
-    
-private:
 };
-
-
-
-
 
 #endif
 
