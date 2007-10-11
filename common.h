@@ -28,7 +28,10 @@
 #define REALTYPE float          /* legacy */
 
 /* Sampling rate */
-#define SAMPLE_RATE 48000
+/* FIXME: using globals is lame! */
+#define SAMPLE_RATE g_sample_rate
+
+extern float g_sample_rate;
 
 /* 
  * The size of a sound buffer (or the granularity)

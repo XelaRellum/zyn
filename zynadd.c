@@ -94,7 +94,7 @@ zynadd_instantiate(
 
   zynadd_ptr->sample_rate = sample_rate;
 
-  if (!zyn_addsynth_create(NUM_VOICES, &zynadd_ptr->synth))
+  if (!zyn_addsynth_create(sample_rate, NUM_VOICES, &zynadd_ptr->synth))
   {
     goto fail_free_ports;
   }

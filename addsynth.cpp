@@ -49,12 +49,15 @@
 
 bool
 zyn_addsynth_create(
+  float sample_rate,
   unsigned int voices_count,
   zyn_addsynth_handle * handle_ptr)
 {
   struct zyn_addsynth * zyn_addsynth_ptr;
   unsigned int note_index;
   unsigned int voice_index;
+
+  g_sample_rate = sample_rate;
 
 //  printf("zyn_addsynth_create\n");
   zyn_addsynth_ptr = (struct zyn_addsynth *)malloc(sizeof(struct zyn_addsynth));

@@ -34,6 +34,7 @@ typedef void * zyn_addsynth_component;
 
 bool
 zyn_addsynth_create(
+  float sample_rate,
   unsigned int voices_count,
   zyn_addsynth_handle * handle_ptr);
 
