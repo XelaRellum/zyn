@@ -47,6 +47,8 @@
 
 #define ZYN_DEFAULT_POLYPHONY 60
 
+float g_sample_rate;
+
 bool
 zyn_addsynth_create(
   float sample_rate,
