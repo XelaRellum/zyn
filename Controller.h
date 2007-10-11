@@ -35,23 +35,8 @@ public:
   void defaults();
 
   //Controllers functions
-  void setfiltercutoff(int value);
-  void setfilterq(int value);
   void setbandwidth(int value);
   void setmodwheel(int value);
-  void setfmamp(int value);
-
-  struct{//Filter cutoff
-    int data;
-    REALTYPE relfreq;
-    unsigned char depth;
-  } filtercutoff;
-
-  struct{//Filter Q
-    int data;
-    REALTYPE relq;
-    unsigned char depth;
-  } filterq;
 
   struct{//Bandwidth
     int data;
@@ -66,12 +51,6 @@ public:
     unsigned char depth;
     unsigned char exponential;
   } modwheel;
-
-  struct{//FM amplitude
-    int data;
-    REALTYPE relamp;
-    unsigned char receive;
-  } fmamp;
 };
 
 #endif

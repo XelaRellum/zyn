@@ -447,7 +447,8 @@ ADnote::note_on(
       m_voices_ptr[voice_index].m_fm_frequency_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_fm_frequency_envelope_params, m_basefreq);
     }
 
-    m_FM_new_amplitude_ptr[voice_index] = m_voices_ptr[voice_index].FMVolume*m_ctl->fmamp.relamp;
+    m_FM_new_amplitude_ptr[voice_index] = m_voices_ptr[voice_index].FMVolume;
+    //m_FM_new_amplitude_ptr[voice_index] *= m_ctl->fmamp.relamp; // 0..1
 
     if (m_synth_ptr->voices_params_ptr[voice_index].PFMAmpEnvelopeEnabled != 0)
     {
@@ -675,12 +676,13 @@ ADnote::computecurrentparameters()
 
   temp_filter_frequency =
     globalfilterpitch +
-    m_ctl->filtercutoff.relfreq +
+    //m_ctl->filtercutoff.relfreq + // (value-64.0)*filtercutoff.depth/4096.0*3.321928;//3.3219..=ln2(10)
     m_filter_frequency_tracking;
 
   temp_filter_frequency = m_filter_left.getrealfreq(temp_filter_frequency);
 
-  global_filter_q = m_filter_q_factor * m_ctl->filterq.relq;
+  global_filter_q = m_filter_q_factor;
+  //global_filter_q *= m_ctl->filterq.relq; // filterq.relq=pow(30.0,(value-64.0)/64.0*(filterq.depth/64.0));
 
   m_filter_left.setfreq_and_q(temp_filter_frequency, global_filter_q);
   if (m_stereo)
@@ -792,7 +794,9 @@ ADnote::computecurrentparameters()
         setfreqFM(voice_index, FMfreq);
 
         m_FM_old_amplitude_ptr[voice_index] = m_FM_new_amplitude_ptr[voice_index];
-        m_FM_new_amplitude_ptr[voice_index] = m_voices_ptr[voice_index].FMVolume * m_ctl->fmamp.relamp;
+        m_FM_new_amplitude_ptr[voice_index] = m_voices_ptr[voice_index].FMVolume;
+        //m_FM_new_amplitude_ptr[voice_index] *= m_ctl->fmamp.relamp; // 0..1
+
         if (m_synth_ptr->voices_params_ptr[voice_index].PFMAmpEnvelopeEnabled)
         {
           m_FM_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_fm_amplitude_envelope.envout_dB();
