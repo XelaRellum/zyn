@@ -45,7 +45,8 @@ zynadd_appear_parameter(
   lv2dynparam_plugin_group parent_group;
 
   LOG_DEBUG(
-    "Appearing parameter \"%s\" -> %u",
+    "Appearing parameter \"%s\"/\"%s\" -> %u",
+    parameter_ptr->parent_ptr ? parameter_ptr->parent_ptr->name_ptr : "",
     parameter_ptr->name_ptr,
     parameter_ptr->addsynth_parameter);
 
@@ -190,6 +191,8 @@ zynadd_dynparam_forest_initializer_prepare(
   struct zynadd_group * group_ptr;
   struct zynadd_parameter * parameter_ptr;
 
+  LOG_DEBUG("Preparing forest with root \"%s\"/", root_group_ptr == NULL ? "" : root_group_ptr->name_ptr);
+
   forest_ptr->map_ptr = map_ptr;
 
   forest_ptr->groups_count = map_ptr->groups_count;
@@ -237,7 +240,14 @@ zynadd_dynparam_forest_initializer_prepare(
 
   for (i = 0 ; i < forest_ptr->parameters_count ; i++)
   {
-    LOG_DEBUG("Preparing group \"%s\"", forest_ptr->map_ptr->parameters[i].name);
+    LOG_DEBUG(
+      "Preparing parameter \"%s\"/\"%s\"",
+      forest_ptr->map_ptr->parameters[i].parent == LV2DYNPARAM_GROUP_ROOT ?
+      (root_group_ptr == NULL ?
+       "" :
+       root_group_ptr->name_ptr) :
+      forest_ptr->groups[forest_ptr->map_ptr->parameters[i].parent]->name_ptr,
+      forest_ptr->map_ptr->parameters[i].name);
 
     parameter_ptr = malloc(sizeof(struct zynadd_parameter));
     if (parameter_ptr == NULL)

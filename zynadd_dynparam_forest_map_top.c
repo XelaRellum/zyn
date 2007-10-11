@@ -161,12 +161,17 @@
 struct group_descriptor g_top_forest_map_groups[LV2DYNPARAM_GROUPS_COUNT];
 struct parameter_descriptor g_top_forest_map_parameters[LV2DYNPARAM_PARAMETERS_COUNT];
 struct zyn_forest_map g_top_forest_map;
+int g_top_forest_map_voices_group_index;
 #define map_ptr (&g_top_forest_map)
 
 void zynadd_init_top_forest_map() __attribute__((constructor));
 void zynadd_init_top_forest_map()
 {
   int i;
+  int group_index;
+  int param_index;
+  int groups_map[LV2DYNPARAM_GROUPS_COUNT + 2];
+  int params_map[LV2DYNPARAM_PARAMETERS_COUNT];
 
   LOG_DEBUG("zynadd_init_top_forest_map() called");
 
@@ -176,14 +181,21 @@ void zynadd_init_top_forest_map()
   map_ptr->groups = g_top_forest_map_groups;
   map_ptr->parameters = g_top_forest_map_parameters;
 
+  groups_map[0] = LV2DYNPARAM_GROUP_INVALID;
+  groups_map[1] = LV2DYNPARAM_GROUP_ROOT;
+  group_index = 0;
+  param_index = 0;
+
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
     map_ptr->groups[i].parent = LV2DYNPARAM_GROUP_INVALID;
+    groups_map[i + 2] = LV2DYNPARAM_GROUP_INVALID;
   }
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
     map_ptr->parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
+    params_map[i] = -1;
   }
 
   LV2DYNPARAM_GROUP_INIT(ROOT, AMP, "Amplitude", NULL);
@@ -251,19 +263,23 @@ void zynadd_init_top_forest_map()
   {
     LV2DYNPARAM_GROUP_INIT(FILTER, FILTER_FILTERS, "Filter parameters", HINT_ONE_SUBGROUP, NULL, NULL);
     {
-      map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].parent = LV2DYNPARAM_GROUP(FILTER_FILTERS);
-      map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].name = "Filter category";
-      map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].type = LV2DYNPARAM_PARAMETER_TYPE_FILTER_TYPE;
-      map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
-      map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
+      params_map[LV2DYNPARAM_PARAMETER_GLOBAL_FILTER_TYPE] = param_index;  
+      map_ptr->parameters[param_index].parent = groups_map[LV2DYNPARAM_GROUP(FILTER_FILTERS) + 2];
+      map_ptr->parameters[param_index].name = "Filter category";
+      map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_FILTER_TYPE;
+      map_ptr->parameters[param_index].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
+      map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
+      param_index++;
 
       LV2DYNPARAM_GROUP_INIT(FILTER_FILTERS, FILTER_ANALOG, "Analog", NULL);
       {
-        map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].parent = LV2DYNPARAM_GROUP(FILTER_ANALOG);
-        map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].name = "Filter type";
-        map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].type = LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE;
-        map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
-        map_ptr->parameters[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
+        params_map[LV2DYNPARAM_PARAMETER_GLOBAL_ANALOG_FILTER_TYPE] = param_index;
+        map_ptr->parameters[param_index].parent = groups_map[LV2DYNPARAM_GROUP(FILTER_ANALOG) + 2];
+        map_ptr->parameters[param_index].name = "Filter type";
+        map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE;
+        map_ptr->parameters[param_index].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS;
+        map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_FILTER_GLOBALS;
+        param_index++;
 
         LV2DYNPARAM_PARAMETER_INIT_INT(FILTER_ANALOG, GLOBAL_ANALOG_FILTER_STAGES, FILTER_GLOBALS, STAGES, "Stages", 1, 5, ALWAYS, NULL);
 
@@ -381,8 +397,19 @@ void zynadd_init_top_forest_map()
     LV2DYNPARAM_PARAMETER_INIT_FLOAT(PITCH_BEND, PITCH_BEND, AMP_GLOBALS, PITCH_BEND, "Bend", -1.0, 1.0, ALWAYS, NULL);
   }
 
+  g_top_forest_map_voices_group_index = group_index;
   LV2DYNPARAM_GROUP_INIT(ROOT, VOICES, "Voices", NULL);
   {
+  }
+
+  /* updated scope_specific when needed */
+  for (i = 0 ; i < map_ptr->parameters_count ; i++)
+  {
+    if (map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_HIDE_OTHER ||
+        map_ptr->parameters[i].scope == LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER)
+    {
+      map_ptr->parameters[i].scope_specific = params_map[map_ptr->parameters[i].scope_specific];
+    }
   }
 
   LV2DYNPARAM_FOREST_MAP_ASSERT_VALID;
@@ -391,5 +418,5 @@ void zynadd_init_top_forest_map()
 unsigned int
 zynadd_top_forest_map_get_voices_group()
 {
-  return LV2DYNPARAM_GROUP_VOICES;
+  return g_top_forest_map_voices_group_index;
 }

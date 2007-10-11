@@ -32,19 +32,23 @@ extern const char * g_filter_type_names[];
 #define LV2DYNPARAM_PARAMETER_SHAPE(parameter) LV2DYNPARAM_PARAMETER_ ## parameter ## _SHAPE
 
 #define LV2DYNPARAM_GROUP_INIT(parent_group, group, name_value, hints...) \
-  lv2dynparam_group_init(map_ptr, LV2DYNPARAM_GROUP(parent_group), LV2DYNPARAM_GROUP(group), name_value, ## hints)
+  groups_map[LV2DYNPARAM_GROUP(group) + 2] = group_index;               \
+  lv2dynparam_group_init(map_ptr, groups_map[LV2DYNPARAM_GROUP(parent_group) + 2], group_index, name_value, ## hints); \
+  group_index++;
 
 #define LV2DYNPARAM_PARAMETER_INIT_BOOL(parent_group, lv2parameter, component, zynparameter, name_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") bool -> %u",                       \
             LV2DYNPARAM_PARAMETER(lv2parameter),                        \
             name_value,                                                 \
             ZYNADD_PARAMETER_BOOL_ ## zynparameter);                    \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter;
+  params_map[LV2DYNPARAM_PARAMETER(lv2parameter)] = param_index;        \
+  map_ptr->parameters[param_index].parent = groups_map[LV2DYNPARAM_GROUP(parent_group) + 2]; \
+  map_ptr->parameters[param_index].name = name_value;                   \
+  map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
+  map_ptr->parameters[param_index].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  map_ptr->parameters[param_index].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter; \
+  param_index++;
 
 #define LV2DYNPARAM_PARAMETER_INIT_BOOL_SEMI(parent_group, lv2parameter, component, zynparameter, name_value, scope_value, other_parameter, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") bool -> %u; with other %u",        \
@@ -52,13 +56,15 @@ extern const char * g_filter_type_names[];
             name_value,                                                 \
             ZYNADD_PARAMETER_BOOL_ ## zynparameter,                     \
             LV2DYNPARAM_PARAMETER(other_parameter));                    \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value ## _OTHER; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope_specific = LV2DYNPARAM_PARAMETER(other_parameter);
+  params_map[LV2DYNPARAM_PARAMETER(lv2parameter)] = param_index;        \
+  map_ptr->parameters[param_index].parent = groups_map[LV2DYNPARAM_GROUP(parent_group) + 2]; \
+  map_ptr->parameters[param_index].name = name_value;                   \
+  map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_BOOL; \
+  map_ptr->parameters[param_index].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value ## _OTHER; \
+  map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  map_ptr->parameters[param_index].addsynth_parameter = ZYNADD_PARAMETER_BOOL_ ## zynparameter; \
+  map_ptr->parameters[param_index].scope_specific = LV2DYNPARAM_PARAMETER(other_parameter); \
+  param_index++;
 
 #define LV2DYNPARAM_PARAMETER_INIT_FLOAT(parent_group, lv2parameter, component, zynparameter, name_value, min_value, max_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") float -> %u:%u",                   \
@@ -66,14 +72,16 @@ extern const char * g_filter_type_names[];
             name_value,                                                 \
             ZYNADD_COMPONENT_ ## component,                             \
             ZYNADD_PARAMETER_FLOAT_ ## zynparameter);                   \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].min.fpoint = min_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].max.fpoint = max_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## zynparameter;
+  params_map[LV2DYNPARAM_PARAMETER(lv2parameter)] = param_index;        \
+  map_ptr->parameters[param_index].parent = groups_map[LV2DYNPARAM_GROUP(parent_group) + 2]; \
+  map_ptr->parameters[param_index].name = name_value;                   \
+  map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_FLOAT; \
+  map_ptr->parameters[param_index].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  map_ptr->parameters[param_index].min.fpoint = min_value;              \
+  map_ptr->parameters[param_index].max.fpoint = max_value;              \
+  map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  map_ptr->parameters[param_index].addsynth_parameter = ZYNADD_PARAMETER_FLOAT_ ## zynparameter; \
+  param_index++;
 
 #define LV2DYNPARAM_PARAMETER_INIT_INT(parent_group, lv2parameter, component, zynparameter, name_value, min_value, max_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") int -> %u:%u",                     \
@@ -81,27 +89,35 @@ extern const char * g_filter_type_names[];
             name_value,                                                 \
             ZYNADD_COMPONENT_ ## component,                             \
             ZYNADD_PARAMETER_INT_ ## zynparameter);                     \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].name = name_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_INT; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].min.integer = min_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].max.integer = max_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER(lv2parameter)].addsynth_parameter = ZYNADD_PARAMETER_INT_ ## zynparameter;
+  params_map[LV2DYNPARAM_PARAMETER(lv2parameter)] = param_index;        \
+  map_ptr->parameters[param_index].parent = groups_map[LV2DYNPARAM_GROUP(parent_group) + 2]; \
+  map_ptr->parameters[param_index].name = name_value;                   \
+  map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_INT; \
+  map_ptr->parameters[param_index].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  map_ptr->parameters[param_index].min.integer = min_value;             \
+  map_ptr->parameters[param_index].max.integer = max_value;             \
+  map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  map_ptr->parameters[param_index].addsynth_parameter = ZYNADD_PARAMETER_INT_ ## zynparameter; \
+  param_index++;
 
 #define LV2DYNPARAM_PARAMETER_INIT_SHAPE(parent_group, lv2parameter, component, name_value, scope_value, hints...) \
   LOG_DEBUG("Registering %u (\"%s\") shape -> %u",                      \
             LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter),                  \
             name_value);                                                \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].parent = LV2DYNPARAM_GROUP(parent_group); \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].name = name_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].type = LV2DYNPARAM_PARAMETER_TYPE_SHAPE; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
-  map_ptr->parameters[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)].addsynth_component = ZYNADD_COMPONENT_ ## component;
+  params_map[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)] = param_index;  \
+  map_ptr->parameters[param_index].parent = groups_map[LV2DYNPARAM_GROUP(parent_group) + 2]; \
+  map_ptr->parameters[param_index].name = name_value;                   \
+  map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_SHAPE; \
+  map_ptr->parameters[param_index].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  param_index++;
 
 #define LV2DYNPARAM_FOREST_MAP_ASSERT_VALID                             \
   /* santity check that we have filled all values */                    \
+                                                                        \
+  assert(group_index == LV2DYNPARAM_GROUPS_COUNT);                      \
+                                                                        \
+  assert(param_index == LV2DYNPARAM_PARAMETERS_COUNT);                  \
                                                                         \
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)                  \
   {                                                                     \

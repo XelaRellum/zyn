@@ -48,6 +48,10 @@ void zynadd_init_voice_forest_map() __attribute__((constructor));
 void zynadd_init_voice_forest_map()
 {
   int i;
+  int group_index;
+  int param_index;
+  int groups_map[LV2DYNPARAM_GROUPS_COUNT + 2];
+  int params_map[LV2DYNPARAM_PARAMETERS_COUNT];
 
   LOG_DEBUG("zynadd_init_voice_forest_map() called");
 
@@ -57,14 +61,21 @@ void zynadd_init_voice_forest_map()
   map_ptr->groups = g_voice_forest_map_groups;
   map_ptr->parameters = g_voice_forest_map_parameters;
 
+  groups_map[0] = LV2DYNPARAM_GROUP_INVALID;
+  groups_map[1] = LV2DYNPARAM_GROUP_ROOT;
+  group_index = 0;
+  param_index = 0;
+
   for (i = 0 ; i < LV2DYNPARAM_GROUPS_COUNT ; i++)
   {
     map_ptr->groups[i].parent = LV2DYNPARAM_GROUP_INVALID;
+    groups_map[i + 2] = LV2DYNPARAM_GROUP_INVALID;
   }
 
   for (i = 0 ; i < LV2DYNPARAM_PARAMETERS_COUNT ; i++)
   {
     map_ptr->parameters[i].parent = LV2DYNPARAM_GROUP_INVALID;
+    params_map[i] = -1;
   }
 
   LV2DYNPARAM_PARAMETER_INIT_BOOL(ROOT, RESONANCE, VOICE_GLOBALS, RESONANCE, "Resonance", ALWAYS, NULL);
