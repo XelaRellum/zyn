@@ -35,8 +35,7 @@ class ADnote
 {
 public:
   ADnote(
-    struct zyn_addsynth * synth_ptr,
-    Controller * ctl);
+    struct zyn_addsynth * synth_ptr);
 
   ~ADnote();
 
@@ -84,7 +83,6 @@ private:
   REALTYPE m_basefreq;
 
   bool m_note_enabled;
-  Controller * m_ctl;
 
   /***********************************************************/
   /*                    VOICE PARAMETERS                     */

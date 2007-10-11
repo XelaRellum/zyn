@@ -36,7 +36,6 @@
 #include "filter_base.h"
 #include "analog_filter.h"
 #include "filter.h"
-#include "Controller.h"
 #include "portamento.h"
 #include "addsynth_internal.h"
 #include "addsynth_voice.h"
@@ -205,8 +204,13 @@ zyn_addsynth_create(
 
   // ADnoteParameters temp end
 
-  zyn_addsynth_ptr->ctl_ptr = new Controller;
-  zyn_addsynth_ptr->ctl_ptr->defaults();
+  zyn_addsynth_ptr->bandwidth_depth = 64;
+  zyn_addsynth_ptr->bandwidth_exponential = false;
+  zyn_addsynth_ptr->modwheel_depth = 80;
+  zyn_addsynth_ptr->modwheel_exponential = false;
+
+  zyn_addsynth_set_bandwidth(zyn_addsynth_ptr, 64);
+  zyn_addsynth_set_modwheel(zyn_addsynth_ptr, 64);
 
   zyn_portamento_init(&zyn_addsynth_ptr->portamento);
 
@@ -261,7 +265,7 @@ zyn_addsynth_create(
 
   for (note_index = 0 ; note_index < ZYN_DEFAULT_POLYPHONY ; note_index++)
   {
-    zyn_addsynth_ptr->notes_array[note_index].note_ptr = new ADnote(zyn_addsynth_ptr, zyn_addsynth_ptr->ctl_ptr);
+    zyn_addsynth_ptr->notes_array[note_index].note_ptr = new ADnote(zyn_addsynth_ptr);
     zyn_addsynth_ptr->notes_array[note_index].midinote = -1;
   }
 
@@ -461,8 +465,6 @@ zyn_addsynth_destroy(
 
   // ADnoteParameters temp end
 
-  delete zyn_addsynth_ptr->ctl_ptr;
-
   free(zyn_addsynth_ptr->voices_params_ptr);
 
   free(zyn_addsynth_ptr->notes_array);
@@ -605,4 +607,62 @@ zyn_addsynth_set_int_parameter(
   signed int value)
 {
   return component_ptr->set_int(component_ptr->context, parameter, value);
+}
+
+#undef zyn_addsynth_ptr
+
+void
+zyn_addsynth_set_bandwidth(struct zyn_addsynth * zyn_addsynth_ptr, int value)
+{
+  float tmp;
+
+  if (!zyn_addsynth_ptr->bandwidth_exponential)
+  {
+    if (value < 64 && zyn_addsynth_ptr->bandwidth_depth >= 64)
+    {
+      tmp = 1.0;
+    }
+    else
+    {
+      tmp = pow(25.0, pow(zyn_addsynth_ptr->bandwidth_depth / 127.0, 1.5)) - 1.0;
+    }
+
+    zyn_addsynth_ptr->bandwidth_relbw = (value / 64.0 - 1.0) * tmp + 1.0;
+    if (zyn_addsynth_ptr->bandwidth_relbw < 0.01)
+    {
+      zyn_addsynth_ptr->bandwidth_relbw = 0.01;
+    }
+  }
+  else
+  {
+    zyn_addsynth_ptr->bandwidth_relbw = pow(25.0, (value - 64.0) / 64.0 * (zyn_addsynth_ptr->bandwidth_depth / 64.0));
+  }
+}
+
+void
+zyn_addsynth_set_modwheel(struct zyn_addsynth * zyn_addsynth_ptr, int value)
+{
+  float tmp;
+
+  if (!zyn_addsynth_ptr->modwheel_exponential)
+  {
+    if ((value < 64) && (zyn_addsynth_ptr->modwheel_depth >= 64))
+    {
+      tmp = 1.0;
+    }
+    else
+    {
+      tmp = pow(25.0, pow(zyn_addsynth_ptr->modwheel_depth / 127.0, 1.5) * 2.0) / 25.0;
+    }
+
+    zyn_addsynth_ptr->modwheel_relmod = (value / 64.0 - 1.0) * tmp + 1.0;
+    if (zyn_addsynth_ptr->modwheel_relmod < 0.0)
+    {
+      zyn_addsynth_ptr->modwheel_relmod = 0.0;
+    }
+  }
+  else
+  {
+    zyn_addsynth_ptr->modwheel_relmod = pow(25.0 , (value - 64.0) / 64.0 * (zyn_addsynth_ptr->modwheel_depth / 80.0));
+  }
 }

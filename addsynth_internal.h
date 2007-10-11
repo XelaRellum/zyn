@@ -225,7 +225,6 @@ struct zyn_addsynth
   unsigned int polyphony;
   struct note_channel * notes_array;
   zyn_fft_handle fft;
-  Controller * ctl_ptr;
   unsigned char velsns;         // velocity sensing (amplitude velocity scale)
   zyn_sample_type oldfreq;      // this is used for portamento
 
@@ -271,6 +270,14 @@ struct zyn_addsynth
   float pitch_bend;
   float pitch_bend_relative_frequency;
 
+  int bandwidth_depth;
+  int bandwidth_exponential;
+  float bandwidth_relbw;
+
+  int modwheel_depth;
+  int modwheel_exponential;
+  float modwheel_relmod;
+
   unsigned int voices_count;
 
   struct zyn_addnote_voice_parameters * voices_params_ptr; /* array with one entry per voice */
@@ -289,6 +296,9 @@ extern "C" {
 
 float percent_from_0_127(unsigned char value);
 unsigned char percent_to_0_127(float value);
+
+void zyn_addsynth_set_bandwidth(struct zyn_addsynth * zyn_addsynth_ptr, int value);
+void zyn_addsynth_set_modwheel(struct zyn_addsynth * zyn_addsynth_ptr, int value);
 
 #if 0
 { /* Adjust editor indent */

@@ -32,7 +32,6 @@
 #include "envelope_parameters.h"
 #include "lfo_parameters.h"
 #include "filter_parameters.h"
-#include "Controller.h"
 #include "lfo.h"
 #include "filter_base.h"
 #include "analog_filter.h"
@@ -48,8 +47,7 @@
 #include "log.h"
 
 ADnote::ADnote(
-  struct zyn_addsynth * synth_ptr,
-  Controller * ctl)
+  struct zyn_addsynth * synth_ptr)
 {
   m_tmpwave = new REALTYPE [SOUND_BUFFER_SIZE];
   m_bypassl = new REALTYPE [SOUND_BUFFER_SIZE];
@@ -76,8 +74,6 @@ ADnote::ADnote(
 
   m_FM_old_amplitude_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
   m_FM_new_amplitude_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
-
-  m_ctl = ctl;
 
   m_stereo = synth_ptr->stereo;
 
@@ -600,10 +596,9 @@ REALTYPE ADnote::getvoicebasefreq(int nvoice)
 {
   REALTYPE detune;
 
-  detune =
-    m_voices_ptr[nvoice].Detune / 100.0 +
-    m_voices_ptr[nvoice].FineDetune / 100.0 * m_ctl->bandwidth.relbw * m_bandwidth_detune_multiplier +
-    m_detune / 100.0;
+  detune = m_voices_ptr[nvoice].Detune / 100.0;
+  detune += m_voices_ptr[nvoice].FineDetune / 100.0 * m_synth_ptr->bandwidth_relbw * m_bandwidth_detune_multiplier;
+  detune += m_detune / 100.0;
 
   if (m_voices_ptr[nvoice].fixedfreq == 0)
   {
@@ -660,7 +655,7 @@ ADnote::computecurrentparameters()
 
   globalpitch =
     0.01 * (m_frequency_envelope.envout() +
-            m_frequency_lfo.lfoout() * m_ctl->modwheel.relmod);
+            m_frequency_lfo.lfoout() * m_synth_ptr->modwheel_relmod);
 
   globaloldamplitude = globalnewamplitude;
 
@@ -767,7 +762,7 @@ ADnote::computecurrentparameters()
       voicepitch=0.0;
       if (m_synth_ptr->voices_params_ptr[voice_index].PFreqLfoEnabled)
       {
-        voicepitch += m_voices_ptr[voice_index].m_frequency_lfo.lfoout() / 100.0 * m_ctl->bandwidth.relbw;
+        voicepitch += m_voices_ptr[voice_index].m_frequency_lfo.lfoout() / 100.0 * m_synth_ptr->bandwidth_relbw;
       }
 
       if (m_synth_ptr->voices_params_ptr[voice_index].PFreqEnvelopeEnabled)

@@ -22,8 +22,8 @@
 #include <assert.h>
 
 #include "common.h"
+#include "globals.h"
 #include "addsynth.h"
-#include "Controller.h"
 #include "lfo_parameters.h"
 #include "lfo.h"
 #include "filter_parameters.h"

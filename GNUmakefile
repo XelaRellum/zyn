@@ -42,7 +42,6 @@ PLUGIN_SOURCES_CXX += envelope.cpp
 PLUGIN_SOURCES_CXX += oscillator.cpp
 PLUGIN_SOURCES_CXX += sv_filter.cpp
 PLUGIN_SOURCES_CXX += resonance.cpp
-PLUGIN_SOURCES_CXX += Controller.cpp
 PLUGIN_SOURCES_CXX += addsynth_component_amp_globals.cpp
 PLUGIN_SOURCES_CXX += addsynth_component_amp_envelope.cpp
 PLUGIN_SOURCES_CXX += addsynth_component_lfo.cpp
