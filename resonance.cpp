@@ -211,7 +211,14 @@ REALTYPE Resonance::getoctavesfreq(){
     return(0.25+10.0*Poctavesfreq/127.0);
 };
 
-void Resonance::sendcontroller(MidiControllers ctl,REALTYPE par){
-    if (ctl==C_resonance_center) ctlcenter=par;
-	else ctlbw=par;
-};
+// -1 .. 1
+void Resonance::set_center(float center)
+{
+  ctlcenter = pow(3.0, center);
+}
+
+// -1 .. 1
+void Resonance::set_badnwidth(float bandwidth)
+{
+  ctlbw = pow(1.5, bandwidth * 0.5);
+}

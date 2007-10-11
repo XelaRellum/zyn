@@ -40,8 +40,6 @@ public:
   void setbandwidth(int value);
   void setmodwheel(int value);
   void setfmamp(int value);
-  void setresonancecenter(int value);
-  void setresonancebw(int value);
 
   struct{//Filter cutoff
     int data;
@@ -74,18 +72,6 @@ public:
     REALTYPE relamp;
     unsigned char receive;
   } fmamp;
-
-  struct{//Resonance Center Frequency
-    int data;
-    REALTYPE relcenter;
-    unsigned char depth;
-  } resonancecenter;
-
-  struct{//Resonance Bandwidth
-    int data;
-    REALTYPE relbw;
-    unsigned char depth;
-  } resonancebandwidth;
 };
 
 #endif

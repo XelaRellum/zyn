@@ -43,7 +43,9 @@ public:
   REALTYPE getfreqresponse(REALTYPE freq);
   REALTYPE getcenterfreq();
   REALTYPE getoctavesfreq();
-  void sendcontroller(MidiControllers ctl,REALTYPE par);
+
+  void set_center(float center);
+  void set_badnwidth(float bandwidth);
 
   //parameters
   unsigned char Penabled;     //if the ressonance is enabled  

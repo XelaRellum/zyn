@@ -43,9 +43,6 @@ void Controller::defaults(){
   modwheel.depth=80;
   modwheel.exponential=0;
   fmamp.receive=1;
-
-  resonancecenter.depth=64;
-  resonancebandwidth.depth=64;
 }
 
 void Controller::resetall(){
@@ -54,8 +51,6 @@ void Controller::resetall(){
   setbandwidth(64);
   setmodwheel(64);
   setfmamp(127);
-  setresonancecenter(64);
-  setresonancebw(64);
 };
 
 void Controller::setfiltercutoff(int value){
@@ -95,13 +90,4 @@ void Controller::setfmamp(int value){
   fmamp.relamp=value/127.0;
   if (fmamp.receive!=0) fmamp.relamp=value/127.0;
   else fmamp.relamp=1.0;
-};
-
-void Controller::setresonancecenter(int value){
-  resonancecenter.data=value;
-  resonancecenter.relcenter=pow(3.0,(value-64.0)/64.0*(resonancecenter.depth/64.0));
-};
-void Controller::setresonancebw(int value){
-  resonancebandwidth.data=value;
-  resonancebandwidth.relbw=pow(1.5,(value-64.0)/64.0*(resonancebandwidth.depth/127.0));
 };
