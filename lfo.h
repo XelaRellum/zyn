@@ -35,6 +35,7 @@ public:
 
   void
   init(
+    float sample_rate,
     float base_frequency,       // note
     const struct zyn_lfo_parameters * parameters_ptr,
     unsigned int type);         // one of ZYN_LFO_TYPE_XXX
@@ -68,6 +69,8 @@ private:
   float m_delay;
 
   char m_shape;
+
+  float m_sample_rate;
 };
 
 #endif

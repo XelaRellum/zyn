@@ -30,12 +30,15 @@
 
 void
 AnalogFilter::init(
+  float sample_rate,
   unsigned char Ftype,
   float Ffreq,
   float Fq,
   unsigned char Fstages)
 {
   int i;
+
+  m_sample_rate = sample_rate;
 
   m_additional_stages = Fstages;
 
@@ -107,9 +110,9 @@ AnalogFilter::computefiltercoefs()
   // do not allow frequencies bigger than samplerate/2
   freq = m_frequency;
 
-  if (freq > SAMPLE_RATE / 2 - 500.0)
+  if (freq > m_sample_rate / 2 - 500.0)
   {
-    freq = SAMPLE_RATE / 2 - 500.0;
+    freq = m_sample_rate / 2 - 500.0;
     zerocoefs = 1;
   }
 
@@ -144,7 +147,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_LPF1:
     if (zerocoefs == 0)
     {
-      tmp = exp(-2.0 * PI * freq / SAMPLE_RATE);
+      tmp = exp(-2.0 * PI * freq / m_sample_rate);
     }
     else
     {
@@ -165,7 +168,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_HPF1:
     if (zerocoefs == 0)
     {
-      tmp = exp(-2.0 * PI * freq / SAMPLE_RATE);
+      tmp = exp(-2.0 * PI * freq / m_sample_rate);
     }
     else
     {
@@ -186,7 +189,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_LPF2:
     if (zerocoefs == 0)
     {
-      omega = 2 * PI * freq / SAMPLE_RATE;
+      omega = 2 * PI * freq / m_sample_rate;
       sn = sin(omega);
       cs = cos(omega);
       alpha = sn / (2 * tmpq);
@@ -214,7 +217,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_HPF2:
     if (zerocoefs == 0)
     {
-      omega = 2 * PI * freq / SAMPLE_RATE;
+      omega = 2 * PI * freq / m_sample_rate;
       sn = sin(omega);
       cs = cos(omega);
       alpha = sn / (2 * tmpq);
@@ -242,7 +245,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_BPF2:
     if (zerocoefs == 0)
     {
-      omega = 2 * PI * freq / SAMPLE_RATE;
+      omega = 2 * PI * freq / m_sample_rate;
       sn = sin(omega);
       cs = cos(omega);
       alpha = sn / (2 * tmpq);
@@ -270,7 +273,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_NF2:
     if (zerocoefs == 0)
     {
-      omega = 2 * PI * freq / SAMPLE_RATE;
+      omega = 2 * PI * freq / m_sample_rate;
       sn = sin(omega);
       cs = cos(omega);
       alpha = sn / (2 * sqrt(tmpq));
@@ -297,7 +300,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_PKF2:
     if (zerocoefs == 0)
     {
-      omega = 2 * PI * freq / SAMPLE_RATE;
+      omega = 2 * PI * freq / m_sample_rate;
       sn = sin(omega);
       cs = cos(omega);
       tmpq *= 3.0;
@@ -326,7 +329,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_LSH2:
     if (zerocoefs == 0)
     {
-      omega = 2 * PI * freq / SAMPLE_RATE;
+      omega = 2 * PI * freq / m_sample_rate;
       sn = sin(omega);
       cs = cos(omega);
       tmpq = sqrt(tmpq);
@@ -357,7 +360,7 @@ AnalogFilter::computefiltercoefs()
   case ZYN_FILTER_ANALOG_TYPE_HSH2:
     if (zerocoefs == 0)
     {
-      omega = 2 * PI * freq / SAMPLE_RATE;
+      omega = 2 * PI * freq / m_sample_rate;
       sn = sin(omega);
       cs = cos(omega);
       tmpq = sqrt(tmpq);
@@ -410,7 +413,7 @@ AnalogFilter::setfreq(float frequency)
   }
 
   m_old_above_nq = m_above_nq;
-  m_above_nq = frequency > (SAMPLE_RATE / 2 - 500.0);
+  m_above_nq = frequency > (m_sample_rate / 2 - 500.0);
 
   nyquist_thresh = ZYN_BOOL_XOR(m_above_nq, m_old_above_nq);
 
@@ -573,7 +576,7 @@ AnalogFilter::H(float freq)
   float h;
   int n;
 
-  fr = freq / SAMPLE_RATE * PI * 2.0;
+  fr = freq / m_sample_rate * PI * 2.0;
   x = m_c[0];
   y = 0.0;
 

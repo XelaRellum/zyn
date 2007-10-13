@@ -27,7 +27,8 @@
 #include "filter_base.h"
 #include "sv_filter.h"
 
-SVFilter::SVFilter(unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages){
+SVFilter::SVFilter(float sample_rate, unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages){
+  m_sample_rate = sample_rate;
     stages=Fstages;
     type=Ftype;
     freq=Ffreq;
@@ -54,7 +55,7 @@ void SVFilter::cleanup(){
 };
 
 void SVFilter::computefiltercoefs(){
-    par.f=freq / SAMPLE_RATE*4.0;
+    par.f = freq / m_sample_rate * 4.0;
     if (par.f>0.99999) par.f=0.99999;
     par.q=1.0-atan(sqrt(q))*2.0/PI;
     par.q=pow(par.q,1.0/(stages+1));
@@ -66,7 +67,8 @@ void SVFilter::setfreq(REALTYPE frequency){
     if (frequency<0.1) frequency=0.1;
     REALTYPE rap=freq/frequency;if (rap<1.0) rap=1.0/rap;
     
-    oldabovenq=abovenq;abovenq=frequency>(SAMPLE_RATE/2-500.0);
+    oldabovenq = abovenq;
+    abovenq = frequency > (m_sample_rate / 2 - 500.0);
     
     int nyquistthresh=(abovenq^oldabovenq);
 

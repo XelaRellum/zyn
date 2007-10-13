@@ -41,13 +41,12 @@ zyn_portamento_init(
   portamento_ptr->up_down_time_stretch = 0.0;
   portamento_ptr->pitch_threshold = 3; /* 3 equally tempered semitones */
   portamento_ptr->pitch_threshold_above = true;
-
-  zyn_portamento_start(portamento_ptr, 440.0, 440.0);
 }
 
 // returns true if the portamento's conditions are true, else returns false
 bool
 zyn_portamento_start(
+  float sample_rate,
   struct zyn_portamento * portamento_ptr,
   float oldfreq,
   float newfreq)
@@ -96,7 +95,7 @@ zyn_portamento_start(
     portamentotime *= pow(0.1, -portamento_ptr->up_down_time_stretch);
   }
     
-  portamento_ptr->dx = SOUND_BUFFER_SIZE / (portamentotime * SAMPLE_RATE);
+  portamento_ptr->dx = SOUND_BUFFER_SIZE / (portamentotime * sample_rate);
   portamento_ptr->origfreqrap = oldfreq / newfreq;
 
   if (portamento_ptr->origfreqrap > 1.0)

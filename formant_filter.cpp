@@ -29,7 +29,7 @@
 #include "filter_parameters.h"
 #include "formant_filter.h"
 
-FormantFilter::FormantFilter(FilterParams *pars)
+FormantFilter::FormantFilter(float sample_rate, FilterParams *pars)
 {
   int i, j;
 
@@ -38,7 +38,7 @@ FormantFilter::FormantFilter(FilterParams *pars)
   for (i = 0 ; i < numformants ; i++)
   {
     formant[i] = new AnalogFilter();
-    formant[i]->init(ZYN_FILTER_ANALOG_TYPE_BPF2, 1000.0, 10.0, pars->Pstages);
+    formant[i]->init(sample_rate, ZYN_FILTER_ANALOG_TYPE_BPF2, 1000.0, 10.0, pars->Pstages);
   }
 
   cleanup();

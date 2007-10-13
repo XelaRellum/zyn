@@ -25,8 +25,14 @@
 #include "globals.h"
 #include "filter_parameters.h"
 
-void FilterParams::init(unsigned char Ptype_,unsigned char Pfreq_,unsigned  char Pq_)
+void FilterParams::init(
+  float sample_rate,
+  unsigned char Ptype_,
+  unsigned char Pfreq_,
+  unsigned  char Pq_)
 {
+  m_sample_rate = sample_rate;
+
   Dtype=Ptype_;
   Dfreq=Pfreq_;
   Dq=Pq_;
@@ -136,8 +142,9 @@ void FilterParams::formantfilterH(int nvowel,int nfreqs,REALTYPE *freqs){
     filter_amp=getformantamp(Pvowels[nvowel].formants[nformant].amp);
 
 
-    if (filter_freq<=(SAMPLE_RATE/2-100.0)){
-      omega=2*PI*filter_freq/SAMPLE_RATE;
+    if (filter_freq <= (m_sample_rate / 2 - 100.0))
+    {
+      omega = 2 * PI * filter_freq / m_sample_rate;
       sn=sin(omega);
       cs=cos(omega);
       alpha=sn/(2*filter_q);
@@ -147,16 +154,26 @@ void FilterParams::formantfilterH(int nvowel,int nfreqs,REALTYPE *freqs){
       c[2]=-alpha/tmp*sqrt(filter_q+1);
       d[1]=-2*cs/tmp*(-1);
       d[2]=(1-alpha)/tmp*(-1);
-    } else continue;
-
+    }
+    else
+    {
+      continue;
+    }
 
     for (int i=0;i<nfreqs;i++) {
       REALTYPE freq=getfreqx(i/(REALTYPE) nfreqs);
-      if (freq>SAMPLE_RATE/2) {
-        for (int tmp=i;tmp<nfreqs;tmp++) freqs[tmp]=0.0;
+
+      if (freq > m_sample_rate / 2)
+      {
+        for (int tmp = i ; tmp < nfreqs ; tmp++)
+        {
+          freqs[tmp] = 0.0;
+        }
+
         break;
-      };
-      REALTYPE fr=freq/SAMPLE_RATE*PI*2.0;
+      }
+
+      REALTYPE fr = freq / m_sample_rate * PI * 2.0;
       REALTYPE x=c[0],y=0.0;
       for (int n=1;n<3;n++){
         x+=cos(n*fr)*c[n];

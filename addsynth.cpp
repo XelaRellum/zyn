@@ -47,8 +47,6 @@
 
 #define ZYN_DEFAULT_POLYPHONY 60
 
-float g_sample_rate;
-
 bool
 zyn_addsynth_create(
   float sample_rate,
@@ -59,10 +57,10 @@ zyn_addsynth_create(
   unsigned int note_index;
   unsigned int voice_index;
 
-  g_sample_rate = sample_rate;
-
 //  printf("zyn_addsynth_create\n");
   zyn_addsynth_ptr = (struct zyn_addsynth *)malloc(sizeof(struct zyn_addsynth));
+
+  zyn_addsynth_ptr->sample_rate = sample_rate;
 
   zyn_addsynth_ptr->polyphony = ZYN_DEFAULT_POLYPHONY;
   zyn_addsynth_ptr->notes_array = (struct note_channel *)malloc(ZYN_DEFAULT_POLYPHONY * sizeof(struct note_channel));
@@ -76,7 +74,7 @@ zyn_addsynth_create(
     
   zyn_addsynth_ptr->m_amplitude_envelope_params.init_adsr(64, true, 0, 40, 127, 25, false);
 
-  zyn_addsynth_ptr->m_filter_params.init(2, 94, 40);
+  zyn_addsynth_ptr->m_filter_params.init(sample_rate, 2, 94, 40);
   zyn_addsynth_ptr->m_filter_envelope_params.init_adsr_filter(0, true, 64, 40, 64, 70, 60, 64);
   zyn_addsynth_ptr->GlobalPar.Reson=new Resonance();
 
@@ -86,9 +84,9 @@ zyn_addsynth_create(
   for (voice_index = 0 ; voice_index < voices_count ; voice_index++)
   {
     zyn_addsynth_ptr->voices_params_ptr[voice_index].OscilSmp =
-      new OscilGen(zyn_addsynth_ptr->fft, zyn_addsynth_ptr->GlobalPar.Reson);
+      new OscilGen(sample_rate, zyn_addsynth_ptr->fft, zyn_addsynth_ptr->GlobalPar.Reson);
     zyn_addsynth_ptr->voices_params_ptr[voice_index].FMSmp =
-      new OscilGen(zyn_addsynth_ptr->fft, NULL);
+      new OscilGen(sample_rate, zyn_addsynth_ptr->fft, NULL);
 
     zyn_addsynth_ptr->voices_params_ptr[voice_index].m_amplitude_envelope_params.init_adsr(64, true, 0, 100, 127, 100, false); 
 
@@ -118,7 +116,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params_ptr[voice_index].frequency_lfo_params.stretch = 0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].frequency_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].m_filter_params.init(2, 50, 60);
+    zyn_addsynth_ptr->voices_params_ptr[voice_index].m_filter_params.init(sample_rate, 2, 50, 60);
     zyn_addsynth_ptr->voices_params_ptr[voice_index].m_filter_envelope_params.init_adsr_filter(0, false, 90, 70, 40, 70, 10, 40);
 
     zyn_addsynth_ptr->voices_params_ptr[voice_index].filter_lfo_params.frequency = 50.0 / 127.0;
@@ -415,7 +413,7 @@ unused_note_channel_found:
     zyn_addsynth_ptr->oldfreq = notebasefreq;
   }
       
-  bool portamento = zyn_portamento_start(&zyn_addsynth_ptr->portamento, zyn_addsynth_ptr->oldfreq, notebasefreq);
+  bool portamento = zyn_portamento_start(zyn_addsynth_ptr->sample_rate, &zyn_addsynth_ptr->portamento, zyn_addsynth_ptr->oldfreq, notebasefreq);
       
   zyn_addsynth_ptr->oldfreq = notebasefreq;
 

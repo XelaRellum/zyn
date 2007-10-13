@@ -40,12 +40,15 @@ LFO::~LFO()
 
 void
 LFO::init(
+  float sample_rate,
   float base_frequency,       // note
   const struct zyn_lfo_parameters * parameters_ptr,
   unsigned int type)
 {
   float lfostretch;
   float lfofreq;
+
+  m_sample_rate = sample_rate;
 
   // max 2x/octave
   lfostretch = pow(base_frequency / 440.0, parameters_ptr->stretch);
@@ -55,7 +58,7 @@ LFO::init(
   lfofreq /= 12.0;
   lfofreq *= lfostretch;
 
-  m_incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
+  m_incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / sample_rate;
 
   m_x = parameters_ptr->random_start_phase ? zyn_random() : parameters_ptr->start_phase;
 
@@ -240,7 +243,7 @@ LFO::lfoout()
   }
   else
   {
-    m_delay -= (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
+    m_delay -= (float)SOUND_BUFFER_SIZE / m_sample_rate;
   }
 
   return out;

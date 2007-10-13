@@ -29,7 +29,7 @@ public:
   Filter();
   ~Filter();  
 
-  void init(FilterParams *pars);
+  void init(float sample_rate, FilterParams *pars);
 
   void filterout(float *smp);
   void setfreq(float frequency);

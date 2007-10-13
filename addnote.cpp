@@ -141,7 +141,7 @@ ADnote::note_on(
         *VelF(m_velocity,m_synth_ptr->GlobalPar.PPunchVelocitySensing) );
     REALTYPE time = pow(10,3.0*m_synth_ptr->GlobalPar.PPunchTime/127.0)/10000.0; //0.1 .. 100 ms
     REALTYPE stretch = pow(440.0/freq,m_synth_ptr->GlobalPar.PPunchStretch/64.0);
-    m_punch_duration = 1.0 / (time * SAMPLE_RATE * stretch);
+    m_punch_duration = 1.0 / (time * m_synth_ptr->sample_rate * stretch);
   }
   else
   {
@@ -279,20 +279,22 @@ ADnote::note_on(
     m_FM_old_smp_ptr[voice_index] = 0.0; // this is for FM (integration)
 
     m_first_tick_ptr[voice_index] = true;
-    m_voices_ptr[voice_index].DelayTicks=(int)((exp(m_synth_ptr->voices_params_ptr[voice_index].PDelay/127.0*log(50.0))-1.0)/SOUND_BUFFER_SIZE/10.0*SAMPLE_RATE);
+    m_voices_ptr[voice_index].DelayTicks=(int)((exp(m_synth_ptr->voices_params_ptr[voice_index].PDelay/127.0*log(50.0))-1.0)/SOUND_BUFFER_SIZE/10.0 * m_synth_ptr->sample_rate);
   }
 
   // Global Parameters
-  m_frequency_envelope.init(&m_synth_ptr->m_frequency_envelope_params, m_basefreq);
+  m_frequency_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->m_frequency_envelope_params, m_basefreq);
 
   m_frequency_lfo.init(
+    m_synth_ptr->sample_rate,
     m_basefreq,
     &m_synth_ptr->frequency_lfo_params,
     ZYN_LFO_TYPE_FREQUENCY);
 
-  m_amplitude_envelope.init(&m_synth_ptr->m_amplitude_envelope_params, m_basefreq);
+  m_amplitude_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->m_amplitude_envelope_params, m_basefreq);
 
   m_amplitude_lfo.init(
+    m_synth_ptr->sample_rate,
     m_basefreq,
     &m_synth_ptr->amplitude_lfo_params,
     ZYN_LFO_TYPE_AMPLITUDE);
@@ -304,15 +306,16 @@ ADnote::note_on(
 
   globalnewamplitude = m_volume * m_amplitude_envelope.envout_dB() * m_amplitude_lfo.amplfoout();
 
-  m_filter_left.init(&m_synth_ptr->m_filter_params);
+  m_filter_left.init(m_synth_ptr->sample_rate, &m_synth_ptr->m_filter_params);
   if (m_stereo)
   {
-    m_filter_right.init(&m_synth_ptr->m_filter_params);
+    m_filter_right.init(m_synth_ptr->sample_rate, &m_synth_ptr->m_filter_params);
   }
 
-  m_filter_envelope.init(&m_synth_ptr->m_filter_envelope_params, m_basefreq);
+  m_filter_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->m_filter_envelope_params, m_basefreq);
 
   m_filter_lfo.init(
+    m_synth_ptr->sample_rate,
     m_basefreq,
     &m_synth_ptr->filter_lfo_params,
     ZYN_LFO_TYPE_FILTER);
@@ -358,7 +361,7 @@ ADnote::note_on(
     m_new_amplitude_ptr[voice_index] = 1.0;
     if (m_synth_ptr->voices_params_ptr[voice_index].PAmpEnvelopeEnabled != 0)
     {
-      m_voices_ptr[voice_index].m_amplitude_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_amplitude_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_amplitude_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->voices_params_ptr[voice_index].m_amplitude_envelope_params, m_basefreq);
       m_voices_ptr[voice_index].m_amplitude_envelope.envout_dB(); // discard the first envelope sample
       m_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_amplitude_envelope.envout_dB();
     }
@@ -366,6 +369,7 @@ ADnote::note_on(
     if (m_synth_ptr->voices_params_ptr[voice_index].PAmpLfoEnabled != 0)
     {
       m_voices_ptr[voice_index].m_amplitude_lfo.init(
+        m_synth_ptr->sample_rate,
         m_basefreq,
         &m_synth_ptr->voices_params_ptr[voice_index].amplitude_lfo_params,
         ZYN_LFO_TYPE_AMPLITUDE);
@@ -376,12 +380,13 @@ ADnote::note_on(
     /* Voice Frequency Parameters Init */
     if (m_synth_ptr->voices_params_ptr[voice_index].PFreqEnvelopeEnabled != 0)
     {
-      m_voices_ptr[voice_index].m_frequency_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_frequency_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_frequency_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->voices_params_ptr[voice_index].m_frequency_envelope_params, m_basefreq);
     }
 
     if (m_synth_ptr->voices_params_ptr[voice_index].PFreqLfoEnabled != 0)
     {
       m_voices_ptr[voice_index].m_frequency_lfo.init(
+        m_synth_ptr->sample_rate,
         m_basefreq,
         &m_synth_ptr->voices_params_ptr[voice_index].frequency_lfo_params,
         ZYN_LFO_TYPE_FREQUENCY);
@@ -390,17 +395,18 @@ ADnote::note_on(
     /* Voice Filter Parameters Init */
     if (m_synth_ptr->voices_params_ptr[voice_index].PFilterEnabled != 0)
     {
-      m_voices_ptr[voice_index].m_voice_filter.init(&m_synth_ptr->voices_params_ptr[voice_index].m_filter_params);
+      m_voices_ptr[voice_index].m_voice_filter.init(m_synth_ptr->sample_rate, &m_synth_ptr->voices_params_ptr[voice_index].m_filter_params);
     }
 
     if (m_synth_ptr->voices_params_ptr[voice_index].PFilterEnvelopeEnabled != 0)
     {
-      m_voices_ptr[voice_index].m_filter_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_filter_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_filter_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->voices_params_ptr[voice_index].m_filter_envelope_params, m_basefreq);
     }
 
     if (m_synth_ptr->voices_params_ptr[voice_index].PFilterLfoEnabled != 0)
     {
       m_voices_ptr[voice_index].m_filter_lfo.init(
+        m_synth_ptr->sample_rate,
         m_basefreq,
         &m_synth_ptr->voices_params_ptr[voice_index].filter_lfo_params,
         ZYN_LFO_TYPE_FILTER);
@@ -440,7 +446,7 @@ ADnote::note_on(
 
     if (m_synth_ptr->voices_params_ptr[voice_index].PFMFreqEnvelopeEnabled != 0)
     {
-      m_voices_ptr[voice_index].m_fm_frequency_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_fm_frequency_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_fm_frequency_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->voices_params_ptr[voice_index].m_fm_frequency_envelope_params, m_basefreq);
     }
 
     m_FM_new_amplitude_ptr[voice_index] = m_voices_ptr[voice_index].FMVolume;
@@ -448,7 +454,7 @@ ADnote::note_on(
 
     if (m_synth_ptr->voices_params_ptr[voice_index].PFMAmpEnvelopeEnabled != 0)
     {
-      m_voices_ptr[voice_index].m_fm_amplitude_envelope.init(&m_synth_ptr->voices_params_ptr[voice_index].m_fm_amplitude_envelope_params, m_basefreq);
+      m_voices_ptr[voice_index].m_fm_amplitude_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->voices_params_ptr[voice_index].m_fm_amplitude_envelope_params, m_basefreq);
       m_FM_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_fm_amplitude_envelope.envout_dB();
     }
   }
@@ -566,27 +572,40 @@ ADnote::~ADnote()
 /*
  * Computes the frequency of an oscillator
  */
-void ADnote::setfreq(int nvoice,REALTYPE freq){
+void ADnote::setfreq(int nvoice,REALTYPE freq)
+{
   REALTYPE speed;
-  freq=fabs(freq);
-  speed=freq*REALTYPE(OSCIL_SIZE)/(REALTYPE) SAMPLE_RATE;
-  if (speed>OSCIL_SIZE) speed=OSCIL_SIZE;
 
-  F2I(speed,m_osc_freq_hi_ptr[nvoice]);
-  m_osc_freq_lo_ptr[nvoice]=speed-floor(speed);
+  freq = fabs(freq);
+
+  speed = freq * REALTYPE(OSCIL_SIZE) / m_synth_ptr->sample_rate;
+  if (speed > OSCIL_SIZE)
+  {
+    speed = OSCIL_SIZE;
+  }
+
+  F2I(speed, m_osc_freq_hi_ptr[nvoice]);
+
+  m_osc_freq_lo_ptr[nvoice] = speed - floor(speed);
 }
 
 /*
  * Computes the frequency of an modullator oscillator
  */
-void ADnote::setfreqFM(int nvoice,REALTYPE freq){
+void ADnote::setfreqFM(int nvoice,REALTYPE freq)
+{
   REALTYPE speed;
-  freq=fabs(freq);
-  speed=freq*REALTYPE(OSCIL_SIZE)/(REALTYPE) SAMPLE_RATE;
-  if (speed>OSCIL_SIZE) speed=OSCIL_SIZE;
 
-  F2I(speed,m_osc_freq_hi_FM_ptr[nvoice]);
-  m_osc_freq_lo_FM_ptr[nvoice]=speed-floor(speed);
+  freq = fabs(freq);
+
+  speed = freq * REALTYPE(OSCIL_SIZE) / m_synth_ptr->sample_rate;
+  if (speed > OSCIL_SIZE)
+  {
+    speed = OSCIL_SIZE;
+  }
+
+  F2I(speed, m_osc_freq_hi_FM_ptr[nvoice]);
+  m_osc_freq_lo_FM_ptr[nvoice] = speed - floor(speed);
 }
 
 /*
@@ -800,7 +819,7 @@ ADnote::computecurrentparameters()
     }
   }
 
-  m_time += (REALTYPE)SOUND_BUFFER_SIZE/(REALTYPE)SAMPLE_RATE;
+  m_time += (REALTYPE)SOUND_BUFFER_SIZE / m_synth_ptr->sample_rate;
 }
 
 
@@ -1010,7 +1029,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int voice_index,in
 
   //normalize makes all sample-rates, oscil_sizes toproduce same sound
   if (FMmode!=0){//Frequency modulation
-    REALTYPE normalize=OSCIL_SIZE/262144.0*44100.0/(REALTYPE)SAMPLE_RATE;
+    REALTYPE normalize = OSCIL_SIZE / 262144.0 * 44100.0 / m_synth_ptr->sample_rate;
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
       m_FM_old_smp_ptr[voice_index]=fmod(m_FM_old_smp_ptr[voice_index]+m_tmpwave[i]*normalize,OSCIL_SIZE);
       m_tmpwave[i]=m_FM_old_smp_ptr[voice_index];

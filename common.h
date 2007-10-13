@@ -27,12 +27,6 @@
 #define zyn_sample_type float
 #define REALTYPE float          /* legacy */
 
-/* Sampling rate */
-/* FIXME: using globals is lame! */
-#define SAMPLE_RATE g_sample_rate
-
-extern float g_sample_rate;
-
 /* 
  * The size of a sound buffer (or the granularity)
  * All internal transfer of sound data use buffer of this size

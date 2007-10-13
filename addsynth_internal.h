@@ -222,6 +222,7 @@ struct zyn_addnote_voice_parameters
 
 struct zyn_addsynth
 {
+  float sample_rate;
   unsigned int polyphony;
   struct note_channel * notes_array;
   zyn_fft_handle fft;

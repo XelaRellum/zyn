@@ -28,6 +28,7 @@
 
 void
 Envelope::init(
+  float sample_rate,
   EnvelopeParams * parameters_ptr,
   float basefreq)
 {
@@ -46,7 +47,7 @@ Envelope::init(
   m_stretch = pow(440.0 / basefreq, parameters_ptr->m_stretch / 64.0);
   m_linear = parameters_ptr->m_linear;
 
-  buffer_duration = SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
+  buffer_duration = SOUND_BUFFER_SIZE / sample_rate;
 
   for (i = 0 ; i < MAX_ENVELOPE_POINTS ; i++)
   {

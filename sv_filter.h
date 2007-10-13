@@ -25,7 +25,7 @@
 
 class SVFilter:public Filter_{
  public:
-    SVFilter(unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages);
+    SVFilter(float sample_rate, unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages);
     ~SVFilter();	
     void filterout(REALTYPE *smp);
     void setfreq(REALTYPE frequency);
@@ -38,6 +38,8 @@ class SVFilter:public Filter_{
     void cleanup();
 
  private:
+  float m_sample_rate;
+
     struct fstage{
       REALTYPE low,high,band,notch;
     } st[MAX_FILTER_STAGES+1];

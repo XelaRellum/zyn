@@ -77,6 +77,7 @@ zyn_portamento_init(
 // returns true if the portamento's conditions are true, else returns false
 bool
 zyn_portamento_start(
+  float sample_rate,
   struct zyn_portamento * portamento_ptr,
   float oldfreq,
   float newfreq);

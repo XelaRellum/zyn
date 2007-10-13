@@ -26,7 +26,12 @@
 class FilterParams
 {
 public:
-  void init(unsigned char Ptype_,unsigned char Pfreq,unsigned char Pq_);
+  void
+  init(
+    float sample_rate,
+    unsigned char Ptype_,
+    unsigned char Pfreq,
+    unsigned char Pq_);
 
   void defaults();
 
@@ -77,6 +82,8 @@ public:
   
 private:
   void defaults(int n);
+
+  float m_sample_rate;
     
   //stored default parameters
   unsigned char Dtype;

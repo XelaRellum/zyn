@@ -144,8 +144,10 @@ void waveshapesmps(int n,REALTYPE *smps,unsigned char type,unsigned char drive)
 REALTYPE *OscilGen::tmpsmps;//this array stores some termporary data and it has SOUND_BUFFER_SIZE elements
 struct zyn_fft_freqs OscilGen::outoscilFFTfreqs;
 
-OscilGen::OscilGen(zyn_fft_handle fft, Resonance *res_)
+OscilGen::OscilGen(float sample_rate, zyn_fft_handle fft, Resonance *res_)
 {
+  m_sample_rate = sample_rate;
+
   m_fft = fft;
   res=res_;
 
@@ -1034,7 +1036,7 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz, bool resonance){
     outoscilFFTfreqs.s[i]=0.0;
   };
 
-  nyquist=(int)(0.5*SAMPLE_RATE/fabs(freqHz))+2;
+  nyquist=(int)(0.5 * m_sample_rate / fabs(freqHz)) + 2;
   if (ADvsPAD) nyquist=(int)(OSCIL_SIZE/2);
   if (nyquist>OSCIL_SIZE/2) nyquist=OSCIL_SIZE/2;
     

@@ -29,7 +29,11 @@ public:
   Envelope();
   ~Envelope();
 
-  void init(EnvelopeParams * envpars, float basefreq);
+  void
+  init(
+    float sample_rate,
+    EnvelopeParams * envpars,
+    float basefreq);
 
   void relasekey();
 

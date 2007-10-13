@@ -31,7 +31,7 @@ struct zyn_formant
 class FormantFilter : public Filter_
 {
 public:
-  FormantFilter(FilterParams *pars);
+  FormantFilter(float sample_rate, FilterParams *pars);
   ~FormantFilter(); 
   void filterout(float *smp);
   void setfreq(float frequency);

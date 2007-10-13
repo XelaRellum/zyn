@@ -26,7 +26,7 @@
 class OscilGen
 {
 public:
-  OscilGen(zyn_fft_handle fft, Resonance *res_);
+  OscilGen(float sample_rate, zyn_fft_handle fft, Resonance *res_);
   ~OscilGen();
 
   //computes the full spectrum of oscil from harmonics,phases and basefunc
@@ -104,6 +104,7 @@ public:
   static struct zyn_fft_freqs outoscilFFTfreqs;
 
 private:
+  float m_sample_rate;
   
   REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
 //    private:

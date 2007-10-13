@@ -35,7 +35,7 @@ public:
   AnalogFilter() {};
   ~AnalogFilter() {};
 
-  void init(unsigned char type, float freq, float q_factor, unsigned char stages);
+  void init(float sample_rate, unsigned char type, float freq, float q_factor, unsigned char stages);
   void filterout(float *smp);
   void setfreq(float frequency);
   void setfreq_and_q(float frequency,float q_);
@@ -50,6 +50,8 @@ public:
   float H(float freq);
 
 private:
+  float m_sample_rate;
+
   struct analog_filter_stage m_x[MAX_FILTER_STAGES + 1];
   struct analog_filter_stage m_y[MAX_FILTER_STAGES + 1];
   struct analog_filter_stage m_x_old[MAX_FILTER_STAGES + 1];
