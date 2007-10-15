@@ -54,33 +54,6 @@ typedef void
   unsigned int parameter,
   bool value);
 
-typedef unsigned int
-(* zyn_component_get_shape_parameter)(
-  void * context);
-
-typedef void
-(* zyn_component_set_shape_parameter)(
-  void * context,
-  unsigned int value);
-
-typedef unsigned int
-(* zyn_component_get_filter_type_parameter)(
-  void * context);
-
-typedef void
-(* zyn_component_set_filter_type_parameter)(
-  void * context,
-  unsigned int value);
-
-typedef unsigned int
-(* zyn_component_get_analog_filter_type_parameter)(
-  void * context);
-
-typedef void
-(* zyn_component_set_analog_filter_type_parameter)(
-  void * context,
-  unsigned int value);
-
 struct zyn_component_descriptor
 {
   void * context;
@@ -91,12 +64,6 @@ struct zyn_component_descriptor
   zyn_component_set_int_parameter set_int;
   zyn_component_get_bool_parameter get_bool;
   zyn_component_set_bool_parameter set_bool;
-  zyn_component_get_shape_parameter get_shape;
-  zyn_component_set_shape_parameter set_shape;
-  zyn_component_get_filter_type_parameter get_filter_type;
-  zyn_component_set_filter_type_parameter set_filter_type;
-  zyn_component_get_analog_filter_type_parameter get_analog_filter_type;
-  zyn_component_set_analog_filter_type_parameter set_analog_filter_type;
 };
 
 #define ZYN_INIT_COMPONENT(component_ptr, context_param, prefix)        \
@@ -106,13 +73,7 @@ struct zyn_component_descriptor
   (component_ptr)->get_int = prefix ## get_int;                         \
   (component_ptr)->set_int = prefix ## set_int;                         \
   (component_ptr)->get_bool = prefix ## get_bool;                       \
-  (component_ptr)->set_bool = prefix ## set_bool;                       \
-  (component_ptr)->get_shape = prefix ## get_shape;                     \
-  (component_ptr)->set_shape = prefix ## set_shape;                     \
-  (component_ptr)->get_filter_type = prefix ## get_filter_type;         \
-  (component_ptr)->set_filter_type = prefix ## set_filter_type;         \
-  (component_ptr)->get_analog_filter_type = prefix ## get_analog_filter_type; \
-  (component_ptr)->set_analog_filter_type = prefix ## set_analog_filter_type; \
+  (component_ptr)->set_bool = prefix ## set_bool;
 
 #ifdef __cplusplus
 extern "C" {

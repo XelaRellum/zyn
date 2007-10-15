@@ -29,7 +29,6 @@ extern const char * g_filter_type_names[];
 
 #define LV2DYNPARAM_GROUP(group) LV2DYNPARAM_GROUP_ ## group
 #define LV2DYNPARAM_PARAMETER(parameter) LV2DYNPARAM_PARAMETER_ ## parameter
-#define LV2DYNPARAM_PARAMETER_SHAPE(parameter) LV2DYNPARAM_PARAMETER_ ## parameter ## _SHAPE
 
 #define LV2DYNPARAM_GROUP_INIT(parent_group, group, name_value, hints...) \
   groups_map[LV2DYNPARAM_GROUP(group) + 2] = group_index;               \
@@ -100,16 +99,19 @@ extern const char * g_filter_type_names[];
   map_ptr->parameters[param_index].addsynth_parameter = ZYNADD_PARAMETER_INT_ ## zynparameter; \
   param_index++;
 
-#define LV2DYNPARAM_PARAMETER_INIT_SHAPE(parent_group, lv2parameter, component, name_value, scope_value, hints...) \
-  LOG_DEBUG("Registering %u (\"%s\") shape -> %u",                      \
-            LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter),                  \
+#define LV2DYNPARAM_PARAMETER_INIT_ENUM(parent_group, lv2parameter, component, zynparameter, name_value, values, count, scope_value, hints...) \
+  LOG_DEBUG("Registering %u (\"%s\") enum -> %u",                       \
+            LV2DYNPARAM_PARAMETER(lv2parameter),                  \
             name_value);                                                \
-  params_map[LV2DYNPARAM_PARAMETER_SHAPE(lv2parameter)] = param_index;  \
+  params_map[LV2DYNPARAM_PARAMETER(lv2parameter)] = param_index;  \
   map_ptr->parameters[param_index].parent = groups_map[LV2DYNPARAM_GROUP(parent_group) + 2]; \
   map_ptr->parameters[param_index].name = name_value;                   \
-  map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_SHAPE; \
+  map_ptr->parameters[param_index].type = LV2DYNPARAM_PARAMETER_TYPE_ENUM; \
   map_ptr->parameters[param_index].scope = LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ ## scope_value; \
+  map_ptr->parameters[param_index].min.enum_values = values;            \
+  map_ptr->parameters[param_index].max.enum_values_count = count;       \
   map_ptr->parameters[param_index].addsynth_component = ZYNADD_COMPONENT_ ## component; \
+  map_ptr->parameters[param_index].addsynth_parameter = ZYNADD_PARAMETER_ENUM_ ## zynparameter; \
   param_index++;
 
 #define LV2DYNPARAM_FOREST_MAP_BEGIN(_groups_count, _params_count, _groups, _params) \
@@ -213,12 +215,14 @@ struct parameter_descriptor
   {
     float fpoint;
     signed int integer;
+    const char ** enum_values;
   } min;
 
   union
   {
     float fpoint;
     signed int integer;
+    unsigned int enum_values_count;
   } max;
 };
 

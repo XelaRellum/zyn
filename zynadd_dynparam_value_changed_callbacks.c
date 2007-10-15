@@ -103,37 +103,6 @@ zynadd_float_parameter_changed(
 }
 
 bool
-zynadd_shape_parameter_changed(
-  void * context,
-  const char * value,
-  unsigned int value_index)
-{
-  zyn_addsynth_set_shape_parameter(
-    parameter_ptr->addsynth_component,
-    value_index);
-
-  return true;
-}
-
-bool
-zynadd_filter_type_parameter_changed(
-  void * context,
-  const char * value,
-  unsigned int value_index)
-{
-  return true;
-}
-
-bool
-zynadd_analog_filter_type_parameter_changed(
-  void * context,
-  const char * value,
-  unsigned int value_index)
-{
-  return true;
-}
-
-bool
 zynadd_int_parameter_changed(
   void * context,
   signed int value)
@@ -144,6 +113,20 @@ zynadd_int_parameter_changed(
     parameter_ptr->addsynth_component,
     parameter_ptr->addsynth_parameter,
     value);
+
+  return true;
+}
+
+bool
+zynadd_enum_parameter_changed(
+  void * context,
+  const char * value,
+  unsigned int value_index)
+{
+  zyn_addsynth_set_int_parameter(
+    parameter_ptr->addsynth_component,
+    parameter_ptr->addsynth_parameter,
+    value_index);
 
   return true;
 }

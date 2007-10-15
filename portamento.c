@@ -260,54 +260,6 @@ zyn_component_portamento_set_bool(
   }
 }
 
-unsigned int
-zyn_component_portamento_get_shape(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_portamento_set_shape(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_portamento_get_filter_type(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_portamento_set_filter_type(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_portamento_get_analog_filter_type(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_portamento_set_analog_filter_type(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
 #undef portamento_ptr
 
 void

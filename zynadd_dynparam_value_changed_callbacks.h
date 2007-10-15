@@ -37,19 +37,7 @@ zynadd_int_parameter_changed(
   signed int value);
 
 bool
-zynadd_shape_parameter_changed(
-  void * context,
-  const char * value,
-  unsigned int value_index);
-
-bool
-zynadd_filter_type_parameter_changed(
-  void * context,
-  const char * value,
-  unsigned int value_index);
-
-bool
-zynadd_analog_filter_type_parameter_changed(
+zynadd_enum_parameter_changed(
   void * context,
   const char * value,
   unsigned int value_index);

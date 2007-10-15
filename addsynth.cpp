@@ -558,51 +558,6 @@ zyn_addsynth_set_bool_parameter(
   return component_ptr->set_bool(component_ptr->context, parameter, value);
 }
 
-unsigned int
-zyn_addsynth_get_shape_parameter(
-  zyn_addsynth_component component)
-{
-  return component_ptr->get_shape(component_ptr->context);
-}
-
-void
-zyn_addsynth_set_shape_parameter(
-  zyn_addsynth_component component,
-  unsigned int value)
-{
-  return component_ptr->set_shape(component_ptr->context, value);
-}
-
-unsigned int
-zyn_addsynth_get_filter_type_parameter(
-  zyn_addsynth_component component)
-{
-  return component_ptr->get_filter_type(component_ptr->context);
-}
-
-void
-zyn_addsynth_set_filter_type_parameter(
-  zyn_addsynth_component component,
-  unsigned int value)
-{
-  return component_ptr->set_filter_type(component_ptr->context, value);
-}
-
-unsigned int
-zyn_addsynth_get_analog_filter_type_parameter(
-  zyn_addsynth_component component)
-{
-  return component_ptr->get_analog_filter_type(component_ptr->context);
-}
-
-void
-zyn_addsynth_set_analog_filter_type_parameter(
-  zyn_addsynth_component component,
-  unsigned int value)
-{
-  return component_ptr->set_analog_filter_type(component_ptr->context, value);
-}
-
 signed int
 zyn_addsynth_get_int_parameter(
   zyn_addsynth_component component,

@@ -109,8 +109,15 @@ zyn_component_lfo_get_int(
   void * context,
   unsigned int parameter)
 {
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_ENUM_LFO_SHAPE:
+    return lfo_params_ptr->shape;
+  }
+
+  LOG_ERROR("Unknown int LFO parameter %u", parameter);
   assert(0);
-  return 0;
+  return -1;
 }
 
 void
@@ -119,6 +126,14 @@ zyn_component_lfo_set_int(
   unsigned int parameter,
   signed int value)
 {
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_ENUM_LFO_SHAPE:
+    lfo_params_ptr->shape = value;
+    return;
+  }
+
+  LOG_ERROR("Unknown int LFO parameter %u", parameter);
   assert(0);
 }
 
@@ -162,53 +177,6 @@ zyn_component_lfo_set_bool(
     LOG_ERROR("Unknown bool LFO parameter %u", parameter);
     assert(0);
   }
-}
-
-unsigned int
-zyn_component_lfo_get_shape(
-  void * context)
-{
-  return lfo_params_ptr->shape;
-}
-
-void
-zyn_component_lfo_set_shape(
-  void * context,
-  unsigned int value)
-{
-  lfo_params_ptr->shape = value;
-}
-
-unsigned int
-zyn_component_lfo_get_filter_type(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_lfo_set_filter_type(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_lfo_get_analog_filter_type(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_lfo_set_analog_filter_type(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
 }
 
 #undef lfo_params_ptr

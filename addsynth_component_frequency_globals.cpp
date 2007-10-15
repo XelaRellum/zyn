@@ -94,54 +94,6 @@ zyn_component_frequency_globals_set_bool(
   assert(0);
 }
 
-unsigned int
-zyn_component_frequency_globals_get_shape(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_frequency_globals_set_shape(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_frequency_globals_get_filter_type(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_frequency_globals_set_filter_type(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_frequency_globals_get_analog_filter_type(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_frequency_globals_set_analog_filter_type(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
 void
 zyn_addsynth_component_init_frequency_globals(
   struct zyn_component_descriptor * component_ptr)

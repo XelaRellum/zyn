@@ -119,50 +119,18 @@ zynadd_appear_parameter(
 
     return true;
 
-  case LV2DYNPARAM_PARAMETER_TYPE_SHAPE:
+  case LV2DYNPARAM_PARAMETER_TYPE_ENUM:
     if (!lv2dynparam_plugin_param_enum_add(
           zynadd_ptr->dynparams,
           parent_group,
           parameter_ptr->name_ptr,
           parameter_ptr->hints_ptr,
-          g_shape_names,
-          ZYN_LFO_SHAPES_COUNT,
-          zyn_addsynth_get_shape_parameter(parameter_ptr->addsynth_component),
-          zynadd_shape_parameter_changed,
-          parameter_ptr,
-          &parameter_ptr->lv2parameter))
-    {
-      return false;
-    }
-
-    return true;
-  case LV2DYNPARAM_PARAMETER_TYPE_FILTER_TYPE:
-    if (!lv2dynparam_plugin_param_enum_add(
-          zynadd_ptr->dynparams,
-          parent_group,
-          parameter_ptr->name_ptr,
-          parameter_ptr->hints_ptr,
-          g_filter_type_names,
-          ZYN_FILTER_TYPES_COUNT,
-          zyn_addsynth_get_filter_type_parameter(parameter_ptr->addsynth_component),
-          zynadd_filter_type_parameter_changed,
-          parameter_ptr,
-          &parameter_ptr->lv2parameter))
-    {
-      return false;
-    }
-
-    return true;
-  case LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE:
-    if (!lv2dynparam_plugin_param_enum_add(
-          zynadd_ptr->dynparams,
-          parent_group,
-          parameter_ptr->name_ptr,
-          parameter_ptr->hints_ptr,
-          g_analog_filter_type_names,
-          ZYN_FILTER_ANALOG_TYPES_COUNT,
-          zyn_addsynth_get_analog_filter_type_parameter(parameter_ptr->addsynth_component),
-          zynadd_analog_filter_type_parameter_changed,
+          parameter_ptr->map_element_ptr->min.enum_values,
+          parameter_ptr->map_element_ptr->max.enum_values_count,
+          zyn_addsynth_get_int_parameter(
+            parameter_ptr->addsynth_component,
+            parameter_ptr->addsynth_parameter),
+          zynadd_enum_parameter_changed,
           parameter_ptr,
           &parameter_ptr->lv2parameter))
     {

@@ -160,54 +160,6 @@ zyn_component_frequency_envelope_set_bool(
   }
 }
 
-unsigned int
-zyn_component_frequency_envelope_get_shape(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_frequency_envelope_set_shape(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_frequency_envelope_get_filter_type(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_frequency_envelope_set_filter_type(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_frequency_envelope_get_analog_filter_type(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_frequency_envelope_set_analog_filter_type(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
 #undef envelope_params_ptr
 
 void

@@ -24,9 +24,7 @@
 #define LV2DYNPARAM_PARAMETER_TYPE_BOOL               1
 #define LV2DYNPARAM_PARAMETER_TYPE_FLOAT              2
 #define LV2DYNPARAM_PARAMETER_TYPE_INT                3
-#define LV2DYNPARAM_PARAMETER_TYPE_SHAPE              4
-#define LV2DYNPARAM_PARAMETER_TYPE_FILTER_TYPE        5
-#define LV2DYNPARAM_PARAMETER_TYPE_ANALOG_FILTER_TYPE 6
+#define LV2DYNPARAM_PARAMETER_TYPE_ENUM               4
 
 #define LV2DYNPARAM_PARAMETER_SCOPE_TYPE_ALWAYS          0 /* always visible, not interacting with other parameters */
 #define LV2DYNPARAM_PARAMETER_SCOPE_TYPE_SHOW_OTHER      1 /* always visible bool, when true, other param appearing */

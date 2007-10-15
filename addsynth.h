@@ -141,6 +141,10 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_BOOL_RESONANCE                         0
 #define ZYNADD_PARAMETER_BOOL_WHITE_NOISE                       1
 
+#define ZYNADD_PARAMETER_ENUM_LFO_SHAPE                      1000
+#define ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY                1001
+#define ZYNADD_PARAMETER_ENUM_ANALOG_FILTER_TYPE             1002
+
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
 
 #define ZYNADD_PARAMETER_INT_PORTAMENTO_PITCH_THRESHOLD  1 /* 0 .. 127 */
@@ -187,33 +191,6 @@ zyn_addsynth_set_bool_parameter(
   zyn_addsynth_component component,
   unsigned int parameter,
   bool value);
-
-unsigned int
-zyn_addsynth_get_shape_parameter(
-  zyn_addsynth_component component);
-
-void
-zyn_addsynth_set_shape_parameter(
-  zyn_addsynth_component component,
-  unsigned int value);
-
-unsigned int
-zyn_addsynth_get_filter_type_parameter(
-  zyn_addsynth_component component);
-
-void
-zyn_addsynth_set_filter_type_parameter(
-  zyn_addsynth_component component,
-  unsigned int value);
-
-unsigned int
-zyn_addsynth_get_analog_filter_type_parameter(
-  zyn_addsynth_component component);
-
-void
-zyn_addsynth_set_analog_filter_type_parameter(
-  zyn_addsynth_component component,
-  unsigned int value);
 
 #if 0
 { /* Adjust editor indent */

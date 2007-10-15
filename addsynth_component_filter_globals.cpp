@@ -104,6 +104,19 @@ zyn_component_filter_globals_get_int(
   void * context,
   unsigned int parameter)
 {
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_INT_STAGES:
+    return -1;
+  case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
+    return ZYN_FILTER_TYPE_ANALOG;
+  case ZYNADD_PARAMETER_ENUM_ANALOG_FILTER_TYPE:
+    return ZYN_FILTER_ANALOG_TYPE_LPF1;
+  }
+
+  LOG_ERROR("Unknown int filter parameter %u", parameter);
+  assert(0);
+
   return -1;
 }
 
@@ -113,6 +126,17 @@ zyn_component_filter_globals_set_int(
   unsigned int parameter,
   signed int value)
 {
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_INT_STAGES:
+    return;
+  case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
+    return;
+  case ZYNADD_PARAMETER_ENUM_ANALOG_FILTER_TYPE:
+    return;
+  }
+
+  LOG_ERROR("Unknown int filter parameter %u", parameter);
   assert(0);
 }
 
@@ -130,51 +154,6 @@ zyn_component_filter_globals_set_bool(
   void * context,
   unsigned int parameter,
   bool value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_filter_globals_get_shape(
-  void * context)
-{
-  assert(0);
-  return 0;
-}
-
-void
-zyn_component_filter_globals_set_shape(
-  void * context,
-  unsigned int value)
-{
-  assert(0);
-}
-
-unsigned int
-zyn_component_filter_globals_get_filter_type(
-  void * context)
-{
-  return ZYN_FILTER_TYPE_ANALOG;
-}
-
-void
-zyn_component_filter_globals_set_filter_type(
-  void * context,
-  unsigned int value)
-{
-}
-
-unsigned int
-zyn_component_filter_globals_get_analog_filter_type(
-  void * context)
-{
-  return ZYN_FILTER_ANALOG_TYPE_LPF1;
-}
-
-void
-zyn_component_filter_globals_set_analog_filter_type(
-  void * context,
-  unsigned int value)
 {
   assert(0);
 }
