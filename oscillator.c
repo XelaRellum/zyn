@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 
 #include "globals.h"
 #include "fft.h"
@@ -341,47 +342,49 @@ zyn_addsynth_oscillator_get_base_function(
   
     switch (oscillator_ptr->Pcurrentbasefunc)
     {
-    case 1:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_SINE:
+      samples[i] = -sin(2.0 * PI * i / OSCIL_SIZE);
+    case ZYN_OSCILLATOR_BASE_FUNCTION_TRIANGLE:
       samples[i] = zyn_addsynth_oscillator_base_function_triangle(t, par);
       break;
-    case 2:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_PULSE:
       samples[i] = zyn_addsynth_oscillator_base_function_pulse(t, par);
       break;
-    case 3:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_SAW:
       samples[i] = zyn_addsynth_oscillator_base_function_saw(t, par);
       break;
-    case 4:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_POWER:
       samples[i] = zyn_addsynth_oscillator_base_function_power(t, par);
       break;
-    case 5:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_GAUSS:
       samples[i] = zyn_addsynth_oscillator_base_function_gauss(t, par);
       break;
-    case 6:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_DIODE:
       samples[i] = zyn_addsynth_oscillator_base_function_diode(t, par);
       break;
-    case 7:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_ABS_SINE:
       samples[i] = zyn_addsynth_oscillator_base_function_abssine(t, par);
       break;
-    case 8:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_PULSE_SINE:
       samples[i] = zyn_addsynth_oscillator_base_function_pulsesine(t, par);
       break;
-    case 9:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_STRETCH_SINE:
       samples[i] = zyn_addsynth_oscillator_base_function_stretchsine(t, par);
       break;
-    case 10:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_CHIRP:
       samples[i] = zyn_addsynth_oscillator_base_function_chirp(t, par);
       break;
-    case 11:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_ABS_STRETCH_SINE:
       samples[i] = zyn_addsynth_oscillator_base_function_absstretchsine(t, par);
       break;
-    case 12:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_CHEBYSHEV:
       samples[i] = zyn_addsynth_oscillator_base_function_chebyshev(t, par);
       break;
-    case 13:
+    case ZYN_OSCILLATOR_BASE_FUNCTION_SQRT:
       samples[i] = zyn_addsynth_oscillator_base_function_sqr(t, par);
       break;
     default:
-      samples[i] = -sin(2.0 * PI * i / OSCIL_SIZE);
+      assert(0);
     }
   }
 }
