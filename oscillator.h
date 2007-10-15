@@ -23,9 +23,9 @@
 #ifndef OSCIL_GEN_H
 #define OSCIL_GEN_H
 
-#define ZYN_ADDSYNTH_OSCILLATOR_EXTRA_POINTS 2
+#define ZYN_OSCILLATOR_EXTRA_POINTS 2
 
-struct zyn_addsynth_oscillator
+struct zyn_oscillator
 {
   //Parameters
       
@@ -102,7 +102,7 @@ struct zyn_addsynth_oscillator
   
   unsigned int randseed;
 
-  float modulation_temp[OSCIL_SIZE + ZYN_ADDSYNTH_OSCILLATOR_EXTRA_POINTS];
+  float modulation_temp[OSCIL_SIZE + ZYN_OSCILLATOR_EXTRA_POINTS];
 };
 
 #ifdef __cplusplus
@@ -113,8 +113,8 @@ extern "C" {
 #endif
 
 void
-zyn_addsynth_oscillator_init(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_init(
+  struct zyn_oscillator * oscillator_ptr,
   float sample_rate,
   zyn_fft_handle fft,
   struct zyn_resonance * resonance_ptr,
@@ -122,14 +122,14 @@ zyn_addsynth_oscillator_init(
   struct zyn_fft_freqs * oscillator_fft_frequencies_ptr);
 
 void
-zyn_addsynth_oscillator_uninit(
-  struct zyn_addsynth_oscillator * oscillator_ptr);
+zyn_oscillator_uninit(
+  struct zyn_oscillator * oscillator_ptr);
 
 // makes a new random seed for Amplitude Randomness
 // this should be called every note on event
 void
-zyn_addsynth_oscillator_new_rand_seed(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_new_rand_seed(
+  struct zyn_oscillator * oscillator_ptr,
   unsigned int randseed);
 
 // do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT
@@ -137,8 +137,8 @@ zyn_addsynth_oscillator_new_rand_seed(
 //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
 short
-zyn_addsynth_oscillator_get(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_get(
+  struct zyn_oscillator * oscillator_ptr,
   zyn_sample_type *smps,
   float freqHz,
   bool resonance);

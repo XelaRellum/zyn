@@ -101,7 +101,7 @@ struct zyn_addnote_voice_parameters
   unsigned char Pfilterbypass;
 
   /* Voice oscillator */
-  struct zyn_addsynth_oscillator oscillator;
+  struct zyn_oscillator oscillator;
 
   /**********************************
    *     FREQUENCY PARAMETERS        *
@@ -189,7 +189,7 @@ struct zyn_addnote_voice_parameters
   short int PFMVoice;
 
   /* Modullator oscillator */
-  struct zyn_addsynth_oscillator modulator_oscillator;
+  struct zyn_oscillator modulator_oscillator;
 
   /* Modullator Volume */
   unsigned char PFMVolume;

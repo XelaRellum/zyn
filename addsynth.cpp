@@ -87,7 +87,7 @@ zyn_addsynth_create(
 
   for (voice_index = 0 ; voice_index < voices_count ; voice_index++)
   {
-    zyn_addsynth_oscillator_init(
+    zyn_oscillator_init(
       &zyn_addsynth_ptr->voices_params_ptr[voice_index].oscillator,
       sample_rate,
       zyn_addsynth_ptr->fft,
@@ -95,7 +95,7 @@ zyn_addsynth_create(
       zyn_addsynth_ptr->temporary_samples_ptr,
       &zyn_addsynth_ptr->oscillator_fft_frequencies);
 
-    zyn_addsynth_oscillator_init(
+    zyn_oscillator_init(
       &zyn_addsynth_ptr->voices_params_ptr[voice_index].modulator_oscillator,
       sample_rate,
       zyn_addsynth_ptr->fft,
@@ -468,8 +468,8 @@ zyn_addsynth_destroy(
 
   for (voice_index = 0 ; voice_index < zyn_addsynth_ptr->voices_count ; voice_index++)
   {
-    zyn_addsynth_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].oscillator);
-    zyn_addsynth_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].modulator_oscillator);
+    zyn_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].oscillator);
+    zyn_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].modulator_oscillator);
   }
 
   // ADnoteParameters temp end

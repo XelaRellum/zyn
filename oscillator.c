@@ -33,14 +33,14 @@
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_pulse(float x, float a)
+zyn_oscillator_base_function_pulse(float x, float a)
 {
   return (fmod(x, 1.0) < a) ? -1.0 : 1.0;
 }
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_saw(float x, float a)
+zyn_oscillator_base_function_saw(float x, float a)
 {
   if (a < 0.00001)
   {
@@ -64,7 +64,7 @@ zyn_addsynth_oscillator_base_function_saw(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_triangle(float x, float a)
+zyn_oscillator_base_function_triangle(float x, float a)
 {
   x = fmod(x + 0.25, 1);
   a = 1 - a;
@@ -100,7 +100,7 @@ zyn_addsynth_oscillator_base_function_triangle(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_power(float x, float a)
+zyn_oscillator_base_function_power(float x, float a)
 {
   x=fmod(x,1);
   if (a<0.00001) a=0.00001;
@@ -110,7 +110,7 @@ zyn_addsynth_oscillator_base_function_power(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_gauss(float x, float a)
+zyn_oscillator_base_function_gauss(float x, float a)
 {
   x = fmod(x, 1) * 2.0 - 1.0;
 
@@ -124,7 +124,7 @@ zyn_addsynth_oscillator_base_function_gauss(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_diode(float x, float a)
+zyn_oscillator_base_function_diode(float x, float a)
 {
   if (a < 0.00001)
   {
@@ -148,7 +148,7 @@ zyn_addsynth_oscillator_base_function_diode(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_abssine(float x, float a)
+zyn_oscillator_base_function_abssine(float x, float a)
 {
   x = fmod(x, 1);
   if (a < 0.00001)
@@ -165,7 +165,7 @@ zyn_addsynth_oscillator_base_function_abssine(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_pulsesine(float x, float a)
+zyn_oscillator_base_function_pulsesine(float x, float a)
 {
   if (a < 0.00001)
   {
@@ -190,7 +190,7 @@ zyn_addsynth_oscillator_base_function_pulsesine(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_stretchsine(float x, float a)
+zyn_oscillator_base_function_stretchsine(float x, float a)
 {
   float b;
 
@@ -217,7 +217,7 @@ zyn_addsynth_oscillator_base_function_stretchsine(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_chirp(float x, float a)
+zyn_oscillator_base_function_chirp(float x, float a)
 {
   x = fmod(x, 1.0) * 2.0 * PI;
 
@@ -235,7 +235,7 @@ zyn_addsynth_oscillator_base_function_chirp(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_absstretchsine(float x, float a)
+zyn_oscillator_base_function_absstretchsine(float x, float a)
 {
   float b;
 
@@ -255,7 +255,7 @@ zyn_addsynth_oscillator_base_function_absstretchsine(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_chebyshev(float x, float a)
+zyn_oscillator_base_function_chebyshev(float x, float a)
 {
   a = a * a * a * 30.0 + 1.0;
 
@@ -264,7 +264,7 @@ zyn_addsynth_oscillator_base_function_chebyshev(float x, float a)
 
 static
 zyn_sample_type
-zyn_addsynth_oscillator_base_function_sqr(float x, float a)
+zyn_oscillator_base_function_sqr(float x, float a)
 {
   a = a * a * a  * a * 160.0 + 0.001;
 
@@ -275,8 +275,8 @@ zyn_addsynth_oscillator_base_function_sqr(float x, float a)
  * Get the base function
  */
 void
-zyn_addsynth_oscillator_get_base_function(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_get_base_function(
+  struct zyn_oscillator * oscillator_ptr,
   zyn_sample_type * samples)
 {
   int i;    
@@ -345,43 +345,43 @@ zyn_addsynth_oscillator_get_base_function(
     case ZYN_OSCILLATOR_BASE_FUNCTION_SINE:
       samples[i] = -sin(2.0 * PI * i / OSCIL_SIZE);
     case ZYN_OSCILLATOR_BASE_FUNCTION_TRIANGLE:
-      samples[i] = zyn_addsynth_oscillator_base_function_triangle(t, par);
+      samples[i] = zyn_oscillator_base_function_triangle(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_PULSE:
-      samples[i] = zyn_addsynth_oscillator_base_function_pulse(t, par);
+      samples[i] = zyn_oscillator_base_function_pulse(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_SAW:
-      samples[i] = zyn_addsynth_oscillator_base_function_saw(t, par);
+      samples[i] = zyn_oscillator_base_function_saw(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_POWER:
-      samples[i] = zyn_addsynth_oscillator_base_function_power(t, par);
+      samples[i] = zyn_oscillator_base_function_power(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_GAUSS:
-      samples[i] = zyn_addsynth_oscillator_base_function_gauss(t, par);
+      samples[i] = zyn_oscillator_base_function_gauss(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_DIODE:
-      samples[i] = zyn_addsynth_oscillator_base_function_diode(t, par);
+      samples[i] = zyn_oscillator_base_function_diode(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_ABS_SINE:
-      samples[i] = zyn_addsynth_oscillator_base_function_abssine(t, par);
+      samples[i] = zyn_oscillator_base_function_abssine(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_PULSE_SINE:
-      samples[i] = zyn_addsynth_oscillator_base_function_pulsesine(t, par);
+      samples[i] = zyn_oscillator_base_function_pulsesine(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_STRETCH_SINE:
-      samples[i] = zyn_addsynth_oscillator_base_function_stretchsine(t, par);
+      samples[i] = zyn_oscillator_base_function_stretchsine(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_CHIRP:
-      samples[i] = zyn_addsynth_oscillator_base_function_chirp(t, par);
+      samples[i] = zyn_oscillator_base_function_chirp(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_ABS_STRETCH_SINE:
-      samples[i] = zyn_addsynth_oscillator_base_function_absstretchsine(t, par);
+      samples[i] = zyn_oscillator_base_function_absstretchsine(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_CHEBYSHEV:
-      samples[i] = zyn_addsynth_oscillator_base_function_chebyshev(t, par);
+      samples[i] = zyn_oscillator_base_function_chebyshev(t, par);
       break;
     case ZYN_OSCILLATOR_BASE_FUNCTION_SQRT:
-      samples[i] = zyn_addsynth_oscillator_base_function_sqr(t, par);
+      samples[i] = zyn_oscillator_base_function_sqr(t, par);
       break;
     default:
       assert(0);
@@ -392,8 +392,8 @@ zyn_addsynth_oscillator_get_base_function(
 /* Shift the harmonics */
 static
 void
-zyn_addsynth_oscillator_shift_harmonics(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_shift_harmonics(
+  struct zyn_oscillator * oscillator_ptr)
 {
   int i;
   REALTYPE hc,hs;
@@ -466,14 +466,14 @@ zyn_addsynth_oscillator_shift_harmonics(
  */
 static
 void
-zyn_addsynth_oscillator_change_base_function(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_change_base_function(
+  struct zyn_oscillator * oscillator_ptr)
 {
   int i;
 
   if (oscillator_ptr->Pcurrentbasefunc != 0)
   {
-    zyn_addsynth_oscillator_get_base_function(oscillator_ptr, oscillator_ptr->temporary_samples_ptr);
+    zyn_oscillator_get_base_function(oscillator_ptr, oscillator_ptr->temporary_samples_ptr);
     zyn_fft_smps2freqs(oscillator_ptr->fft, oscillator_ptr->temporary_samples_ptr, &oscillator_ptr->basefuncFFTfreqs);
     oscillator_ptr->basefuncFFTfreqs.c[0] = 0.0;
   }
@@ -497,7 +497,7 @@ zyn_addsynth_oscillator_change_base_function(
 }
 
 void
-zyn_addsynth_oscillator_waveshape_samples(
+zyn_oscillator_waveshape_samples(
   int n,
   zyn_sample_type *smps,
   unsigned char type,
@@ -761,8 +761,8 @@ zyn_addsynth_oscillator_waveshape_samples(
  */
 static
 void
-zyn_addsynth_oscillator_waveshape(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_waveshape(
+  struct zyn_oscillator * oscillator_ptr)
 {
   int i;
   float tmp;
@@ -814,7 +814,7 @@ zyn_addsynth_oscillator_waveshape(
   }
 
   // Do the waveshaping
-  zyn_addsynth_oscillator_waveshape_samples(
+  zyn_oscillator_waveshape_samples(
     OSCIL_SIZE,
     oscillator_ptr->temporary_samples_ptr,
     oscillator_ptr->Pwaveshapingfunction,
@@ -830,8 +830,8 @@ zyn_addsynth_oscillator_waveshape(
 //Filter the oscillator accotding to Pfiltertype and Pfilterpar
 static
 void
-zyn_addsynth_oscillator_filter(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_filter(
+  struct zyn_oscillator * oscillator_ptr)
 {
   REALTYPE par;
   REALTYPE par2;
@@ -991,8 +991,8 @@ zyn_addsynth_oscillator_filter(
  */
 static
 void
-zyn_addsynth_oscillator_modulation(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_modulation(
+  struct zyn_oscillator * oscillator_ptr)
 {
   int i;
   float modulationpar1;
@@ -1074,7 +1074,7 @@ zyn_addsynth_oscillator_modulation(
     oscillator_ptr->modulation_temp[i] = oscillator_ptr->temporary_samples_ptr[i] * max;
   }
 
-  for (i = 0 ; i < ZYN_ADDSYNTH_OSCILLATOR_EXTRA_POINTS ; i++)
+  for (i = 0 ; i < ZYN_OSCILLATOR_EXTRA_POINTS ; i++)
   {
     oscillator_ptr->modulation_temp[i + OSCIL_SIZE] = oscillator_ptr->temporary_samples_ptr[i] * max;
   }
@@ -1117,8 +1117,8 @@ zyn_addsynth_oscillator_modulation(
  */
 static
 void
-zyn_addsynth_oscillator_spectrum_adjust(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_spectrum_adjust(
+  struct zyn_oscillator * oscillator_ptr)
 {
   float par;
   int i;
@@ -1204,8 +1204,8 @@ zyn_addsynth_oscillator_spectrum_adjust(
  */
 static
 void
-zyn_addsynth_oscillator_prepare(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_prepare(
+  struct zyn_oscillator * oscillator_ptr)
 {
   int i, j, k;
   REALTYPE a, b, c, d, hmagnew;
@@ -1217,7 +1217,7 @@ zyn_addsynth_oscillator_prepare(
       (oscillator_ptr->oldbasefuncmodulationpar2 != oscillator_ptr->Pbasefuncmodulationpar2) ||
       (oscillator_ptr->oldbasefuncmodulationpar3 != oscillator_ptr->Pbasefuncmodulationpar3))
   { 
-    zyn_addsynth_oscillator_change_base_function(oscillator_ptr);
+    zyn_oscillator_change_base_function(oscillator_ptr);
   }
 
   for (i = 0 ; i < MAX_AD_HARMONICS ; i++)
@@ -1307,26 +1307,26 @@ zyn_addsynth_oscillator_prepare(
 
   if (oscillator_ptr->Pharmonicshiftfirst != 0)
   {
-    zyn_addsynth_oscillator_shift_harmonics(oscillator_ptr);
+    zyn_oscillator_shift_harmonics(oscillator_ptr);
   }
 
   if (oscillator_ptr->Pfilterbeforews == 0)
   {
-    zyn_addsynth_oscillator_waveshape(oscillator_ptr);
-    zyn_addsynth_oscillator_filter(oscillator_ptr);
+    zyn_oscillator_waveshape(oscillator_ptr);
+    zyn_oscillator_filter(oscillator_ptr);
   }
   else
   {
-    zyn_addsynth_oscillator_filter(oscillator_ptr);
-    zyn_addsynth_oscillator_waveshape(oscillator_ptr);
+    zyn_oscillator_filter(oscillator_ptr);
+    zyn_oscillator_waveshape(oscillator_ptr);
   }
 
-  zyn_addsynth_oscillator_modulation(oscillator_ptr);
-  zyn_addsynth_oscillator_spectrum_adjust(oscillator_ptr);
+  zyn_oscillator_modulation(oscillator_ptr);
+  zyn_oscillator_spectrum_adjust(oscillator_ptr);
 
   if (oscillator_ptr->Pharmonicshiftfirst == 0)
   {
-    zyn_addsynth_oscillator_shift_harmonics(oscillator_ptr);
+    zyn_oscillator_shift_harmonics(oscillator_ptr);
   }
 
   oscillator_ptr->oscilFFTfreqs.c[0] = 0.0;
@@ -1339,8 +1339,8 @@ zyn_addsynth_oscillator_prepare(
 
 static
 void
-zyn_addsynth_oscillator_defaults(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_defaults(
+  struct zyn_oscillator * oscillator_ptr)
 {
   int i;
 
@@ -1423,12 +1423,12 @@ zyn_addsynth_oscillator_defaults(
   oscillator_ptr->oldfilterpars = 0;
   oscillator_ptr->oldsapars = 0;
 
-  zyn_addsynth_oscillator_prepare(oscillator_ptr);
+  zyn_oscillator_prepare(oscillator_ptr);
 }
 
 void
-zyn_addsynth_oscillator_init(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_init(
+  struct zyn_oscillator * oscillator_ptr,
   float sample_rate,
   zyn_fft_handle fft,
   struct zyn_resonance * resonance_ptr,
@@ -1449,20 +1449,20 @@ zyn_addsynth_oscillator_init(
   oscillator_ptr->randseed = 1;
   oscillator_ptr->ADvsPAD = false;
 
-  zyn_addsynth_oscillator_defaults(oscillator_ptr);
+  zyn_oscillator_defaults(oscillator_ptr);
 }
 
 void
-zyn_addsynth_oscillator_uninit(
-  struct zyn_addsynth_oscillator * oscillator_ptr)
+zyn_oscillator_uninit(
+  struct zyn_oscillator * oscillator_ptr)
 {
   zyn_fft_freqs_uninit(&oscillator_ptr->basefuncFFTfreqs);
   zyn_fft_freqs_uninit(&oscillator_ptr->oscilFFTfreqs);
 }
 
 void
-zyn_addsynth_oscillator_new_rand_seed(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_new_rand_seed(
+  struct zyn_oscillator * oscillator_ptr,
   unsigned int randseed)
 {
   oscillator_ptr->randseed = randseed;
@@ -1470,8 +1470,8 @@ zyn_addsynth_oscillator_new_rand_seed(
 
 static
 void
-zyn_addsynth_oscillator_adaptive_harmonic(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_adaptive_harmonic(
+  struct zyn_oscillator * oscillator_ptr,
   struct zyn_fft_freqs * freqs_ptr,
   float freq)
 {
@@ -1588,8 +1588,8 @@ zyn_addsynth_oscillator_adaptive_harmonic(
 
 static
 void
-zyn_addsynth_oscillator_adaptive_harmonic_post_process(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_adaptive_harmonic_post_process(
+  struct zyn_oscillator * oscillator_ptr,
   float *f,
   int size)
 {
@@ -1654,8 +1654,8 @@ zyn_addsynth_oscillator_adaptive_harmonic_post_process(
  * Get the oscillator function
  */
 short
-zyn_addsynth_oscillator_get(
-  struct zyn_addsynth_oscillator * oscillator_ptr,
+zyn_oscillator_get(
+  struct zyn_oscillator * oscillator_ptr,
   zyn_sample_type *smps,
   float freqHz,
   bool resonance)
@@ -1730,7 +1730,7 @@ zyn_addsynth_oscillator_get(
     
   if (!oscillator_ptr->prepared)
   {
-    zyn_addsynth_oscillator_prepare(oscillator_ptr);
+    zyn_oscillator_prepare(oscillator_ptr);
   }
 
   outpos = (int)((RND * 2.0 - 1.0) * (float)OSCIL_SIZE * (oscillator_ptr->Prand - 64.0) / 64.0);
@@ -1768,9 +1768,9 @@ zyn_addsynth_oscillator_get(
     oscillator_ptr->oscillator_fft_frequencies_ptr->s[i] = oscillator_ptr->oscilFFTfreqs.s[i];
   }
 
-  zyn_addsynth_oscillator_adaptive_harmonic(oscillator_ptr, oscillator_ptr->oscillator_fft_frequencies_ptr, freqHz);
-  zyn_addsynth_oscillator_adaptive_harmonic_post_process(oscillator_ptr, &oscillator_ptr->oscillator_fft_frequencies_ptr->c[1], OSCIL_SIZE / 2 - 1);
-  zyn_addsynth_oscillator_adaptive_harmonic_post_process(oscillator_ptr, &oscillator_ptr->oscillator_fft_frequencies_ptr->s[1], OSCIL_SIZE / 2 - 1);
+  zyn_oscillator_adaptive_harmonic(oscillator_ptr, oscillator_ptr->oscillator_fft_frequencies_ptr, freqHz);
+  zyn_oscillator_adaptive_harmonic_post_process(oscillator_ptr, &oscillator_ptr->oscillator_fft_frequencies_ptr->c[1], OSCIL_SIZE / 2 - 1);
+  zyn_oscillator_adaptive_harmonic_post_process(oscillator_ptr, &oscillator_ptr->oscillator_fft_frequencies_ptr->s[1], OSCIL_SIZE / 2 - 1);
 
   nyquist = realnyquist;
 

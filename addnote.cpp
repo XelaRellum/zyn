@@ -150,7 +150,7 @@ ADnote::note_on(
 
   for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
-    zyn_addsynth_oscillator_new_rand_seed(
+    zyn_oscillator_new_rand_seed(
       &m_synth_ptr->voices_params_ptr[voice_index].oscillator,
       rand());
     m_voices_ptr[voice_index].OscilSmp=NULL;
@@ -227,13 +227,13 @@ ADnote::note_on(
 
     if (!random_grouping)
     {
-      zyn_addsynth_oscillator_new_rand_seed(
+      zyn_oscillator_new_rand_seed(
         &m_synth_ptr->voices_params_ptr[vc].oscillator,
         rand());
     }
 
     m_osc_pos_hi_ptr[voice_index] =
-      zyn_addsynth_oscillator_get(
+      zyn_oscillator_get(
         &m_synth_ptr->voices_params_ptr[vc].oscillator,
         m_voices_ptr[voice_index].OscilSmp,
         getvoicebasefreq(voice_index),
@@ -423,7 +423,7 @@ ADnote::note_on(
     /* Voice Modulation Parameters Init */
     if (m_voices_ptr[voice_index].fm_type != ZYN_FM_TYPE_NONE && m_voices_ptr[voice_index].FMVoice < 0)
     {
-      zyn_addsynth_oscillator_new_rand_seed(
+      zyn_oscillator_new_rand_seed(
         &m_synth_ptr->voices_params_ptr[voice_index].modulator_oscillator,
         rand());
 
@@ -444,13 +444,13 @@ ADnote::note_on(
 
       if (!random_grouping)
       {
-        zyn_addsynth_oscillator_new_rand_seed(
+        zyn_oscillator_new_rand_seed(
           &m_synth_ptr->voices_params_ptr[vc].modulator_oscillator,
           rand());
       }
 
       m_osc_pos_hi_FM_ptr[voice_index] = m_osc_pos_hi_ptr[voice_index];
-      m_osc_pos_hi_FM_ptr[voice_index] += zyn_addsynth_oscillator_get(
+      m_osc_pos_hi_FM_ptr[voice_index] += zyn_oscillator_get(
         &m_synth_ptr->voices_params_ptr[vc].modulator_oscillator,
         m_voices_ptr[voice_index].FMSmp,
         tmp,
