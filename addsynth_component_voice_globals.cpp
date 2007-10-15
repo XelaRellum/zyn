@@ -51,10 +51,11 @@ zyn_component_voice_globals_get_float(
 {
   switch (parameter)
   {
-  default:
-    LOG_ERROR("Unknown frequency envelope parameter %u", parameter);
-    assert(0);
   }
+
+  LOG_ERROR("Unknown voice global float parameter %u", parameter);
+  assert(0);
+  return 0.0;
 }
 
 void
@@ -65,10 +66,10 @@ zyn_component_voice_globals_set_float(
 {
   switch (parameter)
   {
-  default:
-    LOG_ERROR("Unknown frequency envelope parameter %u", parameter);
-    assert(0);
   }
+
+  LOG_ERROR("Unknown voice global float parameter %u", parameter);
+  assert(0);
 }
 
 signed int
@@ -76,6 +77,11 @@ zyn_component_voice_globals_get_int(
   void * context,
   unsigned int parameter)
 {
+  switch (parameter)
+  {
+  }
+
+  LOG_ERROR("Unknown voice global int/enum parameter %u", parameter);
   assert(0);
   return 0;
 }
@@ -86,6 +92,11 @@ zyn_component_voice_globals_set_int(
   unsigned int parameter,
   signed int value)
 {
+  switch (parameter)
+  {
+  }
+
+  LOG_ERROR("Unknown voice global int/enum parameter %u", parameter);
   assert(0);
 }
 
@@ -100,10 +111,11 @@ zyn_component_voice_globals_get_bool(
     return voice_params_ptr->resonance;
   case ZYNADD_PARAMETER_BOOL_WHITE_NOISE:
     return voice_params_ptr->white_noise;
-  default:
-    LOG_ERROR("Unknown bool voice global parameter %u", parameter);
-    assert(0);
   }
+
+  LOG_ERROR("Unknown voice global bool parameter %u", parameter);
+  assert(0);
+  return false;
 }
 
 void
@@ -122,10 +134,10 @@ zyn_component_voice_globals_set_bool(
     LOG_DEBUG("voice white noise -> %s (%p)", value ? "on" : "off", voice_params_ptr);
     voice_params_ptr->white_noise = value;
     return;
-  default:
-    LOG_ERROR("Unknown bool voice global parameter %u", parameter);
-    assert(0);
   }
+
+  LOG_ERROR("Unknown voice global bool parameter %u", parameter);
+  assert(0);
 }
 
 #undef voice_params_ptr
