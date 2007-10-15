@@ -60,12 +60,12 @@ void
 zyn_fft_smps2freqs(
   zyn_fft_handle handle,
   REALTYPE * smps,
-  struct zyn_fft_freqs freqs);
+  struct zyn_fft_freqs * freqs_ptr);
 
 void
 zyn_fft_freqs2smps(
   zyn_fft_handle handle,
-  struct zyn_fft_freqs freqs,
+  struct zyn_fft_freqs * freqs_ptr,
   REALTYPE * smps);
 
 #if 0

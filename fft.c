@@ -98,7 +98,7 @@ void
 zyn_fft_smps2freqs(
   zyn_fft_handle handle,
   REALTYPE * smps,
-  struct zyn_fft_freqs freqs)
+  struct zyn_fft_freqs * freqs_ptr)
 {
   int i;
   fftw_real * tmp_data_ptr;
@@ -118,10 +118,10 @@ zyn_fft_smps2freqs(
 
   for (i = 0 ; i < fft_ptr->size / 2 ; i++)
   {
-    freqs.c[i] = tmp_data_ptr[i];
+    freqs_ptr->c[i] = tmp_data_ptr[i];
     if (i != 0)
     {
-      freqs.s[i] = tmp_data_ptr[fft_ptr->size - i];
+      freqs_ptr->s[i] = tmp_data_ptr[fft_ptr->size - i];
     }
   }
 
@@ -134,7 +134,7 @@ zyn_fft_smps2freqs(
 void
 zyn_fft_freqs2smps(
   zyn_fft_handle handle,
-  struct zyn_fft_freqs freqs,
+  struct zyn_fft_freqs * freqs_ptr,
   REALTYPE * smps)
 {
   int i;
@@ -150,10 +150,10 @@ zyn_fft_freqs2smps(
 
   for (i = 0 ; i < fft_ptr->size / 2 ; i++)
   {
-    tmp_data_ptr[i] = freqs.c[i];
+    tmp_data_ptr[i] = freqs_ptr->c[i];
     if (i != 0)
     {
-      tmp_data_ptr[fft_ptr->size - i] = freqs.s[i];
+      tmp_data_ptr[fft_ptr->size - i] = freqs_ptr->s[i];
     }
   }
 

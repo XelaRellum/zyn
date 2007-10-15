@@ -24,18 +24,49 @@
 
 #define N_RES_POINTS 256
 
-class Resonance
+struct zyn_resonance
 {
-public:
-  Resonance();
-  ~Resonance();
+  bool enabled;                 // whether resonance is enabled  
+  unsigned char points[N_RES_POINTS]; // how many points define the resonance function
+  unsigned char maxdB;          // how many dB the signal may be amplified
+  unsigned char centerfreq;     // the center frequency of the res. func.
+  unsigned char octavesfreq;    // and the number of octaves
+  unsigned char protectthefundamental; // the fundamental (1-st harmonic) is not damped, even it resonance function is low
+
+  float center;                 // center frequency(relative)
+  float bw;                     // bandwidth(relative)
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#if 0
+} /* Adjust editor indent */
+#endif
+
+void
+zyn_resonance_init(
+  struct zyn_resonance * resonance_ptr);
+
+void
+zyn_resonance_apply(
+  struct zyn_resonance * resonance_ptr,
+  int n,
+  struct zyn_fft_freqs * fftdata_ptr,
+  float freq);
+
+#if 0
+{ /* Adjust editor indent */
+#endif
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#if 0
   void setpoint(int n,unsigned char p);
-  void applyres(int n, struct zyn_fft_freqs fftdata, REALTYPE freq);
   void smooth();
   void interpolatepeaks(int type);
   void randomize(int type);
-
-  void defaults();
 
 
   REALTYPE getfreqpos(REALTYPE freq);
@@ -46,19 +77,6 @@ public:
 
   void set_center(float center);
   void set_badnwidth(float bandwidth);
-
-  //parameters
-  unsigned char Penabled;     //if the ressonance is enabled  
-  unsigned char Prespoints[N_RES_POINTS]; //how many points define the resonance function
-  unsigned char PmaxdB;     //how many dB the signal may be amplified
-  unsigned char Pcenterfreq,Poctavesfreq;     //the center frequency of the res. func., and the number of octaves
-  unsigned char Pprotectthefundamental;       //the fundamental (1-st harmonic) is not damped, even it resonance function is low
-
-  //controllers
-  REALTYPE ctlcenter;//center frequency(relative)
-  REALTYPE ctlbw;//bandwidth(relative)
-    
-private:
-};
+#endif
 
 #endif

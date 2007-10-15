@@ -20,14 +20,1880 @@
 
 */
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "globals.h"
-#include "resonance.h"
 #include "fft.h"
+#include "resonance.h"
 #include "oscillator.h"
+#include "log.h"
 
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_pulse(float x, float a)
+{
+  return (fmod(x, 1.0) < a) ? -1.0 : 1.0;
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_saw(float x, float a)
+{
+  if (a < 0.00001)
+  {
+    a = 0.00001;
+  }
+  else if (a > 0.99999)
+  {
+    a = 0.99999;
+  }
+
+  x = fmod(x, 1);
+  if (x < a)
+  {
+    return x / a * 2.0 - 1.0;
+  }
+  else
+  {
+    return (1.0 - x) / (1.0 - a) * 2.0 - 1.0;
+  }
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_triangle(float x, float a)
+{
+  x = fmod(x + 0.25, 1);
+  a = 1 - a;
+
+  if (a < 0.00001)
+  {
+    a = 0.00001;
+  }
+
+  if (x < 0.5)
+  {
+    x = x * 4 - 1.0;
+  }
+  else
+  {
+    x = (1.0 - x) * 4 - 1.0;
+  }
+
+  x /= -a;
+
+  if (x <- 1.0)
+  {
+    x = -1.0;
+  }
+
+  if (x > 1.0)
+  {
+    x = 1.0;
+  }
+
+  return x;
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_power(float x, float a)
+{
+  x=fmod(x,1);
+  if (a<0.00001) a=0.00001;
+  else if (a>0.99999) a=0.99999;
+  return(pow(x,exp((a-0.5)*10.0))*2.0-1.0);
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_gauss(float x, float a)
+{
+  x = fmod(x, 1) * 2.0 - 1.0;
+
+  if (a < 0.00001)
+  {
+    a = 0.00001;
+  }
+
+  return exp(-x * x * (exp(a * 8) + 5.0)) * 2.0 - 1.0;
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_diode(float x, float a)
+{
+  if (a < 0.00001)
+  {
+    a = 0.00001;
+  }
+  else if (a > 0.99999)
+  {
+    a = 0.99999;
+  }
+
+  a = a * 2.0 - 1.0;
+  x = cos((x + 0.5) * 2.0 * PI) - a;
+
+  if (x < 0.0)
+  {
+    x = 0.0;
+  }
+
+  return x / (1.0 - a) * 2 - 1.0;
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_abssine(float x, float a)
+{
+  x = fmod(x, 1);
+  if (a < 0.00001)
+  {
+    a = 0.00001;
+  }
+  else if (a > 0.99999)
+  {
+    a = 0.99999;
+  }
+
+  return sin(pow(x, exp((a - 0.5) * 5.0)) * PI) * 2.0 - 1.0;
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_pulsesine(float x, float a)
+{
+  if (a < 0.00001)
+  {
+    a = 0.00001;
+  }
+
+  x = (fmod(x, 1) - 0.5) * exp((a - 0.5) * log(128));
+
+  if (x < -0.5)
+  {
+    x = -0.5;
+  }
+  else if (x > 0.5)
+  {
+    x = 0.5;
+  }
+
+  x = sin(x * PI * 2.0);
+
+  return x;
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_stretchsine(float x, float a)
+{
+  float b;
+
+  x = fmod(x + 0.5, 1) * 2.0 - 1.0;
+
+  a = (a - 0.5) * 4;
+
+  if (a > 0.0)
+  {
+    a *= 2;
+  }
+
+  a = pow(3.0, a);
+
+  b = pow(fabs(x), a);
+
+  if (x < 0)
+  {
+    b = -b;
+  }
+
+  return -sin(b * PI);
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_chirp(float x, float a)
+{
+  x = fmod(x, 1.0) * 2.0 * PI;
+
+  a = (a - 0.5) * 4;
+
+  if (a < 0.0)
+  {
+    a *= 2.0;
+  }
+
+  a = pow(3.0, a);
+
+  return sin(x / 2.0) * sin(a * x * x);
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_absstretchsine(float x, float a)
+{
+  float b;
+
+  x = fmod(x + 0.5,1) * 2.0 - 1.0;
+  a = (a - 0.5) * 9;
+  a = pow(3.0, a);
+
+  b = pow(fabs(x), a);
+
+  if (x < 0)
+  {
+    b = -b;
+  }
+
+  return -pow(sin(b * PI), 2);
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_chebyshev(float x, float a)
+{
+  a = a * a * a * 30.0 + 1.0;
+
+  return cos(acos(x * 2.0 - 1.0) * a);
+}
+
+static
+zyn_sample_type
+zyn_addsynth_oscillator_base_function_sqr(float x, float a)
+{
+  a = a * a * a  * a * 160.0 + 0.001;
+
+  return -atan(sin(x * 2.0 * PI) * a);
+}
+
+/* 
+ * Get the base function
+ */
+void
+zyn_addsynth_oscillator_get_base_function(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  zyn_sample_type * samples)
+{
+  int i;    
+  float par;
+  float basefuncmodulationpar1;
+  float basefuncmodulationpar2;
+  float basefuncmodulationpar3;
+  float t;
+
+  par = (oscillator_ptr->Pbasefuncpar + 0.5) / 128.0;
+  if (oscillator_ptr->Pbasefuncpar == 64)
+  {
+    par = 0.5;
+  }
+    
+  basefuncmodulationpar1 = oscillator_ptr->Pbasefuncmodulationpar1 / 127.0;
+  basefuncmodulationpar2 = oscillator_ptr->Pbasefuncmodulationpar2 / 127.0;
+  basefuncmodulationpar3 = oscillator_ptr->Pbasefuncmodulationpar3 / 127.0;
+
+  switch(oscillator_ptr->Pbasefuncmodulation)
+  {
+  case 1:
+    basefuncmodulationpar1 = (pow(2, basefuncmodulationpar1 * 5.0) - 1.0) / 10.0;
+    basefuncmodulationpar3 = floor(pow(2, basefuncmodulationpar3 * 5.0) - 1.0);
+    if (basefuncmodulationpar3 < 0.9999)
+    {
+      basefuncmodulationpar3 = -1.0;
+    }
+    break;
+  case 2:
+    basefuncmodulationpar1 = (pow(2, basefuncmodulationpar1 * 5.0) - 1.0) / 10.0;
+    basefuncmodulationpar3 = 1.0 + floor((pow(2, basefuncmodulationpar3 * 5.0) - 1.0));
+    break;
+  case 3:
+    basefuncmodulationpar1 = (pow(2,basefuncmodulationpar1*7.0)-1.0)/10.0;
+    basefuncmodulationpar3 = 0.01+(pow(2,basefuncmodulationpar3*16.0)-1.0)/10.0;
+    break;
+  }
+
+  LOG_DEBUG("%.5f %.5f", basefuncmodulationpar1, basefuncmodulationpar3);
+
+  for (i = 0 ; i < OSCIL_SIZE ; i++)
+  {
+    t = i * 1.0 / OSCIL_SIZE;
+
+    switch (oscillator_ptr->Pbasefuncmodulation)
+    {
+    case 1:
+      // rev
+      t = t * basefuncmodulationpar3 + sin((t + basefuncmodulationpar2) * 2.0 * PI) * basefuncmodulationpar1;
+      break;
+    case 2:
+      // sine
+      t = t + sin((t * basefuncmodulationpar3 + basefuncmodulationpar2) * 2.0 * PI) * basefuncmodulationpar1;
+      break;
+    case 3:
+      // power
+      t = t + pow((1.0 - cos((t + basefuncmodulationpar2) * 2.0 * PI)) * 0.5, basefuncmodulationpar3) * basefuncmodulationpar1;
+      break;
+    };
+  
+    t = t - floor(t);
+  
+    switch (oscillator_ptr->Pcurrentbasefunc)
+    {
+    case 1:
+      samples[i] = zyn_addsynth_oscillator_base_function_triangle(t, par);
+      break;
+    case 2:
+      samples[i] = zyn_addsynth_oscillator_base_function_pulse(t, par);
+      break;
+    case 3:
+      samples[i] = zyn_addsynth_oscillator_base_function_saw(t, par);
+      break;
+    case 4:
+      samples[i] = zyn_addsynth_oscillator_base_function_power(t, par);
+      break;
+    case 5:
+      samples[i] = zyn_addsynth_oscillator_base_function_gauss(t, par);
+      break;
+    case 6:
+      samples[i] = zyn_addsynth_oscillator_base_function_diode(t, par);
+      break;
+    case 7:
+      samples[i] = zyn_addsynth_oscillator_base_function_abssine(t, par);
+      break;
+    case 8:
+      samples[i] = zyn_addsynth_oscillator_base_function_pulsesine(t, par);
+      break;
+    case 9:
+      samples[i] = zyn_addsynth_oscillator_base_function_stretchsine(t, par);
+      break;
+    case 10:
+      samples[i] = zyn_addsynth_oscillator_base_function_chirp(t, par);
+      break;
+    case 11:
+      samples[i] = zyn_addsynth_oscillator_base_function_absstretchsine(t, par);
+      break;
+    case 12:
+      samples[i] = zyn_addsynth_oscillator_base_function_chebyshev(t, par);
+      break;
+    case 13:
+      samples[i] = zyn_addsynth_oscillator_base_function_sqr(t, par);
+      break;
+    default:
+      samples[i] = -sin(2.0 * PI * i / OSCIL_SIZE);
+    }
+  }
+}
+
+/* Shift the harmonics */
+static
+void
+zyn_addsynth_oscillator_shift_harmonics(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  int i;
+  REALTYPE hc,hs;
+  int harmonicshift;
+  int oldh;
+
+  if (oscillator_ptr->Pharmonicshift == 0)
+  {
+    return;
+  }
+    
+  harmonicshift = -oscillator_ptr->Pharmonicshift;
+    
+  if (harmonicshift>0)
+  {
+    for (i=OSCIL_SIZE/2-2;i>=0;i--)
+    {
+      oldh = i - harmonicshift;
+      if (oldh < 0)
+      {
+        hc = 0.0;
+        hs = 0.0;
+      }
+      else
+      {
+        hc = oscillator_ptr->oscilFFTfreqs.c[oldh + 1];
+        hs = oscillator_ptr->oscilFFTfreqs.s[oldh + 1];
+      }
+
+      oscillator_ptr->oscilFFTfreqs.c[i + 1] = hc;
+      oscillator_ptr->oscilFFTfreqs.s[i + 1] = hs;
+    }
+  }
+  else
+  {
+    for (i = 0 ; i < OSCIL_SIZE / 2 - 1 ; i++)
+    {
+      oldh = i + abs(harmonicshift);
+      if (oldh >= (OSCIL_SIZE / 2 - 1))
+      {
+        hc = 0.0;
+        hs = 0.0;
+      }
+      else
+      {
+        hc = oscillator_ptr->oscilFFTfreqs.c[oldh + 1];
+        hs = oscillator_ptr->oscilFFTfreqs.s[oldh + 1];
+
+        if (fabs(hc) < 0.000001)
+        {
+          hc = 0.0;
+        }
+
+        if (fabs(hs) < 0.000001)
+        {
+          hs = 0.0;
+        }
+      }
+      
+      oscillator_ptr->oscilFFTfreqs.c[i + 1] = hc;
+      oscillator_ptr->oscilFFTfreqs.s[i + 1] = hs;
+    }
+  }
+    
+  oscillator_ptr->oscilFFTfreqs.c[0] = 0.0;
+}
+
+/* 
+ * Change the base function
+ */
+static
+void
+zyn_addsynth_oscillator_change_base_function(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  int i;
+
+  if (oscillator_ptr->Pcurrentbasefunc != 0)
+  {
+    zyn_addsynth_oscillator_get_base_function(oscillator_ptr, oscillator_ptr->temporary_samples_ptr);
+    zyn_fft_smps2freqs(oscillator_ptr->fft, oscillator_ptr->temporary_samples_ptr, &oscillator_ptr->basefuncFFTfreqs);
+    oscillator_ptr->basefuncFFTfreqs.c[0] = 0.0;
+  }
+  else
+  {
+    for (i = 0 ; i < OSCIL_SIZE / 2 ; i++)
+    {
+      oscillator_ptr->basefuncFFTfreqs.s[i] = 0.0;
+      oscillator_ptr->basefuncFFTfreqs.c[i] = 0.0;
+    }
+    //in this case basefuncFFTfreqs_ are not used
+  }
+
+  oscillator_ptr->prepared = false;
+  oscillator_ptr->oldbasefunc = oscillator_ptr->Pcurrentbasefunc;
+  oscillator_ptr->oldbasepar = oscillator_ptr->Pbasefuncpar;
+  oscillator_ptr->oldbasefuncmodulation = oscillator_ptr->Pbasefuncmodulation;
+  oscillator_ptr->oldbasefuncmodulationpar1 = oscillator_ptr->Pbasefuncmodulationpar1;
+  oscillator_ptr->oldbasefuncmodulationpar2 = oscillator_ptr->Pbasefuncmodulationpar2;
+  oscillator_ptr->oldbasefuncmodulationpar3 = oscillator_ptr->Pbasefuncmodulationpar3;
+}
+
+void
+zyn_addsynth_oscillator_waveshape_samples(
+  int n,
+  zyn_sample_type *smps,
+  unsigned char type,
+  unsigned char drive)
+{
+  int i;
+  float ws = drive / 127.0;
+  float tmpv;
+  zyn_sample_type tmp;
+
+  switch (type)
+  {
+  case 1:
+    // Arctangent
+    ws = pow(10, ws * ws * 3.0) - 1.0 + 0.001;
+    for (i = 0 ; i < n ; i++)
+    {
+      smps[i] = atan(smps[i] * ws) / atan(ws);
+    }
+    break;
+  case 2:
+    // Asymmetric
+    ws = ws * ws * 32.0 + 0.0001;
+
+    if (ws<1.0)
+    {
+      tmpv = sin(ws) + 0.1;
+    }
+    else
+    {
+      tmpv = 1.1;
+    }
+
+    for (i = 0 ; i < n ; i++)
+    {
+      smps[i] = sin(smps[i] * (0.1 + ws - ws * smps[i])) / tmpv;
+    }
+    break;
+  case 3:
+    // Pow
+    ws = ws * ws * ws * 20.0 + 0.0001;
+    for (i = 0 ; i < n ; i++)
+    {
+      smps[i] *= ws;
+      if (fabs(smps[i])<1.0)
+      {
+        smps[i]=(smps[i]-pow(smps[i],3.0))*3.0;
+        if (ws<1.0) smps[i]/=ws;
+      }
+      else
+      {
+        smps[i] = 0.0;
+      }
+    }
+    break;
+  case 4:
+    // Sine
+    ws = ws * ws * ws * 32.0 + 0.0001;
+    if (ws < 1.57)
+    {
+      tmpv = sin(ws);
+    }
+    else
+    {
+      tmpv = 1.0;
+    }
+
+    for (i = 0 ; i < n ; i++)
+    {
+      smps[i] = sin(smps[i] * ws) / tmpv;
+    }
+    break;
+  case 5:
+    // Quantisize
+    ws = ws * ws + 0.000001;
+    for (i = 0 ; i < n ; i++) 
+    {
+      smps[i] = floor(smps[i] / ws + 0.5) * ws;
+    }
+    break;
+  case 6:
+    // Zigzag
+    ws = ws * ws * ws * 32 + 0.0001;
+    if (ws < 1.0)
+    {
+      tmpv = sin(ws);
+    }
+    else
+    {
+      tmpv = 1.0;
+    }
+
+    for (i = 0 ; i < n ; i++) 
+    {
+      smps[i] = asin(sin(smps[i] * ws)) / tmpv;
+    }
+    break;
+  case 7:
+    // Limiter
+    ws = pow(2.0, -ws * ws * 8.0);
+    for (i=0;i<n;i++)
+    {
+      tmp = smps[i];
+      if (fabs(tmp) > ws)
+      {
+        if (tmp >= 0.0)
+        {
+          smps[i] = 1.0;
+        }
+        else
+        {
+          smps[i] = -1.0;
+        }
+      }
+      else
+      {
+        smps[i] /= ws;
+      }
+    }
+    break;
+  case 8:
+    // Upper Limiter
+    ws = pow(2.0, -ws * ws * 8.0);
+    for (i = 0 ; i < n ; i++)
+    {
+      tmp = smps[i];
+      if (tmp>ws) smps[i]=ws;
+      smps[i]*=2.0;
+    };
+    break;
+  case 9:
+    // Lower Limiter
+    ws=pow(2.0,-ws*ws*8.0);
+    for (i=0;i<n;i++)
+    {
+      tmp = smps[i];
+      if (tmp<-ws) smps[i]=-ws;
+      smps[i]*=2.0;
+    }
+    break;
+  case 10:
+    // Inverse Limiter
+    ws = (pow(2.0, ws * 6.0) - 1.0) / pow(2.0, 6.0);
+    for (i = 0 ; i < n ; i++)
+    {
+      tmp = smps[i];
+      if (fabs(tmp) > ws)
+      {
+        if (tmp >= 0.0)
+        {
+          smps[i] = tmp - ws;
+        }
+        else
+        {
+          smps[i] = tmp + ws;
+        }
+      }
+      else
+      {
+        smps[i] = 0;
+      }
+    }
+    break;
+  case 11:
+    // Clip
+    ws = pow(5, ws * ws * 1.0) - 1.0;
+    for (i = 0 ; i < n ; i++)
+    {
+      smps[i] = smps[i] * (ws + 0.5) * 0.9999 - floor(0.5 + smps[i] * (ws + 0.5) * 0.9999);
+    }
+    break;
+  case 12:
+    // Asym2
+    ws = ws * ws * ws * 30 + 0.001;
+    if (ws < 0.3)
+    {
+      tmpv = ws;
+    }
+    else
+    {
+      tmpv=1.0;
+    }
+
+    for (i = 0 ; i < n ; i++)
+    {
+      tmp = smps[i] * ws;
+      if (tmp > -2.0 && tmp < 1.0)
+      {
+        smps[i] = tmp * (1.0 - tmp) * (tmp + 2.0) / tmpv;
+      }
+      else
+      {
+        smps[i] = 0.0;
+      }
+    }
+    break;
+  case 13:
+    // Pow2
+    ws = ws * ws * ws * 32.0 + 0.0001;
+    if (ws < 1.0)
+    {
+      tmpv = ws * (1 + ws) / 2.0;
+    }
+    else
+    {
+      tmpv = 1.0;
+    }
+
+    for (i = 0 ; i < n ; i++)
+    {
+      tmp = smps[i] * ws;
+      if (tmp > -1.0 && tmp < 1.618034)
+      {
+        smps[i] = tmp * (1.0 - tmp) / tmpv;
+      }
+      else if (tmp > 0.0)
+      {
+        smps[i] = -1.0;
+      }
+      else
+      {
+        smps[i] = -2.0;
+      }
+    }
+    break;
+  case 14:
+    // sigmoid
+    ws = pow(ws, 5.0) * 80.0 + 0.0001;
+    if (ws > 10.0)
+    {
+      tmpv = 0.5;
+    }
+    else
+    {
+      tmpv = 0.5 - 1.0 / (exp(ws) + 1.0);
+    }
+
+    for (i = 0 ; i < n ; i++)
+    {
+      tmp = smps[i] * ws;
+      if (tmp < -10.0)
+      {
+        tmp = -10.0;
+      }
+      else if (tmp>10.0)
+      {
+        tmp = 10.0;
+      }
+
+      tmp = 0.5 - 1.0 / (exp(tmp) + 1.0);
+
+      smps[i] = tmp / tmpv;
+    }
+    break;
+    //update to Distorsion::changepar (Ptype max) if there is added more waveshapings functions
+  }
+}
+
+/* 
+ * Waveshape
+ */
+static
+void
+zyn_addsynth_oscillator_waveshape(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  int i;
+  float tmp;
+  float max;
+
+  oscillator_ptr->oldwaveshapingfunction = oscillator_ptr->Pwaveshapingfunction;
+  oscillator_ptr->oldwaveshaping = oscillator_ptr->Pwaveshaping;
+
+  if (oscillator_ptr->Pwaveshapingfunction == 0)
+  {
+    return;
+  }
+
+  // remove the DC
+  oscillator_ptr->oscilFFTfreqs.c[0] = 0.0;
+
+  // reduce the amplitude of the freqs near the nyquist
+  for (i = 1 ; i < OSCIL_SIZE / 8 ; i++)
+  {
+    tmp = i / (OSCIL_SIZE / 8.0);
+    oscillator_ptr->oscilFFTfreqs.s[OSCIL_SIZE / 2 - i] *= tmp;
+    oscillator_ptr->oscilFFTfreqs.c[OSCIL_SIZE / 2 - i] *= tmp;
+  }
+
+  zyn_fft_freqs2smps(oscillator_ptr->fft, &oscillator_ptr->oscilFFTfreqs, oscillator_ptr->temporary_samples_ptr);
+
+  // Normalize
+
+  max = 0.0;
+
+  for (i = 0 ; i < OSCIL_SIZE ; i++) 
+  {
+    if (max < fabs(oscillator_ptr->temporary_samples_ptr[i]))
+    {
+      max = fabs(oscillator_ptr->temporary_samples_ptr[i]);
+    }
+  }
+
+  if (max < 0.00001)
+  {
+    max=1.0;
+  }
+
+  max = 1.0 / max;
+
+  for (i = 0 ; i < OSCIL_SIZE ; i++)
+  {
+    oscillator_ptr->temporary_samples_ptr[i] *= max;
+  }
+
+  // Do the waveshaping
+  zyn_addsynth_oscillator_waveshape_samples(
+    OSCIL_SIZE,
+    oscillator_ptr->temporary_samples_ptr,
+    oscillator_ptr->Pwaveshapingfunction,
+    oscillator_ptr->Pwaveshaping);
+
+  // perform FFT
+  zyn_fft_smps2freqs(oscillator_ptr->fft, oscillator_ptr->temporary_samples_ptr, &oscillator_ptr->oscilFFTfreqs);
+}
+
+/* 
+ * Filter the oscillator
+ */
+//Filter the oscillator accotding to Pfiltertype and Pfilterpar
+static
+void
+zyn_addsynth_oscillator_filter(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  REALTYPE par;
+  REALTYPE par2;
+  REALTYPE max;
+  REALTYPE tmp;
+  REALTYPE p2;
+  REALTYPE x;
+  int i;
+  REALTYPE gain;
+  REALTYPE imax;
+
+  if (oscillator_ptr->Pfiltertype == 0)
+  {
+    return;
+  }
+
+  par = 1.0 - oscillator_ptr->Pfilterpar1 / 128.0;
+  par2 = oscillator_ptr->Pfilterpar2 / 127.0;
+  max = 0.0;
+  tmp = 0.0;
+
+  for (i = 1 ; i < OSCIL_SIZE / 2 ; i++)
+  {
+    gain = 1.0;
+    switch(oscillator_ptr->Pfiltertype)
+    {
+    case 1:
+      // lp
+      gain = pow(1.0 - par * par * par * 0.99, i);
+      tmp = par2 * par2 * par2 * par2 * 0.5 + 0.0001;
+      if (gain < tmp)
+      {
+        gain = pow(gain, 10.0) / pow(tmp, 9.0);
+      }
+      break;
+    case 2:
+      // hp1
+      gain = 1.0 - pow(1.0 - par * par, i + 1);
+      gain = pow(gain, par2 * 2.0 + 0.1);
+      break;
+    case 3:
+      // hp1b
+      if (par < 0.2)
+      {
+        par = par * 0.25 + 0.15;
+      }
+
+      gain = 1.0 - pow(1.0 - par * par * 0.999 + 0.001, i * 0.05 * i + 1.0);
+      tmp = pow(5.0, par2 * 2.0);
+      gain = pow(gain, tmp);
+      break;
+    case 4:
+      // bp1
+      gain = i + 1 - pow(2, (1.0 - par) * 7.5);
+      gain = 1.0 / (1.0 + gain * gain / (i + 1.0));
+      tmp = pow(5.0, par2 * 2.0);
+      gain = pow(gain, tmp);
+      if (gain < 1e-5)
+      {
+        gain = 1e-5;
+      }
+      break;
+    case 5:
+      // bs1
+      gain = i + 1 - pow(2, (1.0 - par) * 7.5);
+      gain = pow(atan(gain / (i / 10.0 + 1)) / 1.57, 6);
+      gain = pow(gain, par2 * par2 * 3.9 + 0.1);
+      break;
+    case 6:
+      // lp2
+      tmp = pow(par2, 0.33);
+      gain = (i + 1 > pow(2, (1.0 - par) * 10) ? 0.0 : 1.0) * par2 + (1.0 - par2);
+      break;
+    case 7:
+      // hp2
+      tmp = pow(par2,0.33);
+      //tmp = 1.0 - (1.0 - par2) * (1.0 - par2);
+      gain = (i + 1 > pow(2, (1.0 - par) * 7) ? 1.0 : 0.0) * par2 + (1.0 - par2);
+      if (oscillator_ptr->Pfilterpar1 == 0)
+      {
+        gain = 1.0;
+      }
+      break;
+    case 8:
+      // bp2
+      tmp = pow(par2, 0.33);
+      //tmp = 1.0 - (1.0 - par2) * (1.0 - par2);
+      gain = (fabs(pow(2, (1.0 - par) * 7) - i) > i / 2 + 1 ? 0.0 : 1.0) * par2 + (1.0 - par2);
+      break;
+    case 9:
+      // bs2
+      tmp = pow(par2, 0.33);
+      gain = (fabs(pow(2, (1.0 - par) * 7) - i) < i / 2 + 1 ? 0.0 : 1.0) * par2 + (1.0 - par2);
+      break;
+    case 10:
+      tmp = pow(5.0, par2 * 2.0 - 1.0);
+      tmp = pow(i / 32.0, tmp) * 32.0;
+      if (oscillator_ptr->Pfilterpar2 == 64)
+      {
+        tmp = i;
+      }
+      gain = cos(par * par * PI / 2.0 * tmp); // cos
+      gain *= gain;
+      break;
+    case 11:tmp=pow(5.0,par2*2.0-1.0);
+      tmp=pow(i/32.0,tmp)*32.0;
+      if (oscillator_ptr->Pfilterpar2 == 64)
+      {
+        tmp = i;
+      }
+      gain = sin(par * par * PI / 2.0 * tmp); // sin
+      gain *= gain;
+      break;
+    case 12:p2=1.0-par+0.2;
+      x=i/(64.0*p2*p2); 
+      if (x<0.0) x=0.0;
+      else if (x>1.0) x=1.0;
+      tmp=pow(1.0-par2,2.0);
+      gain=cos(x*PI)*(1.0-tmp)+1.01+tmp;//low shelf
+      break;
+    case 13:
+      tmp = (int)pow(2.0, (1.0 - par) * 7.2);
+      gain = 1.0;
+      if (i == (int)tmp)
+      {
+        gain = pow(2.0, par2 * par2 * 8.0);
+      }
+      break;
+    }
+  
+  
+    oscillator_ptr->oscilFFTfreqs.s[i] *= gain;
+    oscillator_ptr->oscilFFTfreqs.c[i] *= gain;
+    tmp = oscillator_ptr->oscilFFTfreqs.s[i] * oscillator_ptr->oscilFFTfreqs.s[i] + oscillator_ptr->oscilFFTfreqs.c[i] * oscillator_ptr->oscilFFTfreqs.c[i];
+    if (max < tmp)
+    {
+      max = tmp;
+    }
+  }
+
+  max = sqrt(max);
+  if (max < 1e-10)
+  {
+    max = 1.0;
+  }
+
+  imax = 1.0 / max;
+  for (i = 1 ; i < OSCIL_SIZE / 2 ; i++)
+  {
+    oscillator_ptr->oscilFFTfreqs.s[i] *= imax; 
+    oscillator_ptr->oscilFFTfreqs.c[i] *= imax; 
+  }
+}
+
+/* 
+ * Do the Frequency Modulation of the Oscil
+ */
+static
+void
+zyn_addsynth_oscillator_modulation(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  int i;
+  float modulationpar1;
+  float modulationpar2;
+  float modulationpar3;
+  float tmp;
+  float max;
+  float t;
+  int poshi;
+  float poslo;
+
+  oscillator_ptr->oldmodulation = oscillator_ptr->Pmodulation;
+  oscillator_ptr->oldmodulationpar1 = oscillator_ptr->Pmodulationpar1;
+  oscillator_ptr->oldmodulationpar2 = oscillator_ptr->Pmodulationpar2;
+  oscillator_ptr->oldmodulationpar3 = oscillator_ptr->Pmodulationpar3;
+
+  if (oscillator_ptr->Pmodulation==0)
+  {
+    return;
+  }
+
+  modulationpar1 = oscillator_ptr->Pmodulationpar1 / 127.0;
+  modulationpar2 = 0.5 - oscillator_ptr->Pmodulationpar2 / 127.0;
+  modulationpar3 = oscillator_ptr->Pmodulationpar3 / 127.0;
+
+  switch(oscillator_ptr->Pmodulation)
+  {
+  case 1:
+    modulationpar1 = (pow(2, modulationpar1 * 7.0) - 1.0) / 100.0;
+    modulationpar3 = floor((pow(2, modulationpar3 * 5.0) - 1.0));
+    if (modulationpar3 < 0.9999)
+    {
+      modulationpar3 = -1.0;
+    }
+    break;
+  case 2:
+    modulationpar1 = (pow(2, modulationpar1 * 7.0) - 1.0) / 100.0;
+    modulationpar3 = 1.0 + floor(pow(2, modulationpar3 * 5.0) - 1.0);
+    break;
+  case 3:
+    modulationpar1 = (pow(2, modulationpar1 * 9.0) - 1.0) / 100.0;
+    modulationpar3 = 0.01 + (pow(2, modulationpar3 * 16.0) - 1.0) / 10.0;
+    break;
+  }
+
+  oscillator_ptr->oscilFFTfreqs.c[0] = 0.0; // remove the DC
+
+  // reduce the amplitude of the freqs near the nyquist
+  for (i = 1 ; i < OSCIL_SIZE / 8 ; i++)
+  {
+    tmp = i / (OSCIL_SIZE / 8.0);
+    oscillator_ptr->oscilFFTfreqs.s[OSCIL_SIZE / 2 - i] *= tmp;
+    oscillator_ptr->oscilFFTfreqs.c[OSCIL_SIZE / 2 - i] *= tmp;
+  }
+
+  zyn_fft_freqs2smps(oscillator_ptr->fft, &oscillator_ptr->oscilFFTfreqs, oscillator_ptr->temporary_samples_ptr);
+
+  // Normalize
+
+  max = 0.0;
+
+  for (i = 0 ; i < OSCIL_SIZE ; i++)
+  {
+    if (max < fabs(oscillator_ptr->temporary_samples_ptr[i]))
+    {
+      max = fabs(oscillator_ptr->temporary_samples_ptr[i]);
+    }
+  }
+
+  if (max < 0.00001)
+  {
+    max = 1.0;
+  }
+
+  max = 1.0 / max;
+  
+  for (i=0 ; i < OSCIL_SIZE ; i++)
+  {
+    oscillator_ptr->modulation_temp[i] = oscillator_ptr->temporary_samples_ptr[i] * max;
+  }
+
+  for (i = 0 ; i < ZYN_ADDSYNTH_OSCILLATOR_EXTRA_POINTS ; i++)
+  {
+    oscillator_ptr->modulation_temp[i + OSCIL_SIZE] = oscillator_ptr->temporary_samples_ptr[i] * max;
+  }
+    
+  // Do the modulation
+  for (i = 0 ; i < OSCIL_SIZE ; i++)
+  {
+    t = i * 1.0 / OSCIL_SIZE;
+
+    switch(oscillator_ptr->Pmodulation)
+    {
+    case 1:
+      // rev
+      t = t * modulationpar3 + sin((t + modulationpar2) * 2.0 * PI) * modulationpar1;
+      break;
+    case 2:
+      //sine
+      t = t + sin((t * modulationpar3 + modulationpar2) * 2.0 * PI) * modulationpar1;
+      break;
+    case 3:
+      // power
+      t = t + pow((1.0 - cos((t + modulationpar2) * 2.0 * PI)) * 0.5, modulationpar3) * modulationpar1;
+      break;
+    }
+  
+    t = (t - floor(t)) * OSCIL_SIZE;
+  
+    poshi = (int)t;
+    poslo = t - floor(t);
+
+    oscillator_ptr->temporary_samples_ptr[i] = oscillator_ptr->modulation_temp[poshi] * (1.0 - poslo) + oscillator_ptr->modulation_temp[poshi + 1] * poslo;
+  }
+
+  // perform FFT
+  zyn_fft_smps2freqs(oscillator_ptr->fft, oscillator_ptr->temporary_samples_ptr, &oscillator_ptr->oscilFFTfreqs);
+}
+
+/* 
+ * Adjust the spectrum
+ */
+static
+void
+zyn_addsynth_oscillator_spectrum_adjust(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  float par;
+  int i;
+  float max;
+  float tmp;
+  float mag;
+  float phase;
+
+  if (oscillator_ptr->Psatype == 0)
+  {
+    return;
+  }
+
+  par = oscillator_ptr->Psapar / 127.0;
+  switch (oscillator_ptr->Psatype)
+  {
+  case 1:
+    par = 1.0 - par * 2.0;
+    if (par >= 0.0)
+    {
+      par = pow(5.0, par);
+    }
+    else
+    {
+      par = pow(8.0, par);
+    }
+    break;
+  case 2:
+    par = pow(10.0, (1.0 - par) * 3.0) * 0.25;
+    break;
+  case 3:
+    par = pow(10.0, (1.0 - par) * 3.0) * 0.25;
+    break;
+  }
+
+  max = 0.0;
+  for (i = 0 ; i < OSCIL_SIZE / 2 ; i++)
+  {
+    tmp = pow(oscillator_ptr->oscilFFTfreqs.c[i], 2) + pow(oscillator_ptr->oscilFFTfreqs.s[i], 2.0);
+    if (max < tmp)
+    {
+      max = tmp;
+    }
+  }
+
+  max = sqrt(max) / OSCIL_SIZE * 2.0;
+  if (max < 1e-8)
+  {
+    max = 1.0;
+  }
+    
+  for (i = 0 ; i < OSCIL_SIZE / 2 ; i++)
+  {
+    mag = sqrt(pow(oscillator_ptr->oscilFFTfreqs.s[i], 2) + pow(oscillator_ptr->oscilFFTfreqs.c[i], 2.0)) / max;
+    phase = atan2(oscillator_ptr->oscilFFTfreqs.s[i], oscillator_ptr->oscilFFTfreqs.c[i]);
+  
+    switch (oscillator_ptr->Psatype)
+    {
+    case 1:
+      mag = pow(mag, par);
+      break;
+    case 2:
+      if (mag < par)
+      {
+        mag = 0.0;
+      }
+      break;
+    case 3:
+      mag /= par;
+      if (mag > 1.0)
+      {
+        mag = 1.0;
+      }
+      break;
+    }
+    oscillator_ptr->oscilFFTfreqs.c[i] = mag * cos(phase);
+    oscillator_ptr->oscilFFTfreqs.s[i] = mag * sin(phase);
+  }  
+}
+
+/* 
+ * Prepare the Oscillator
+ */
+static
+void
+zyn_addsynth_oscillator_prepare(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  int i, j, k;
+  REALTYPE a, b, c, d, hmagnew;
+  
+  if ((oscillator_ptr->oldbasepar != oscillator_ptr->Pbasefuncpar) ||
+      (oscillator_ptr->oldbasefunc != oscillator_ptr->Pcurrentbasefunc) ||
+      (oscillator_ptr->oldbasefuncmodulation != oscillator_ptr->Pbasefuncmodulation) ||
+      (oscillator_ptr->oldbasefuncmodulationpar1 != oscillator_ptr->Pbasefuncmodulationpar1) ||
+      (oscillator_ptr->oldbasefuncmodulationpar2 != oscillator_ptr->Pbasefuncmodulationpar2) ||
+      (oscillator_ptr->oldbasefuncmodulationpar3 != oscillator_ptr->Pbasefuncmodulationpar3))
+  { 
+    zyn_addsynth_oscillator_change_base_function(oscillator_ptr);
+  }
+
+  for (i = 0 ; i < MAX_AD_HARMONICS ; i++)
+  {
+    oscillator_ptr->hphase[i] = (oscillator_ptr->Phphase[i] - 64.0) / 64.0 * PI / (i + 1);
+  }
+
+  for (i = 0 ; i < MAX_AD_HARMONICS ; i++)
+  {
+    hmagnew = 1.0 - fabs(oscillator_ptr->Phmag[i] / 64.0 - 1.0);
+    switch(oscillator_ptr->Phmagtype)
+    {
+    case 1:
+      oscillator_ptr->hmag[i] = exp(hmagnew * log(0.01));
+      break;
+    case 2:
+      oscillator_ptr->hmag[i] = exp(hmagnew * log(0.001));
+      break;
+    case 3:
+      oscillator_ptr->hmag[i] = exp(hmagnew * log(0.0001));
+      break;
+    case 4:
+      oscillator_ptr->hmag[i] = exp(hmagnew * log(0.00001));
+      break;
+    default:
+      oscillator_ptr->hmag[i] = 1.0 - hmagnew;
+      break; 
+    }
+
+    if (oscillator_ptr->Phmag[i] < 64)
+    {
+      oscillator_ptr->hmag[i] =- oscillator_ptr->hmag[i];
+    }
+  }
+    
+  // remove the harmonics where Phmag[i] == 64
+  for (i = 0 ; i < MAX_AD_HARMONICS ; i++)
+  {
+    if (oscillator_ptr->Phmag[i]==64)
+    {
+      oscillator_ptr->hmag[i] = 0.0;
+    }
+  }
+
+  for (i=0 ; i < OSCIL_SIZE / 2 ; i++)
+  {
+    oscillator_ptr->oscilFFTfreqs.c[i] = 0.0;
+    oscillator_ptr->oscilFFTfreqs.s[i] = 0.0;
+  }
+
+  if (oscillator_ptr->Pcurrentbasefunc == 0)
+  {
+    // the sine case
+    for (i=0;i<MAX_AD_HARMONICS;i++)
+    {
+      oscillator_ptr->oscilFFTfreqs.c[i + 1] = -oscillator_ptr->hmag[i] * sin(oscillator_ptr->hphase[i] * (i + 1)) / 2.0;
+      oscillator_ptr->oscilFFTfreqs.s[i + 1] = oscillator_ptr->hmag[i] * cos(oscillator_ptr->hphase[i] * (i + 1)) / 2.0;
+    }
+  }
+  else
+  {
+    for (j = 0 ; j < MAX_AD_HARMONICS ; j++)
+    {
+      if (oscillator_ptr->Phmag[j] == 64)
+      {
+        continue;
+      }
+
+      for (i = 1 ; i < OSCIL_SIZE / 2 ; i++)
+      {
+        k = i * (j + 1);
+
+        if (k >= OSCIL_SIZE / 2)
+        {
+          break;
+        }
+
+        a = oscillator_ptr->basefuncFFTfreqs.c[i];
+        b = oscillator_ptr->basefuncFFTfreqs.s[i];
+        c = oscillator_ptr->hmag[j] * cos(oscillator_ptr->hphase[j] * k);
+        d = oscillator_ptr->hmag[j] * sin(oscillator_ptr->hphase[j] * k);
+        oscillator_ptr->oscilFFTfreqs.c[k] += a * c - b * d;
+        oscillator_ptr->oscilFFTfreqs.s[k] += a * d + b * c;
+      }
+    }
+  }
+
+  if (oscillator_ptr->Pharmonicshiftfirst != 0)
+  {
+    zyn_addsynth_oscillator_shift_harmonics(oscillator_ptr);
+  }
+
+  if (oscillator_ptr->Pfilterbeforews == 0)
+  {
+    zyn_addsynth_oscillator_waveshape(oscillator_ptr);
+    zyn_addsynth_oscillator_filter(oscillator_ptr);
+  }
+  else
+  {
+    zyn_addsynth_oscillator_filter(oscillator_ptr);
+    zyn_addsynth_oscillator_waveshape(oscillator_ptr);
+  }
+
+  zyn_addsynth_oscillator_modulation(oscillator_ptr);
+  zyn_addsynth_oscillator_spectrum_adjust(oscillator_ptr);
+
+  if (oscillator_ptr->Pharmonicshiftfirst == 0)
+  {
+    zyn_addsynth_oscillator_shift_harmonics(oscillator_ptr);
+  }
+
+  oscillator_ptr->oscilFFTfreqs.c[0] = 0.0;
+
+  oscillator_ptr->oldhmagtype = oscillator_ptr->Phmagtype;
+  oscillator_ptr->oldharmonicshift = oscillator_ptr->Pharmonicshift + oscillator_ptr->Pharmonicshiftfirst * 256;
+
+  oscillator_ptr->prepared = true;
+}
+
+static
+void
+zyn_addsynth_oscillator_defaults(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  int i;
+
+  oscillator_ptr->oldbasefunc = 0;
+  oscillator_ptr->oldbasepar = 64;
+  oscillator_ptr->oldhmagtype = 0;
+  oscillator_ptr->oldwaveshapingfunction = 0;
+  oscillator_ptr->oldwaveshaping = 64;
+  oscillator_ptr->oldbasefuncmodulation = 0;
+  oscillator_ptr->oldharmonicshift = 0;
+  oscillator_ptr->oldbasefuncmodulationpar1 = 0;
+  oscillator_ptr->oldbasefuncmodulationpar2 = 0;
+  oscillator_ptr->oldbasefuncmodulationpar3 = 0;
+  oscillator_ptr->oldmodulation = 0;
+  oscillator_ptr->oldmodulationpar1 = 0;
+  oscillator_ptr->oldmodulationpar2 = 0;
+  oscillator_ptr->oldmodulationpar3 = 0;
+
+  for (i = 0 ; i < MAX_AD_HARMONICS ; i++)
+  {
+    oscillator_ptr->hmag[i] = 0.0;
+    oscillator_ptr->hphase[i] = 0.0;
+    oscillator_ptr->Phmag[i] = 64;
+    oscillator_ptr->Phphase[i] = 64;
+  }
+
+  oscillator_ptr->Phmag[0] = 127;
+  oscillator_ptr->Phmagtype = 0;
+  if (oscillator_ptr->ADvsPAD)
+  {
+    oscillator_ptr->Prand = 127; // max phase randomness (usefull if the oscil will be imported to a ADsynth from a PADsynth
+  }
+  else
+  {
+    oscillator_ptr->Prand = 64; // no randomness
+  }
+
+  oscillator_ptr->Pcurrentbasefunc = 0;
+  oscillator_ptr->Pbasefuncpar = 64;
+
+  oscillator_ptr->Pbasefuncmodulation = 0;
+  oscillator_ptr->Pbasefuncmodulationpar1 = 64;
+  oscillator_ptr->Pbasefuncmodulationpar2 = 64;
+  oscillator_ptr->Pbasefuncmodulationpar3 = 32;
+
+  oscillator_ptr->Pmodulation = 0;
+  oscillator_ptr->Pmodulationpar1 = 64;
+  oscillator_ptr->Pmodulationpar2 = 64;
+  oscillator_ptr->Pmodulationpar3 = 32;
+
+  oscillator_ptr->Pwaveshapingfunction = 0;
+  oscillator_ptr->Pwaveshaping = 64;
+  oscillator_ptr->Pfiltertype = 0;
+  oscillator_ptr->Pfilterpar1 = 64;
+  oscillator_ptr->Pfilterpar2 = 64;
+  oscillator_ptr->Pfilterbeforews = 0;
+  oscillator_ptr->Psatype = 0;
+  oscillator_ptr->Psapar = 64;
+
+  oscillator_ptr->Pamprandpower = 64;
+  oscillator_ptr->Pamprandtype = 0;
+    
+  oscillator_ptr->Pharmonicshift = 0;
+  oscillator_ptr->Pharmonicshiftfirst = 0;
+
+  oscillator_ptr->Padaptiveharmonics = 0;
+  oscillator_ptr->Padaptiveharmonicspower = 100;
+  oscillator_ptr->Padaptiveharmonicsbasefreq = 128;
+  oscillator_ptr->Padaptiveharmonicspar = 50;
+    
+  for (i = 0 ; i < OSCIL_SIZE / 2 ; i++)
+  {
+    oscillator_ptr->oscilFFTfreqs.s[i] = 0.0;
+    oscillator_ptr->oscilFFTfreqs.c[i] = 0.0;
+    oscillator_ptr->basefuncFFTfreqs.s[i] = 0.0;
+    oscillator_ptr->basefuncFFTfreqs.c[i] = 0.0;
+  }
+
+  oscillator_ptr->prepared = false;
+  oscillator_ptr->oldfilterpars = 0;
+  oscillator_ptr->oldsapars = 0;
+
+  zyn_addsynth_oscillator_prepare(oscillator_ptr);
+}
+
+void
+zyn_addsynth_oscillator_init(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  float sample_rate,
+  zyn_fft_handle fft,
+  struct zyn_resonance * resonance_ptr,
+  zyn_sample_type * temporary_samples_ptr,
+  struct zyn_fft_freqs * oscillator_fft_frequencies_ptr)
+{
+  oscillator_ptr->sample_rate = sample_rate;
+
+  oscillator_ptr->fft = fft;
+  oscillator_ptr->resonance_ptr = resonance_ptr;
+
+  oscillator_ptr->temporary_samples_ptr = temporary_samples_ptr;
+  oscillator_ptr->oscillator_fft_frequencies_ptr = oscillator_fft_frequencies_ptr;
+
+  zyn_fft_freqs_init(&oscillator_ptr->oscilFFTfreqs, OSCIL_SIZE / 2);
+  zyn_fft_freqs_init(&oscillator_ptr->basefuncFFTfreqs, OSCIL_SIZE / 2);
+
+  oscillator_ptr->randseed = 1;
+  oscillator_ptr->ADvsPAD = false;
+
+  zyn_addsynth_oscillator_defaults(oscillator_ptr);
+}
+
+void
+zyn_addsynth_oscillator_uninit(
+  struct zyn_addsynth_oscillator * oscillator_ptr)
+{
+  zyn_fft_freqs_uninit(&oscillator_ptr->basefuncFFTfreqs);
+  zyn_fft_freqs_uninit(&oscillator_ptr->oscilFFTfreqs);
+}
+
+void
+zyn_addsynth_oscillator_new_rand_seed(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  unsigned int randseed)
+{
+  oscillator_ptr->randseed = randseed;
+}
+
+static
+void
+zyn_addsynth_oscillator_adaptive_harmonic(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  struct zyn_fft_freqs * freqs_ptr,
+  float freq)
+{
+  struct zyn_fft_freqs inf;
+  int i;
+  float hc;
+  float hs;
+  float basefreq;
+  float power;
+  float rap;
+  bool down;
+  float h;
+  int high;
+  float low;
+
+  if (oscillator_ptr->Padaptiveharmonics == 0 /* || freq < 1.0*/)
+  {
+    return;
+  }
+
+  if (freq < 1.0)
+  {
+    freq = 440.0;
+  }
+
+  zyn_fft_freqs_init(&inf, OSCIL_SIZE / 2);
+
+  for (i = 0 ; i < OSCIL_SIZE / 2 ; i++)
+  {
+    inf.s[i] = freqs_ptr->s[i];
+    inf.c[i] = freqs_ptr->c[i];
+    freqs_ptr->s[i] = 0.0;
+    freqs_ptr->c[i] = 0.0;
+  }
+
+  inf.c[0]=0.0;inf.s[0]=0.0;    
+    
+  hc = 0.0;
+  hs = 0.0;
+  basefreq = 30.0 * pow(10.0, oscillator_ptr->Padaptiveharmonicsbasefreq / 128.0);
+  power = (oscillator_ptr->Padaptiveharmonicspower + 1.0) / 101.0;
+    
+  rap = freq / basefreq;
+
+  rap = pow(rap, power);
+
+  if (rap > 1.0)
+  {
+    rap = 1.0 / rap;
+    down = true;
+  }
+  else
+  {
+    down = false;
+  }
+    
+  for (i = 0 ; i < OSCIL_SIZE / 2 - 2 ; i++)
+  {
+    h = i * rap;
+    high = (int)(i * rap);
+    low = fmod(h, 1.0);
+
+    if (high >= OSCIL_SIZE / 2 - 2)
+    {
+      break;
+    }
+    else
+    {
+      if (down)
+      {
+        freqs_ptr->c[high] += inf.c[i] * (1.0 - low);
+        freqs_ptr->s[high] += inf.s[i] * (1.0 - low);
+        freqs_ptr->c[high + 1] += inf.c[i] * low;
+        freqs_ptr->s[high + 1] += inf.s[i] * low;
+      }
+      else
+      {
+        hc = inf.c[high] * (1.0 - low) + inf.c[high + 1] * low;
+        hs = inf.s[high] * (1.0 - low) + inf.s[high + 1] * low;
+      }
+
+      if (fabs(hc) < 0.000001)
+      {
+        hc = 0.0;
+      }
+
+      if (fabs(hs) < 0.000001)
+      {
+        hs = 0.0;
+      }
+    }
+  
+    if (!down)
+    {
+      if (i == 0)
+      {
+        // corect the aplitude of the first harmonic
+        hc *= rap;
+        hs *= rap;
+      }
+
+      freqs_ptr->c[i] = hc;
+      freqs_ptr->s[i] = hs;
+    }
+  }
+    
+  freqs_ptr->c[1] += freqs_ptr->c[0];
+  freqs_ptr->s[1] += freqs_ptr->s[0];
+  freqs_ptr->c[0] = 0.0;
+  freqs_ptr->s[0] = 0.0;    
+
+  zyn_fft_freqs_uninit(&inf);
+}
+
+static
+void
+zyn_addsynth_oscillator_adaptive_harmonic_post_process(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  float *f,
+  int size)
+{
+  float inf[size];
+  int i;
+  float par;
+  int nh;
+  int sub_vs_add;
+
+  if (oscillator_ptr->Padaptiveharmonics <= 1)
+  {
+    return;
+  }
+
+  par = oscillator_ptr->Padaptiveharmonicspar * 0.01;
+  par = 1.0 - pow(1.0 - par, 1.5);
+    
+  for (i = 0 ; i < size ; i++)
+  {
+    inf[i] = f[i] * par;
+    f[i] = f[i] * (1.0 - par);
+  }
+    
+  if (oscillator_ptr->Padaptiveharmonics == 2)
+  { 
+    // 2n+1
+    for (i = 0 ; i < size ; i++)
+    {
+      // i=0 pt prima armonica,etc.
+      if (i % 2 == 0)
+      {
+        f[i] += inf[i];
+      }
+    }
+  }
+  else
+  {
+    // celelalte moduri
+    nh = (oscillator_ptr->Padaptiveharmonics - 3) / 2 + 2;
+    sub_vs_add = (oscillator_ptr->Padaptiveharmonics - 3) % 2;
+    if (sub_vs_add==0)
+    {
+      for (i = 0 ; i < size ; i++)
+      {
+        if ((i + 1) % nh == 0)
+        {
+          f[i] += inf[i];
+        }
+      }
+    }
+    else
+    {
+      for (i = 0 ; i < size / nh - 1 ; i++)
+      {
+        f[(i + 1) * nh - 1] += inf[i];
+      }
+    }
+  }
+}
+
+/* 
+ * Get the oscillator function
+ */
+short
+zyn_addsynth_oscillator_get(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  zyn_sample_type *smps,
+  float freqHz,
+  bool resonance)
+{
+  int i;
+  int nyquist;
+  int outpos;
+  int newpars;
+  int realnyquist;
+  float rnd;
+  float angle;
+  float a;
+  float b;
+  float c;
+  float d;
+  unsigned int realrnd;
+  float power;
+  float normalize;
+  float amp;
+  float rndfreq; 
+  float sum;
+  int j;
+   
+  if (oscillator_ptr->oldbasepar != oscillator_ptr->Pbasefuncpar ||
+      oscillator_ptr->oldbasefunc != oscillator_ptr->Pcurrentbasefunc ||
+      oscillator_ptr->oldhmagtype != oscillator_ptr->Phmagtype ||
+      oscillator_ptr->oldwaveshaping != oscillator_ptr->Pwaveshaping ||
+      oscillator_ptr->oldwaveshapingfunction != oscillator_ptr->Pwaveshapingfunction)
+  {
+    oscillator_ptr->prepared = false;
+  }
+
+  newpars = oscillator_ptr->Pfiltertype * 256;
+  newpars += oscillator_ptr->Pfilterpar1;
+  newpars += oscillator_ptr->Pfilterpar2 * 65536;
+  newpars += oscillator_ptr->Pfilterbeforews * 16777216;
+
+  if (oscillator_ptr->oldfilterpars != newpars)
+  {
+    oscillator_ptr->prepared = false;
+    oscillator_ptr->oldfilterpars = newpars;
+  }
+
+  newpars = oscillator_ptr->Psatype * 256 + oscillator_ptr->Psapar;
+
+  if (oscillator_ptr->oldsapars != newpars)
+  {
+    oscillator_ptr->prepared = false;
+    oscillator_ptr->oldsapars = newpars;
+  }
+
+  if (oscillator_ptr->oldbasefuncmodulation != oscillator_ptr->Pbasefuncmodulation ||
+      oscillator_ptr->oldbasefuncmodulationpar1 != oscillator_ptr->Pbasefuncmodulationpar1 ||
+      oscillator_ptr->oldbasefuncmodulationpar2 != oscillator_ptr->Pbasefuncmodulationpar2 ||
+      oscillator_ptr->oldbasefuncmodulationpar3 != oscillator_ptr->Pbasefuncmodulationpar3)
+  {
+    oscillator_ptr->prepared = false;
+  }
+
+  if (oscillator_ptr->oldmodulation != oscillator_ptr->Pmodulation ||
+      oscillator_ptr->oldmodulationpar1 != oscillator_ptr->Pmodulationpar1 ||
+      oscillator_ptr->oldmodulationpar2 != oscillator_ptr->Pmodulationpar2 ||
+      oscillator_ptr->oldmodulationpar3 != oscillator_ptr->Pmodulationpar3)
+  {
+    oscillator_ptr->prepared = false;
+  }
+
+  if (oscillator_ptr->oldharmonicshift != oscillator_ptr->Pharmonicshift + oscillator_ptr->Pharmonicshiftfirst * 256)
+  {
+    oscillator_ptr->prepared = false;
+  }
+    
+  if (!oscillator_ptr->prepared)
+  {
+    zyn_addsynth_oscillator_prepare(oscillator_ptr);
+  }
+
+  outpos = (int)((RND * 2.0 - 1.0) * (float)OSCIL_SIZE * (oscillator_ptr->Prand - 64.0) / 64.0);
+  outpos = (outpos + 2 * OSCIL_SIZE) % OSCIL_SIZE;
+
+
+  for (i = 0 ; i < OSCIL_SIZE / 2 ; i++)
+  {
+    oscillator_ptr->oscillator_fft_frequencies_ptr->c[i] = 0.0;
+    oscillator_ptr->oscillator_fft_frequencies_ptr->s[i] = 0.0;
+  }
+
+  nyquist = (int)(0.5 * oscillator_ptr->sample_rate / fabs(freqHz)) + 2;
+
+  if (oscillator_ptr->ADvsPAD)
+  {
+    nyquist = (int)(OSCIL_SIZE / 2);
+  }
+
+  if (nyquist > OSCIL_SIZE / 2)
+  {
+    nyquist = OSCIL_SIZE / 2;
+  }
+
+  realnyquist = nyquist;
+    
+  if (oscillator_ptr->Padaptiveharmonics != 0)
+  {
+    nyquist = OSCIL_SIZE / 2;
+  }
+
+  for (i=1;i<nyquist-1;i++)
+  {
+    oscillator_ptr->oscillator_fft_frequencies_ptr->c[i] = oscillator_ptr->oscilFFTfreqs.c[i];
+    oscillator_ptr->oscillator_fft_frequencies_ptr->s[i] = oscillator_ptr->oscilFFTfreqs.s[i];
+  }
+
+  zyn_addsynth_oscillator_adaptive_harmonic(oscillator_ptr, oscillator_ptr->oscillator_fft_frequencies_ptr, freqHz);
+  zyn_addsynth_oscillator_adaptive_harmonic_post_process(oscillator_ptr, &oscillator_ptr->oscillator_fft_frequencies_ptr->c[1], OSCIL_SIZE / 2 - 1);
+  zyn_addsynth_oscillator_adaptive_harmonic_post_process(oscillator_ptr, &oscillator_ptr->oscillator_fft_frequencies_ptr->s[1], OSCIL_SIZE / 2 - 1);
+
+  nyquist = realnyquist;
+
+  // do the antialiasing in the case of adaptive harmonics
+  if (oscillator_ptr->Padaptiveharmonics)
+  {
+    for (i = nyquist ; i < OSCIL_SIZE / 2 ; i++)
+    {
+      oscillator_ptr->oscillator_fft_frequencies_ptr->s[i]=0;
+      oscillator_ptr->oscillator_fft_frequencies_ptr->c[i]=0;
+    }
+  }
+
+  // Randomness (each harmonic), the block type is computed 
+  // in ADnote by setting start position according to this setting
+  if (oscillator_ptr->Prand > 64 &&
+      freqHz >= 0.0 &&
+      !oscillator_ptr->ADvsPAD)
+  {
+    rnd = PI * pow((oscillator_ptr->Prand - 64.0) / 64.0, 2.0);
+
+    // to Nyquist only for AntiAliasing
+    for (i = 1 ; i < nyquist - 1 ; i++)
+    {
+      angle = rnd * i * RND;
+      a = oscillator_ptr->oscillator_fft_frequencies_ptr->c[i];
+      b = oscillator_ptr->oscillator_fft_frequencies_ptr->s[i];
+      c = cos(angle);
+      d = sin(angle);
+      oscillator_ptr->oscillator_fft_frequencies_ptr->c[i] = a * c - b * d;
+      oscillator_ptr->oscillator_fft_frequencies_ptr->s[i] = a * d + b * c;
+    }
+  }
+
+  // Harmonic Amplitude Randomness
+  if (freqHz > 0.1 && !oscillator_ptr->ADvsPAD)
+  {
+    realrnd = rand();
+    srand(oscillator_ptr->randseed);
+    power = oscillator_ptr->Pamprandpower / 127.0;
+    normalize = 1.0 / (1.2 - power);
+
+    switch (oscillator_ptr->Pamprandtype)
+    {
+    case 1:
+      power = power * 2.0 - 0.5;
+      power = pow(15.0, power);
+      for (i=1;i<nyquist-1;i++)
+      {
+        amp = pow(RND, power) * normalize;
+        oscillator_ptr->oscillator_fft_frequencies_ptr->c[i] *= amp;
+        oscillator_ptr->oscillator_fft_frequencies_ptr->s[i] *= amp;
+      }
+      break;
+    case 2:
+      power = power * 2.0 - 0.5;
+      power = pow(15.0, power) * 2.0;
+      rndfreq = 2 * PI * RND;
+
+      for (i = 1 ; i < nyquist - 1 ; i++)
+      {
+        amp = pow(fabs(sin(i * rndfreq)), power) * normalize;
+        oscillator_ptr->oscillator_fft_frequencies_ptr->c[i] *= amp;
+        oscillator_ptr->oscillator_fft_frequencies_ptr->s[i] *= amp;
+      }
+      break;
+    }
+
+    srand(realrnd + 1);
+  }
+
+  if (freqHz > 0.1 && resonance)
+  {
+    zyn_resonance_apply(oscillator_ptr->resonance_ptr, nyquist - 1, oscillator_ptr->oscillator_fft_frequencies_ptr, freqHz);
+  }
+
+  // Full RMS normalize
+  sum = 0;
+
+  for (j = 1 ; j < OSCIL_SIZE / 2 ; j++)
+  {
+    sum += oscillator_ptr->oscillator_fft_frequencies_ptr->c[j] * oscillator_ptr->oscillator_fft_frequencies_ptr->c[j];
+    sum += oscillator_ptr->oscillator_fft_frequencies_ptr->s[j] * oscillator_ptr->oscillator_fft_frequencies_ptr->s[j];
+  }
+
+  if (sum < 0.000001)
+  {
+    sum=1.0;
+  }
+
+  sum = 1.0 / sqrt(sum);
+
+  for (j = 1 ; j < OSCIL_SIZE / 2 ; j++)
+  {
+    oscillator_ptr->oscillator_fft_frequencies_ptr->c[j]*=sum; 
+    oscillator_ptr->oscillator_fft_frequencies_ptr->s[j]*=sum; 
+  }   
+
+  if (oscillator_ptr->ADvsPAD && freqHz > 0.1)
+  {
+    // in this case the smps will contain the freqs
+    for (i=1;i<OSCIL_SIZE/2;i++)
+    {
+      smps[i - 1] = sqrt(oscillator_ptr->oscillator_fft_frequencies_ptr->c[i] * oscillator_ptr->oscillator_fft_frequencies_ptr->c[i] + oscillator_ptr->oscillator_fft_frequencies_ptr->s[i] * oscillator_ptr->oscillator_fft_frequencies_ptr->s[i]);
+    }
+  }
+  else
+  {
+    zyn_fft_freqs2smps(oscillator_ptr->fft, oscillator_ptr->oscillator_fft_frequencies_ptr, smps);
+
+    // correct the amplitude
+    for (i = 0 ; i < OSCIL_SIZE ; i++)
+    {
+      smps[i] *= 0.25;
+    }
+  }
+
+  if (oscillator_ptr->Prand < 64)
+  {
+    return outpos;
+  }
+
+  return 0;
+}
+
+#if 0
 //computes the full spectrum of oscil from harmonics,phases and basefunc
 void prepare();
 
@@ -68,220 +1934,6 @@ void adaptiveharmonic(struct zyn_fft_freqs f, REALTYPE freq);
 //(that's why the sine and cosine components should be processed with a separate call)
 void adaptiveharmonicpostprocess(REALTYPE *f, int size);
     
-//Basic/base functions (Functiile De Baza)
-REALTYPE basefunc_pulse(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_saw(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_triangle(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_power(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_gauss(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_diode(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_abssine(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_pulsesine(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_stretchsine(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_chirp(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_absstretchsine(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_chebyshev(REALTYPE x,REALTYPE a);
-REALTYPE basefunc_sqr(REALTYPE x,REALTYPE a);
-
-void waveshapesmps(int n,REALTYPE *smps,unsigned char type,unsigned char drive)
-{
-  int i;
-  REALTYPE ws=drive/127.0;
-  REALTYPE tmpv;
-
-  switch(type){
-  case 1: ws=pow(10,ws*ws*3.0)-1.0+0.001;//Arctangent
-    for (i=0;i<n;i++) 
-      smps[i]=atan(smps[i]*ws)/atan(ws);
-    break;
-  case 2: ws=ws*ws*32.0+0.0001;//Asymmetric
-    if (ws<1.0) tmpv=sin(ws)+0.1;
-    else tmpv=1.1;
-    for (i=0;i<n;i++) {
-      smps[i]=sin(smps[i]*(0.1+ws-ws*smps[i]))/tmpv;
-    };
-    break;
-  case 3: ws=ws*ws*ws*20.0+0.0001;//Pow
-    for (i=0;i<n;i++) {
-      smps[i]*=ws;
-      if (fabs(smps[i])<1.0) {
-        smps[i]=(smps[i]-pow(smps[i],3.0))*3.0;
-        if (ws<1.0) smps[i]/=ws;
-      } else smps[i]=0.0;
-    };
-    break;
-  case 4: ws=ws*ws*ws*32.0+0.0001;//Sine
-    if (ws<1.57) tmpv=sin(ws);
-    else tmpv=1.0;
-    for (i=0;i<n;i++) smps[i]=sin(smps[i]*ws)/tmpv;
-    break;
-  case 5: ws=ws*ws+0.000001;//Quantisize
-    for (i=0;i<n;i++) 
-      smps[i]=floor(smps[i]/ws+0.5)*ws;
-    break;
-  case 6: ws=ws*ws*ws*32+0.0001;//Zigzag
-    if (ws<1.0) tmpv=sin(ws);
-    else tmpv=1.0;
-    for (i=0;i<n;i++) 
-      smps[i]=asin(sin(smps[i]*ws))/tmpv;
-    break;
-  case 7: ws=pow(2.0,-ws*ws*8.0); //Limiter
-    for (i=0;i<n;i++) {
-      REALTYPE tmp=smps[i];
-      if (fabs(tmp)>ws) {
-        if (tmp>=0.0) smps[i]=1.0;
-        else smps[i]=-1.0;
-      } else smps[i]/=ws;
-    };
-    break;
-  case 8: ws=pow(2.0,-ws*ws*8.0); //Upper Limiter
-    for (i=0;i<n;i++) {
-      REALTYPE tmp=smps[i];
-      if (tmp>ws) smps[i]=ws;
-      smps[i]*=2.0;
-    };
-    break;
-  case 9: ws=pow(2.0,-ws*ws*8.0); //Lower Limiter
-    for (i=0;i<n;i++) {
-      REALTYPE tmp=smps[i];
-      if (tmp<-ws) smps[i]=-ws;
-      smps[i]*=2.0;
-    };
-    break;
-  case 10:ws=(pow(2.0,ws*6.0)-1.0)/pow(2.0,6.0); //Inverse Limiter
-    for (i=0;i<n;i++) {
-      REALTYPE tmp=smps[i];
-      if (fabs(tmp)>ws) {
-        if (tmp>=0.0) smps[i]=tmp-ws;
-        else smps[i]=tmp+ws;
-      } else smps[i]=0;
-    };
-    break;
-  case 11:ws=pow(5,ws*ws*1.0)-1.0;//Clip
-    for (i=0;i<n;i++) 
-      smps[i]=smps[i]*(ws+0.5)*0.9999-floor(0.5+smps[i]*(ws+0.5)*0.9999);
-    break;
-  case 12:ws=ws*ws*ws*30+0.001;//Asym2
-    if (ws<0.3) tmpv=ws;
-    else tmpv=1.0;
-    for (i=0;i<n;i++) {
-      REALTYPE tmp=smps[i]*ws;
-      if ((tmp>-2.0) && (tmp<1.0)) smps[i]=tmp*(1.0-tmp)*(tmp+2.0)/tmpv;
-      else smps[i]=0.0;
-    };
-    break;
-  case 13:ws=ws*ws*ws*32.0+0.0001;//Pow2
-    if (ws<1.0) tmpv=ws*(1+ws)/2.0;
-    else tmpv=1.0;
-    for (i=0;i<n;i++) {
-      REALTYPE tmp=smps[i]*ws;
-      if ((tmp>-1.0)&&(tmp<1.618034)) smps[i]=tmp*(1.0-tmp)/tmpv;
-      else if (tmp>0.0) smps[i]=-1.0;
-      else smps[i]=-2.0;
-    };
-    break;
-  case 14:ws=pow(ws,5.0)*80.0+0.0001;//sigmoid
-    if (ws>10.0) tmpv=0.5;
-    else tmpv=0.5-1.0/(exp(ws)+1.0);
-    for (i=0;i<n;i++) {
-      REALTYPE tmp=smps[i]*ws;
-      if (tmp<-10.0) tmp=-10.0;
-      else if (tmp>10.0) tmp=10.0;
-      tmp=0.5-1.0/(exp(tmp)+1.0);
-      smps[i]=tmp/tmpv;
-    };
-    break;
-    //update to Distorsion::changepar (Ptype max) if there is added more waveshapings functions
-  };
-
-}
-
-REALTYPE *OscilGen::tmpsmps;//this array stores some termporary data and it has SOUND_BUFFER_SIZE elements
-struct zyn_fft_freqs OscilGen::outoscilFFTfreqs;
-
-OscilGen::OscilGen(float sample_rate, zyn_fft_handle fft, Resonance *res_)
-{
-  m_sample_rate = sample_rate;
-
-  m_fft = fft;
-  res=res_;
-
-  zyn_fft_freqs_init(&oscilFFTfreqs, OSCIL_SIZE / 2);
-  zyn_fft_freqs_init(&basefuncFFTfreqs, OSCIL_SIZE / 2);
-
-  randseed=1;
-  ADvsPAD=false;
-
-  defaults();
-}
-
-OscilGen::~OscilGen()
-{
-  zyn_fft_freqs_uninit(&basefuncFFTfreqs);
-  zyn_fft_freqs_uninit(&oscilFFTfreqs);
-}
-
-void OscilGen::defaults(){
-
-  oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64;
-  oldbasefuncmodulation=0;oldharmonicshift=0;oldbasefuncmodulationpar1=0;oldbasefuncmodulationpar2=0;oldbasefuncmodulationpar3=0;
-  oldmodulation=0;oldmodulationpar1=0;oldmodulationpar2=0;oldmodulationpar3=0;
-
-  for (int i=0;i<MAX_AD_HARMONICS;i++){
-    hmag[i]=0.0;
-    hphase[i]=0.0;
-    Phmag[i]=64;
-    Phphase[i]=64;
-  };
-  Phmag[0]=127;
-  Phmagtype=0;
-  if (ADvsPAD) Prand=127;//max phase randomness (usefull if the oscil will be imported to a ADsynth from a PADsynth
-  else Prand=64;//no randomness
-
-  Pcurrentbasefunc=0;
-  Pbasefuncpar=64;
-
-  Pbasefuncmodulation=0;
-  Pbasefuncmodulationpar1=64;
-  Pbasefuncmodulationpar2=64;
-  Pbasefuncmodulationpar3=32;
-
-  Pmodulation=0;
-  Pmodulationpar1=64;
-  Pmodulationpar2=64;
-  Pmodulationpar3=32;
-
-  Pwaveshapingfunction=0;
-  Pwaveshaping=64;
-  Pfiltertype=0;
-  Pfilterpar1=64;
-  Pfilterpar2=64;
-  Pfilterbeforews=0;
-  Psatype=0;
-  Psapar=64;
-
-  Pamprandpower=64;
-  Pamprandtype=0;
-    
-  Pharmonicshift=0;
-  Pharmonicshiftfirst=0;
-
-  Padaptiveharmonics=0;
-  Padaptiveharmonicspower=100;
-  Padaptiveharmonicsbasefreq=128;
-  Padaptiveharmonicspar=50;
-    
-  for (int i=0;i<OSCIL_SIZE/2;i++) {
-    oscilFFTfreqs.s[i]=0.0;
-    oscilFFTfreqs.c[i]=0.0;
-    basefuncFFTfreqs.s[i]=0.0;
-    basefuncFFTfreqs.c[i]=0.0;
-  };
-  oscilprepared=0;
-  oldfilterpars=0;oldsapars=0;
-  prepare();
-};
-
 void
 OscilGen::convert2sine(int magtype)
 {
@@ -326,863 +1978,6 @@ OscilGen::convert2sine(int magtype)
 
   prepare();
 }
-
-/* 
- * Base Functions - START 
- */
-REALTYPE OscilGen::basefunc_pulse(REALTYPE x,REALTYPE a){
-  return((fmod(x,1.0)<a)?-1.0:1.0);
-};
-
-REALTYPE OscilGen::basefunc_saw(REALTYPE x,REALTYPE a){
-  if (a<0.00001) a=0.00001;
-  else if (a>0.99999) a=0.99999;
-  x=fmod(x,1);
-  if (x<a) return(x/a*2.0-1.0);
-  else return((1.0-x)/(1.0-a)*2.0-1.0);
-};
-
-REALTYPE OscilGen::basefunc_triangle(REALTYPE x,REALTYPE a){
-  x=fmod(x+0.25,1);
-  a=1-a;
-  if (a<0.00001) a=0.00001;
-  if (x<0.5) x=x*4-1.0;
-  else x=(1.0-x)*4-1.0;
-  x/=-a;
-  if (x<-1.0) x=-1.0;
-  if (x>1.0) x=1.0;
-  return(x);
-};
-
-REALTYPE OscilGen::basefunc_power(REALTYPE x,REALTYPE a){
-  x=fmod(x,1);
-  if (a<0.00001) a=0.00001;
-  else if (a>0.99999) a=0.99999;
-  return(pow(x,exp((a-0.5)*10.0))*2.0-1.0);
-};
-
-REALTYPE OscilGen::basefunc_gauss(REALTYPE x,REALTYPE a){
-  x=fmod(x,1)*2.0-1.0;
-  if (a<0.00001) a=0.00001;
-  return(exp(-x*x*(exp(a*8)+5.0))*2.0-1.0);
-};
-
-REALTYPE OscilGen::basefunc_diode(REALTYPE x,REALTYPE a){
-  if (a<0.00001) a=0.00001;
-  else if (a>0.99999) a=0.99999;
-  a=a*2.0-1.0;
-  x=cos((x+0.5)*2.0*PI)-a;
-  if (x<0.0) x=0.0;
-  return(x/(1.0-a)*2-1.0);
-};
-
-REALTYPE OscilGen::basefunc_abssine(REALTYPE x,REALTYPE a){
-  x=fmod(x,1);
-  if (a<0.00001) a=0.00001;
-  else if (a>0.99999) a=0.99999;
-  return(sin(pow(x,exp((a-0.5)*5.0))*PI)*2.0-1.0);
-};
-
-REALTYPE OscilGen::basefunc_pulsesine(REALTYPE x,REALTYPE a){
-  if (a<0.00001) a=0.00001;
-  x=(fmod(x,1)-0.5)*exp((a-0.5)*log(128));
-  if (x<-0.5) x=-0.5;
-  else if (x>0.5) x=0.5;
-  x=sin(x*PI*2.0);
-  return(x);
-};
-
-REALTYPE OscilGen::basefunc_stretchsine(REALTYPE x,REALTYPE a){
-  x=fmod(x+0.5,1)*2.0-1.0;
-  a=(a-0.5)*4;if (a>0.0) a*=2;
-  a=pow(3.0,a);
-  REALTYPE b=pow(fabs(x),a);
-  if (x<0) b=-b;
-  return(-sin(b*PI));
-};
-
-REALTYPE OscilGen::basefunc_chirp(REALTYPE x,REALTYPE a){
-  x=fmod(x,1.0)*2.0*PI;
-  a=(a-0.5)*4;if (a<0.0) a*=2.0;
-  a=pow(3.0,a);
-  return(sin(x/2.0)*sin(a*x*x));
-};
-
-REALTYPE OscilGen::basefunc_absstretchsine(REALTYPE x,REALTYPE a){
-  x=fmod(x+0.5,1)*2.0-1.0;
-  a=(a-0.5)*9;
-  a=pow(3.0,a);
-  REALTYPE b=pow(fabs(x),a);
-  if (x<0) b=-b;
-  return(-pow(sin(b*PI),2));
-};
-
-REALTYPE OscilGen::basefunc_chebyshev(REALTYPE x,REALTYPE a){
-  a=a*a*a*30.0+1.0;
-  return(cos(acos(x*2.0-1.0)*a));
-};
-
-REALTYPE OscilGen::basefunc_sqr(REALTYPE x,REALTYPE a){
-  a=a*a*a*a*160.0+0.001;
-  return(-atan(sin(x*2.0*PI)*a));
-};
-/* 
- * Base Functions - END
- */
-
-
-/* 
- * Get the base function
- */
-void OscilGen::getbasefunction(REALTYPE *smps){
-  int i;    
-  REALTYPE par=(Pbasefuncpar+0.5)/128.0;
-  if (Pbasefuncpar==64) par=0.5;
-    
-  REALTYPE basefuncmodulationpar1=Pbasefuncmodulationpar1/127.0,
-    basefuncmodulationpar2=Pbasefuncmodulationpar2/127.0,
-    basefuncmodulationpar3=Pbasefuncmodulationpar3/127.0;
-
-  switch(Pbasefuncmodulation){
-  case 1:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*5.0)-1.0)/10.0;
-    basefuncmodulationpar3=floor((pow(2,basefuncmodulationpar3*5.0)-1.0));
-    if (basefuncmodulationpar3<0.9999) basefuncmodulationpar3=-1.0;
-    break;
-  case 2:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*5.0)-1.0)/10.0;
-    basefuncmodulationpar3=1.0+floor((pow(2,basefuncmodulationpar3*5.0)-1.0));
-    break;
-  case 3:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*7.0)-1.0)/10.0;
-    basefuncmodulationpar3=0.01+(pow(2,basefuncmodulationpar3*16.0)-1.0)/10.0;
-    break;
-  };  
-
-//    printf("%.5f %.5f\n",basefuncmodulationpar1,basefuncmodulationpar3);
-
-  for (i=0;i<OSCIL_SIZE;i++) {
-    REALTYPE t=i*1.0/OSCIL_SIZE;
-
-    switch(Pbasefuncmodulation){
-    case 1:t=t*basefuncmodulationpar3+sin((t+basefuncmodulationpar2)*2.0*PI)*basefuncmodulationpar1;//rev
-      break;
-    case 2:t=t+sin((t*basefuncmodulationpar3+basefuncmodulationpar2)*2.0*PI)*basefuncmodulationpar1;//sine
-      break;
-    case 3:t=t+pow((1.0-cos((t+basefuncmodulationpar2)*2.0*PI))*0.5,basefuncmodulationpar3)*basefuncmodulationpar1;//power
-      break;
-    };
-  
-    t=t-floor(t);
-  
-    switch (Pcurrentbasefunc){
-    case 1:smps[i]=basefunc_triangle(t,par);
-      break;
-    case 2:smps[i]=basefunc_pulse(t,par);
-      break;
-    case 3:smps[i]=basefunc_saw(t,par);
-      break;
-    case 4:smps[i]=basefunc_power(t,par);
-      break;
-    case 5:smps[i]=basefunc_gauss(t,par);
-      break;
-    case 6:smps[i]=basefunc_diode(t,par);
-      break;
-    case 7:smps[i]=basefunc_abssine(t,par);
-      break;
-    case 8:smps[i]=basefunc_pulsesine(t,par);
-      break;
-    case 9:smps[i]=basefunc_stretchsine(t,par);
-      break;
-    case 10:smps[i]=basefunc_chirp(t,par);
-      break;
-    case 11:smps[i]=basefunc_absstretchsine(t,par);
-      break;
-    case 12:smps[i]=basefunc_chebyshev(t,par);
-      break;
-    case 13:smps[i]=basefunc_sqr(t,par);
-      break;
-    default:smps[i]=-sin(2.0*PI*i/OSCIL_SIZE);
-    };
-  };
-};
-
-/* 
- * Filter the oscillator
- */
-void OscilGen::oscilfilter(){
-  if (Pfiltertype==0) return;
-  REALTYPE par=1.0-Pfilterpar1/128.0;
-  REALTYPE par2=Pfilterpar2/127.0;
-  REALTYPE max=0.0,tmp=0.0,p2,x;
-  for (int i=1;i<OSCIL_SIZE/2;i++){
-    REALTYPE gain=1.0;
-    switch(Pfiltertype){
-    case 1: gain=pow(1.0-par*par*par*0.99,i);//lp
-      tmp=par2*par2*par2*par2*0.5+0.0001;
-      if (gain<tmp) gain=pow(gain,10.0)/pow(tmp,9.0);
-      break;
-    case 2: gain=1.0-pow(1.0-par*par,i+1);//hp1
-      gain=pow(gain,par2*2.0+0.1);
-      break;
-    case 3: if (par<0.2) par=par*0.25+0.15;
-      gain=1.0-pow(1.0-par*par*0.999+0.001,i*0.05*i+1.0);//hp1b
-      tmp=pow(5.0,par2*2.0);
-      gain=pow(gain,tmp);
-      break;
-    case 4: gain=i+1-pow(2,(1.0-par)*7.5);//bp1
-      gain=1.0/(1.0+gain*gain/(i+1.0));
-      tmp=pow(5.0,par2*2.0);
-      gain=pow(gain,tmp);
-      if (gain<1e-5) gain=1e-5;
-      break;
-    case 5: gain=i+1-pow(2,(1.0-par)*7.5);//bs1
-      gain=pow(atan(gain/(i/10.0+1))/1.57,6);
-      gain=pow(gain,par2*par2*3.9+0.1);
-      break;
-    case 6: tmp=pow(par2,0.33);
-      gain=(i+1>pow(2,(1.0-par)*10)?0.0:1.0)*par2+(1.0-par2);//lp2
-      break;
-    case 7: tmp=pow(par2,0.33);
-      //tmp=1.0-(1.0-par2)*(1.0-par2);
-      gain=(i+1>pow(2,(1.0-par)*7)?1.0:0.0)*par2+(1.0-par2);//hp2
-      if (Pfilterpar1==0) gain=1.0;
-      break;
-    case 8: tmp=pow(par2,0.33);
-      //tmp=1.0-(1.0-par2)*(1.0-par2);
-      gain=(fabs(pow(2,(1.0-par)*7)-i)>i/2+1?0.0:1.0)*par2+(1.0-par2);//bp2
-      break;
-    case 9: tmp=pow(par2,0.33);
-      gain=(fabs(pow(2,(1.0-par)*7)-i)<i/2+1?0.0:1.0)*par2+(1.0-par2);//bs2
-      break;
-    case 10:tmp=pow(5.0,par2*2.0-1.0);
-      tmp=pow(i/32.0,tmp)*32.0;
-      if (Pfilterpar2==64) tmp=i;
-      gain=cos(par*par*PI/2.0*tmp);//cos
-      gain*=gain;
-      break;
-    case 11:tmp=pow(5.0,par2*2.0-1.0);
-      tmp=pow(i/32.0,tmp)*32.0;
-      if (Pfilterpar2==64) tmp=i;
-      gain=sin(par*par*PI/2.0*tmp);//sin
-      gain*=gain;
-      break;
-    case 12:p2=1.0-par+0.2;
-      x=i/(64.0*p2*p2); 
-      if (x<0.0) x=0.0;
-      else if (x>1.0) x=1.0;
-      tmp=pow(1.0-par2,2.0);
-      gain=cos(x*PI)*(1.0-tmp)+1.01+tmp;//low shelf
-      break;
-    case 13:tmp=(int) (pow(2.0,(1.0-par)*7.2));
-      gain=1.0;
-      if (i==(int) (tmp)) gain=pow(2.0,par2*par2*8.0);
-      break;
-    };
-  
-  
-    oscilFFTfreqs.s[i]*=gain;
-    oscilFFTfreqs.c[i]*=gain;
-    REALTYPE tmp=oscilFFTfreqs.s[i]*oscilFFTfreqs.s[i]+
-      oscilFFTfreqs.c[i]*oscilFFTfreqs.c[i];
-    if (max<tmp) max=tmp;
-  };
-
-  max=sqrt(max);
-  if (max<1e-10) max=1.0;
-  REALTYPE imax=1.0/max;
-  for (int i=1;i<OSCIL_SIZE/2;i++) {
-    oscilFFTfreqs.s[i]*=imax; 
-    oscilFFTfreqs.c[i]*=imax; 
-  };
-};
- 
-/* 
- * Change the base function
- */
-void
-OscilGen::changebasefunction()
-{
-  int i;
-
-  if (Pcurrentbasefunc != 0)
-  {
-    getbasefunction(tmpsmps);
-    zyn_fft_smps2freqs(m_fft, tmpsmps, basefuncFFTfreqs);
-    basefuncFFTfreqs.c[0] = 0.0;
-  }
-  else
-  {
-    for (i = 0 ; i < OSCIL_SIZE / 2 ; i++)
-    {
-      basefuncFFTfreqs.s[i] = 0.0;
-      basefuncFFTfreqs.c[i] = 0.0;
-    }
-    //in this case basefuncFFTfreqs_ are not used
-  }
-
-  oscilprepared = 0;
-  oldbasefunc = Pcurrentbasefunc;
-  oldbasepar = Pbasefuncpar;
-  oldbasefuncmodulation = Pbasefuncmodulation;
-  oldbasefuncmodulationpar1 = Pbasefuncmodulationpar1;
-  oldbasefuncmodulationpar2 = Pbasefuncmodulationpar2;
-  oldbasefuncmodulationpar3 = Pbasefuncmodulationpar3;
-}
-
-/* 
- * Waveshape
- */
-void OscilGen::waveshape()
-{
-  int i;
-  REALTYPE tmp;
-  REALTYPE max;
-
-  oldwaveshapingfunction = Pwaveshapingfunction;
-  oldwaveshaping = Pwaveshaping;
-
-  if (Pwaveshapingfunction == 0)
-  {
-    return;
-  }
-
-  // remove the DC
-  oscilFFTfreqs.c[0] = 0.0;
-
-  // reduce the amplitude of the freqs near the nyquist
-  for (i = 1 ; i < OSCIL_SIZE / 8 ; i++)
-  {
-    tmp = i / (OSCIL_SIZE / 8.0);
-    oscilFFTfreqs.s[OSCIL_SIZE / 2 - i] *= tmp;
-    oscilFFTfreqs.c[OSCIL_SIZE / 2 - i] *= tmp;
-  }
-
-  zyn_fft_freqs2smps(m_fft, oscilFFTfreqs, tmpsmps); 
-
-  // Normalize
-
-  max = 0.0;
-
-  for (i = 0 ; i < OSCIL_SIZE ; i++) 
-  {
-    if (max < fabs(tmpsmps[i]))
-    {
-      max = fabs(tmpsmps[i]);
-    }
-  }
-
-  if (max < 0.00001)
-  {
-    max=1.0;
-  }
-
-  max = 1.0 / max;
-
-  for (i = 0 ; i < OSCIL_SIZE ; i++)
-  {
-    tmpsmps[i] *= max;
-  }
-
-  //Do the waveshaping
-  waveshapesmps(OSCIL_SIZE, tmpsmps, Pwaveshapingfunction, Pwaveshaping);
-
-  //perform FFT
-  zyn_fft_smps2freqs(m_fft, tmpsmps , oscilFFTfreqs);
-}
-
-/* 
- * Do the Frequency Modulation of the Oscil
- */
-void OscilGen::modulation(){
-  int i;
-
-  oldmodulation=Pmodulation;
-  oldmodulationpar1=Pmodulationpar1;
-  oldmodulationpar2=Pmodulationpar2;
-  oldmodulationpar3=Pmodulationpar3;
-  if (Pmodulation==0) return;
-
-
-  REALTYPE modulationpar1=Pmodulationpar1/127.0,
-    modulationpar2=0.5-Pmodulationpar2/127.0,
-    modulationpar3=Pmodulationpar3/127.0;
-
-  switch(Pmodulation){
-  case 1:modulationpar1=(pow(2,modulationpar1*7.0)-1.0)/100.0;
-    modulationpar3=floor((pow(2,modulationpar3*5.0)-1.0));
-    if (modulationpar3<0.9999) modulationpar3=-1.0;
-    break;
-  case 2:modulationpar1=(pow(2,modulationpar1*7.0)-1.0)/100.0;
-    modulationpar3=1.0+floor((pow(2,modulationpar3*5.0)-1.0));
-    break;
-  case 3:modulationpar1=(pow(2,modulationpar1*9.0)-1.0)/100.0;
-    modulationpar3=0.01+(pow(2,modulationpar3*16.0)-1.0)/10.0;
-    break;
-  };  
-
-  oscilFFTfreqs.c[0]=0.0;//remove the DC
-  //reduce the amplitude of the freqs near the nyquist
-  for (i=1;i<OSCIL_SIZE/8;i++) {
-    REALTYPE tmp=i/(OSCIL_SIZE/8.0);
-    oscilFFTfreqs.s[OSCIL_SIZE/2-i]*=tmp;
-    oscilFFTfreqs.c[OSCIL_SIZE/2-i]*=tmp;
-  };
-  zyn_fft_freqs2smps(m_fft, oscilFFTfreqs, tmpsmps);
-  int extra_points=2;
-  REALTYPE *in=new REALTYPE[OSCIL_SIZE+extra_points];
-
-  //Normalize
-  REALTYPE max=0.0;
-  for (i=0;i<OSCIL_SIZE;i++) if (max<fabs(tmpsmps[i])) max=fabs(tmpsmps[i]);
-  if (max<0.00001) max=1.0;
-  max=1.0/max;for (i=0;i<OSCIL_SIZE;i++) in[i]=tmpsmps[i]*max;
-  for (i=0;i<extra_points;i++) in[i+OSCIL_SIZE]=tmpsmps[i]*max;
-    
-  //Do the modulation
-  for (i=0;i<OSCIL_SIZE;i++) {
-    REALTYPE t=i*1.0/OSCIL_SIZE;
-
-    switch(Pmodulation){
-    case 1:t=t*modulationpar3+sin((t+modulationpar2)*2.0*PI)*modulationpar1;//rev
-      break;
-    case 2:t=t+sin((t*modulationpar3+modulationpar2)*2.0*PI)*modulationpar1;//sine
-      break;
-    case 3:t=t+pow((1.0-cos((t+modulationpar2)*2.0*PI))*0.5,modulationpar3)*modulationpar1;//power
-      break;
-    };
-  
-    t=(t-floor(t))*OSCIL_SIZE;
-  
-    int poshi=(int) t;
-    REALTYPE poslo=t-floor(t);
-
-    tmpsmps[i]=in[poshi]*(1.0-poslo)+in[poshi+1]*poslo;
-  };
-
-  delete(in);
-
-  // perform FFT
-  zyn_fft_smps2freqs(m_fft, tmpsmps, oscilFFTfreqs);
-}
-
-/* 
- * Adjust the spectrum
- */
-void OscilGen::spectrumadjust(){
-  if (Psatype==0) return;
-  REALTYPE par=Psapar/127.0;
-  switch(Psatype){
-  case 1: par=1.0-par*2.0;
-    if (par>=0.0) par=pow(5.0,par);
-    else par=pow(8.0,par);
-    break;
-  case 2: par=pow(10.0,(1.0-par)*3.0)*0.25;
-    break;
-  case 3: par=pow(10.0,(1.0-par)*3.0)*0.25;
-    break;
-  };
-
-
-  REALTYPE max=0.0;
-  for (int i=0;i<OSCIL_SIZE/2;i++){ 
-    REALTYPE tmp=pow(oscilFFTfreqs.c[i],2)+pow(oscilFFTfreqs.s[i],2.0);
-    if (max<tmp) max=tmp;
-  };
-  max=sqrt(max)/OSCIL_SIZE*2.0;
-  if (max<1e-8) max=1.0;
-
-    
-  for (int i=0;i<OSCIL_SIZE/2;i++){
-    REALTYPE mag=sqrt(pow(oscilFFTfreqs.s[i],2)+pow(oscilFFTfreqs.c[i],2.0))/max;
-    REALTYPE phase=atan2(oscilFFTfreqs.s[i],oscilFFTfreqs.c[i]);
-  
-    switch (Psatype){
-    case 1: mag=pow(mag,par);
-      break;
-    case 2: if (mag<par) mag=0.0;
-      break;
-    case 3: mag/=par;
-      if (mag>1.0) mag=1.0;
-      break;
-    };
-    oscilFFTfreqs.c[i]=mag*cos(phase);
-    oscilFFTfreqs.s[i]=mag*sin(phase);
-  };
-    
-};
-
-void OscilGen::shiftharmonics(){
-  if (Pharmonicshift==0) return;
-    
-  REALTYPE hc,hs;
-  int harmonicshift=-Pharmonicshift;
-    
-  if (harmonicshift>0){
-    for (int i=OSCIL_SIZE/2-2;i>=0;i--){ 
-      int oldh=i-harmonicshift;
-      if (oldh<0){
-        hc=0.0;
-        hs=0.0;
-      } else {
-        hc=oscilFFTfreqs.c[oldh+1];
-        hs=oscilFFTfreqs.s[oldh+1];
-      };
-      oscilFFTfreqs.c[i+1]=hc;
-      oscilFFTfreqs.s[i+1]=hs;
-    };
-  } else {
-    for (int i=0;i<OSCIL_SIZE/2-1;i++){ 
-      int oldh=i+abs(harmonicshift);
-      if (oldh>=(OSCIL_SIZE/2-1)){
-        hc=0.0;
-        hs=0.0;
-      } else {
-        hc=oscilFFTfreqs.c[oldh+1];
-        hs=oscilFFTfreqs.s[oldh+1];
-        if (fabs(hc)<0.000001) hc=0.0;
-        if (fabs(hs)<0.000001) hs=0.0;
-      };
-      
-      oscilFFTfreqs.c[i+1]=hc;
-      oscilFFTfreqs.s[i+1]=hs;
-    };
-  };
-    
-  oscilFFTfreqs.c[0]=0.0;
-};
-
-/* 
- * Prepare the Oscillator
- */
-void OscilGen::prepare(){
-  int i,j,k;
-  REALTYPE a,b,c,d,hmagnew;
-  
-  if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)||
-      (oldbasefuncmodulation!=Pbasefuncmodulation)||
-      (oldbasefuncmodulationpar1!=Pbasefuncmodulationpar1)||
-      (oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)||
-      (oldbasefuncmodulationpar3!=Pbasefuncmodulationpar3)) 
-    changebasefunction();
-
-  for (i=0;i<MAX_AD_HARMONICS;i++) hphase[i]=(Phphase[i]-64.0)/64.0*PI/(i+1);
-
-  for (i=0;i<MAX_AD_HARMONICS;i++){
-    hmagnew=1.0-fabs(Phmag[i]/64.0-1.0);
-    switch(Phmagtype){
-    case 1:hmag[i]=exp(hmagnew*log(0.01)); break;
-    case 2:hmag[i]=exp(hmagnew*log(0.001));break;
-    case 3:hmag[i]=exp(hmagnew*log(0.0001));break;
-    case 4:hmag[i]=exp(hmagnew*log(0.00001));break;
-    default:hmag[i]=1.0-hmagnew;
-      break; 
-    };
-
-    if (Phmag[i]<64) hmag[i]=-hmag[i];
-  };
-    
-  //remove the harmonics where Phmag[i]==64
-  for (i=0;i<MAX_AD_HARMONICS;i++) if (Phmag[i]==64) hmag[i]=0.0;
-
-
-  for (i=0;i<OSCIL_SIZE/2;i++) {
-    oscilFFTfreqs.c[i]=0.0;
-    oscilFFTfreqs.s[i]=0.0;
-  };
-  if (Pcurrentbasefunc==0) {//the sine case
-    for (i=0;i<MAX_AD_HARMONICS;i++){
-      oscilFFTfreqs.c[i+1]=-hmag[i]*sin(hphase[i]*(i+1))/2.0;
-      oscilFFTfreqs.s[i+1]=hmag[i]*cos(hphase[i]*(i+1))/2.0;
-    };
-  } else {
-    for (j=0;j<MAX_AD_HARMONICS;j++){
-      if (Phmag[j]==64) continue;
-      for (i=1;i<OSCIL_SIZE/2;i++){
-        k=i*(j+1);if (k>=OSCIL_SIZE/2) break;
-        a=basefuncFFTfreqs.c[i];
-        b=basefuncFFTfreqs.s[i];
-        c=hmag[j]*cos(hphase[j]*k);
-        d=hmag[j]*sin(hphase[j]*k);
-        oscilFFTfreqs.c[k]+=a*c-b*d;
-        oscilFFTfreqs.s[k]+=a*d+b*c;
-      };
-    };
-
-  };
-
-  if (Pharmonicshiftfirst!=0)  shiftharmonics();
-
-
-
-  if (Pfilterbeforews==0){
-    waveshape();
-    oscilfilter();
-  } else {
-    oscilfilter();
-    waveshape();
-  };
-
-  modulation();
-  spectrumadjust();
-  if (Pharmonicshiftfirst==0)  shiftharmonics();
-
-  oscilFFTfreqs.c[0]=0.0;
-
-  oldhmagtype=Phmagtype;
-  oldharmonicshift=Pharmonicshift+Pharmonicshiftfirst*256;
-
-  oscilprepared=1;
-};
-
-void OscilGen::adaptiveharmonic(struct zyn_fft_freqs f, REALTYPE freq)
-{
-  struct zyn_fft_freqs inf;
-
-  if ((Padaptiveharmonics==0)/*||(freq<1.0)*/) return;
-  if (freq<1.0) freq=440.0;
-
-  zyn_fft_freqs_init(&inf , OSCIL_SIZE / 2);
-
-  for (int i=0;i<OSCIL_SIZE/2;i++)
-  {
-    inf.s[i]=f.s[i];
-    inf.c[i]=f.c[i];
-    f.s[i]=0.0;
-    f.c[i]=0.0;
-  }
-
-  inf.c[0]=0.0;inf.s[0]=0.0;    
-    
-  REALTYPE hc=0.0,hs=0.0;
-  REALTYPE basefreq=30.0*pow(10.0,Padaptiveharmonicsbasefreq/128.0);
-  REALTYPE power=(Padaptiveharmonicspower+1.0)/101.0;
-    
-  REALTYPE rap=freq/basefreq;
-
-  rap=pow(rap,power);
-
-  bool down=false;
-  if (rap>1.0) {
-    rap=1.0/rap;
-    down=true;
-  };
-    
-  for (int i=0;i<OSCIL_SIZE/2-2;i++){ 
-    REALTYPE h=i*rap;
-    int high=(int)(i*rap);
-    REALTYPE low=fmod(h,1.0);
-
-    if (high>=(OSCIL_SIZE/2-2)){
-      break;
-    } else {
-      if (down){
-        f.c[high]+=inf.c[i]*(1.0-low);
-        f.s[high]+=inf.s[i]*(1.0-low);
-        f.c[high+1]+=inf.c[i]*low;
-        f.s[high+1]+=inf.s[i]*low;
-      } else {
-        hc=inf.c[high]*(1.0-low)+inf.c[high+1]*low;
-        hs=inf.s[high]*(1.0-low)+inf.s[high+1]*low;
-      };
-      if (fabs(hc)<0.000001) hc=0.0;
-      if (fabs(hs)<0.000001) hs=0.0;
-    };
-  
-    if (!down){    
-      if (i==0) {//corect the aplitude of the first harmonic
-        hc*=rap;
-        hs*=rap;
-      };
-      f.c[i]=hc;
-      f.s[i]=hs;
-    };
-  };
-    
-  f.c[1]+=f.c[0];f.s[1]+=f.s[0];
-  f.c[0]=0.0;f.s[0]=0.0;    
-
-  zyn_fft_freqs_uninit(&inf);
-};
-
-void OscilGen::adaptiveharmonicpostprocess(REALTYPE *f,int size){
-  if (Padaptiveharmonics<=1) return;
-  REALTYPE *inf=new REALTYPE[size];
-  REALTYPE par=Padaptiveharmonicspar*0.01;
-  par=1.0-pow((1.0-par),1.5);
-    
-  for (int i=0;i<size;i++) {
-    inf[i]=f[i]*par;
-    f[i]=f[i]*(1.0-par);
-  };
-
-    
-  if (Padaptiveharmonics==2){//2n+1
-    for (int i=0;i<size;i++) if ((i%2)==0) f[i]+=inf[i];//i=0 pt prima armonica,etc.
-  } else{//celelalte moduri
-    int nh=(Padaptiveharmonics-3)/2+2;
-    int sub_vs_add=(Padaptiveharmonics-3)%2;
-    if (sub_vs_add==0){
-      for (int i=0;i<size;i++) {
-        if (((i+1)%nh)==0){
-          f[i]+=inf[i];
-        };
-      };
-    } else {
-      for (int i=0;i<size/nh-1;i++) {
-        f[(i+1)*nh-1]+=inf[i];
-      };
-    };
-  };
-
-  delete(inf);
-};
-
-void OscilGen::newrandseed(unsigned int randseed){
-  this->randseed=randseed;
-};
-
-/* 
- * Get the oscillator function
- */
-short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz, bool resonance){
-  int i;
-  int nyquist,outpos;
-    
-  if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)||(oldhmagtype!=Phmagtype)
-      ||(oldwaveshaping!=Pwaveshaping)||(oldwaveshapingfunction!=Pwaveshapingfunction)) oscilprepared=0;
-  if (oldfilterpars!=Pfiltertype*256+Pfilterpar1+Pfilterpar2*65536+Pfilterbeforews*16777216){ 
-    oscilprepared=0;
-    oldfilterpars=Pfiltertype*256+Pfilterpar1+Pfilterpar2*65536+Pfilterbeforews*16777216;
-  };
-  if (oldsapars!=Psatype*256+Psapar){ 
-    oscilprepared=0;
-    oldsapars=Psatype*256+Psapar;
-  };
-
-  if ((oldbasefuncmodulation!=Pbasefuncmodulation)||
-      (oldbasefuncmodulationpar1!=Pbasefuncmodulationpar1)||
-      (oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)||
-      (oldbasefuncmodulationpar3!=Pbasefuncmodulationpar3)) 
-    oscilprepared=0;
-
-  if ((oldmodulation!=Pmodulation)||
-      (oldmodulationpar1!=Pmodulationpar1)||
-      (oldmodulationpar2!=Pmodulationpar2)||
-      (oldmodulationpar3!=Pmodulationpar3)) 
-    oscilprepared=0;
-
-  if (oldharmonicshift!=Pharmonicshift+Pharmonicshiftfirst*256) oscilprepared=0;
-    
-  if (oscilprepared!=1) prepare();
-
-  outpos=(int)((RND*2.0-1.0)*(REALTYPE) OSCIL_SIZE*(Prand-64.0)/64.0);
-  outpos=(outpos+2*OSCIL_SIZE) % OSCIL_SIZE;
-
-
-  for (i=0;i<OSCIL_SIZE/2;i++){
-    outoscilFFTfreqs.c[i]=0.0;
-    outoscilFFTfreqs.s[i]=0.0;
-  };
-
-  nyquist=(int)(0.5 * m_sample_rate / fabs(freqHz)) + 2;
-  if (ADvsPAD) nyquist=(int)(OSCIL_SIZE/2);
-  if (nyquist>OSCIL_SIZE/2) nyquist=OSCIL_SIZE/2;
-    
-    
-  int realnyquist=nyquist;
-    
-  if (Padaptiveharmonics!=0) nyquist=OSCIL_SIZE/2;
-  for (i=1;i<nyquist-1;i++) {
-    outoscilFFTfreqs.c[i]=oscilFFTfreqs.c[i];
-    outoscilFFTfreqs.s[i]=oscilFFTfreqs.s[i];
-  };
-
-  adaptiveharmonic(outoscilFFTfreqs,freqHz);
-  adaptiveharmonicpostprocess(&outoscilFFTfreqs.c[1],OSCIL_SIZE/2-1);
-  adaptiveharmonicpostprocess(&outoscilFFTfreqs.s[1],OSCIL_SIZE/2-1);
-
-  nyquist=realnyquist;
-  if (Padaptiveharmonics){//do the antialiasing in the case of adaptive harmonics
-    for (i=nyquist;i<OSCIL_SIZE/2;i++) {
-      outoscilFFTfreqs.s[i]=0;
-      outoscilFFTfreqs.c[i]=0;
-    };
-  };
-
-  // Randomness (each harmonic), the block type is computed 
-  // in ADnote by setting start position according to this setting
-  if ((Prand>64)&&(freqHz>=0.0)&&(!ADvsPAD)){
-    REALTYPE rnd,angle,a,b,c,d;
-    rnd=PI*pow((Prand-64.0)/64.0,2.0);
-    for (i=1;i<nyquist-1;i++){//to Nyquist only for AntiAliasing
-      angle=rnd*i*RND;
-      a=outoscilFFTfreqs.c[i];
-      b=outoscilFFTfreqs.s[i];
-      c=cos(angle);
-      d=sin(angle);
-      outoscilFFTfreqs.c[i]=a*c-b*d;
-      outoscilFFTfreqs.s[i]=a*d+b*c;
-    };  
-  };
-
-  //Harmonic Amplitude Randomness
-  if ((freqHz>0.1)&&(!ADvsPAD)) {
-    unsigned int realrnd=rand();
-    srand(randseed);
-    REALTYPE power=Pamprandpower/127.0;
-    REALTYPE normalize=1.0/(1.2-power);
-    switch (Pamprandtype){
-    case 1: power=power*2.0-0.5;
-      power=pow(15.0,power);
-      for (i=1;i<nyquist-1;i++){
-        REALTYPE amp=pow(RND,power)*normalize;
-        outoscilFFTfreqs.c[i]*=amp;
-        outoscilFFTfreqs.s[i]*=amp;
-      };
-      break;
-    case 2: power=power*2.0-0.5;
-      power=pow(15.0,power)*2.0;
-      REALTYPE rndfreq=2*PI*RND;
-      for (i=1;i<nyquist-1;i++){
-        REALTYPE amp=pow(fabs(sin(i*rndfreq)),power)*normalize;
-        outoscilFFTfreqs.c[i]*=amp;
-        outoscilFFTfreqs.s[i]*=amp;
-      };
-      break;
-    };  
-    srand(realrnd+1);
-  };
-
-  if (freqHz > 0.1 && resonance)
-  {
-    res->applyres(nyquist - 1, outoscilFFTfreqs, freqHz);
-  }
-
-  //Full RMS normalize
-  REALTYPE sum=0;
-  for (int j=1;j<OSCIL_SIZE/2;j++) {
-    REALTYPE term=outoscilFFTfreqs.c[j]*outoscilFFTfreqs.c[j]
-      +outoscilFFTfreqs.s[j]*outoscilFFTfreqs.s[j];
-    sum+=term;
-  };
-  if (sum<0.000001) sum=1.0;  
-  sum=1.0/sqrt(sum);
-  for (int j=1;j<OSCIL_SIZE/2;j++) {
-    outoscilFFTfreqs.c[j]*=sum; 
-    outoscilFFTfreqs.s[j]*=sum; 
-  };
-   
-
-  if ((ADvsPAD)&&(freqHz>0.1)){//in this case the smps will contain the freqs
-    for (i=1;i<OSCIL_SIZE/2;i++) smps[i-1]=sqrt(outoscilFFTfreqs.c[i]*outoscilFFTfreqs.c[i]
-                                                +outoscilFFTfreqs.s[i]*outoscilFFTfreqs.s[i]);
-  } else {
-    zyn_fft_freqs2smps(m_fft, outoscilFFTfreqs, smps);
-    for (i=0;i<OSCIL_SIZE;i++) smps[i]*=0.25;//correct the amplitude
-  };
-
-  if (Prand<64) return(outpos);
-  else return(0);
-};
-
 
 /* 
  * Get the spectrum of the oscillator for the UI
@@ -1244,3 +2039,4 @@ OscilGen::getcurrentbasefunction(REALTYPE *smps)
     getbasefunction(smps);
   }
 }
+#endif

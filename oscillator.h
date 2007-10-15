@@ -23,31 +23,10 @@
 #ifndef OSCIL_GEN_H
 #define OSCIL_GEN_H
 
-class OscilGen
+#define ZYN_ADDSYNTH_OSCILLATOR_EXTRA_POINTS 2
+
+struct zyn_addsynth_oscillator
 {
-public:
-  OscilGen(float sample_rate, zyn_fft_handle fft, Resonance *res_);
-  ~OscilGen();
-
-  //computes the full spectrum of oscil from harmonics,phases and basefunc
-  void prepare();
-
-  //do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT
-  short get(REALTYPE *smps,REALTYPE freqHz);//returns where should I start getting samples, used in block type randomness
-  short get(REALTYPE *smps,REALTYPE freqHz, bool resonance);
-  //if freqHz is smaller than 0, return the "un-randomized" sample for UI
-  
-  void getbasefunction(REALTYPE *smps);
-
-  //called by UI
-  void getspectrum(int n,REALTYPE *spc,int what);//what=0 pt. oscil,1 pt. basefunc
-  void getcurrentbasefunction(REALTYPE *smps);
-  void useasbase();//convert oscil to base function
-
-  void defaults();
-
-  void convert2sine(int magtype);
-  
   //Parameters
       
   /* 
@@ -93,62 +72,17 @@ public:
   unsigned char Pmodulation;//what modulation is applied to the oscil
   unsigned char Pmodulationpar1,Pmodulationpar2,Pmodulationpar3;//the parameter of the parameters
 
-
-  //makes a new random seed for Amplitude Randomness
-  //this should be called every note on event
-  void newrandseed(unsigned int randseed);
-  
   bool ADvsPAD;//if it is used by ADsynth or by PADsynth
 
-  static REALTYPE *tmpsmps;//this array stores some termporary data and it has SOUND_BUFFER_SIZE elements
-  static struct zyn_fft_freqs outoscilFFTfreqs;
+  // pointer to array of OSCIL_SIZE samples that stores some termporary data
+  zyn_sample_type * temporary_samples_ptr;
+  struct zyn_fft_freqs * oscillator_fft_frequencies_ptr;
 
-private:
-  float m_sample_rate;
+  float sample_rate;
   
   REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
-//    private:
-  zyn_fft_handle m_fft;
-  //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
-  void changebasefunction();
-  //Waveshaping
-  void waveshape();
 
-  //Filter the oscillator accotding to Pfiltertype and Pfilterpar
-  void oscilfilter();
-
-  //Adjust the spectrum
-  void spectrumadjust();
-  
-  //Shift the harmonics
-  void shiftharmonics();
-    
-  //Do the oscil modulation stuff
-  void modulation();
-
-  //Do the adaptive harmonic stuff
-  void adaptiveharmonic(struct zyn_fft_freqs f, REALTYPE freq);
-  
-  //Do the adaptive harmonic postprocessing (2n+1,2xS,2xA,etc..)
-  //this function is called even for the user interface
-  //this can be called for the sine and components, and for the spectrum 
-  //(that's why the sine and cosine components should be processed with a separate call)
-  void adaptiveharmonicpostprocess(REALTYPE *f, int size);
-    
-  //Basic/base functions (Functiile De Baza)
-  REALTYPE basefunc_pulse(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_saw(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_triangle(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_power(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_gauss(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_diode(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_abssine(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_pulsesine(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_stretchsine(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_chirp(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_absstretchsine(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_chebyshev(REALTYPE x,REALTYPE a);
-  REALTYPE basefunc_sqr(REALTYPE x,REALTYPE a);
+  zyn_fft_handle fft;
 
   //Internal Data
   unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping;
@@ -161,13 +95,59 @@ private:
   // Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
   struct zyn_fft_freqs oscilFFTfreqs;
 
-  int oscilprepared;//1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
+  // true if the oscillator is prepared, false if it is not prepared and it is needed to call prepare() before get()
+  bool prepared;
   
-  Resonance *res; 
+  struct zyn_resonance * resonance_ptr; 
   
   unsigned int randseed;
-  
+
+  float modulation_temp[OSCIL_SIZE + ZYN_ADDSYNTH_OSCILLATOR_EXTRA_POINTS];
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#if 0
+} /* Adjust editor indent */
+#endif
+
+void
+zyn_addsynth_oscillator_init(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  float sample_rate,
+  zyn_fft_handle fft,
+  struct zyn_resonance * resonance_ptr,
+  zyn_sample_type * temporary_samples_ptr,
+  struct zyn_fft_freqs * oscillator_fft_frequencies_ptr);
+
+void
+zyn_addsynth_oscillator_uninit(
+  struct zyn_addsynth_oscillator * oscillator_ptr);
+
+// makes a new random seed for Amplitude Randomness
+// this should be called every note on event
+void
+zyn_addsynth_oscillator_new_rand_seed(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  unsigned int randseed);
+
+// do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT
+// returns where should I start getting samples, used in block type randomness
+//if freqHz is smaller than 0, return the "un-randomized" sample for UI
+
+short
+zyn_addsynth_oscillator_get(
+  struct zyn_addsynth_oscillator * oscillator_ptr,
+  zyn_sample_type *smps,
+  float freqHz,
+  bool resonance);
+
+#if 0
+{ /* Adjust editor indent */
+#endif
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif

@@ -70,7 +70,7 @@ struct ADnoteGlobalParam
   unsigned char PPunchVelocitySensing;
 
   // RESONANCE
-  Resonance *Reson;
+  struct zyn_resonance resonance;
 };
 
 /***********************************************************/
@@ -101,7 +101,7 @@ struct zyn_addnote_voice_parameters
   unsigned char Pfilterbypass;
 
   /* Voice oscillator */
-  OscilGen *OscilSmp;
+  struct zyn_addsynth_oscillator oscillator;
 
   /**********************************
    *     FREQUENCY PARAMETERS        *
@@ -189,7 +189,7 @@ struct zyn_addnote_voice_parameters
   short int PFMVoice;
 
   /* Modullator oscillator */
-  OscilGen *FMSmp;
+  struct zyn_addsynth_oscillator modulator_oscillator;
 
   /* Modullator Volume */
   unsigned char PFMVolume;
@@ -278,6 +278,9 @@ struct zyn_addsynth
   int modwheel_depth;
   int modwheel_exponential;
   float modwheel_relmod;
+
+  zyn_sample_type * temporary_samples_ptr; // this array stores some termporary data and it has OSCIL_SIZE elements
+  struct zyn_fft_freqs oscillator_fft_frequencies;
 
   unsigned int voices_count;
 

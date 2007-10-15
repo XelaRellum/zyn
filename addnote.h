@@ -122,11 +122,11 @@ private:
   float * m_FM_old_smp_ptr;     // array with one entry per voice
     
   //temporary buffer
-  REALTYPE * m_tmpwave;
+  zyn_sample_type * m_tmpwave;
     
   //Filter bypass samples
-  REALTYPE * m_bypassl;
-  REALTYPE * m_bypassr;
+  zyn_sample_type * m_bypassl;
+  zyn_sample_type * m_bypassr;
 
   //interpolate the amplitudes    
   REALTYPE globaloldamplitude,globalnewamplitude;

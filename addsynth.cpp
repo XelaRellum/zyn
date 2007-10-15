@@ -62,6 +62,9 @@ zyn_addsynth_create(
 
   zyn_addsynth_ptr->sample_rate = sample_rate;
 
+  zyn_addsynth_ptr->temporary_samples_ptr = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * OSCIL_SIZE);
+  zyn_fft_freqs_init(&zyn_addsynth_ptr->oscillator_fft_frequencies, OSCIL_SIZE / 2);
+
   zyn_addsynth_ptr->polyphony = ZYN_DEFAULT_POLYPHONY;
   zyn_addsynth_ptr->notes_array = (struct note_channel *)malloc(ZYN_DEFAULT_POLYPHONY * sizeof(struct note_channel));
 
@@ -76,17 +79,29 @@ zyn_addsynth_create(
 
   zyn_addsynth_ptr->m_filter_params.init(sample_rate, 2, 94, 40);
   zyn_addsynth_ptr->m_filter_envelope_params.init_adsr_filter(0, true, 64, 40, 64, 70, 60, 64);
-  zyn_addsynth_ptr->GlobalPar.Reson=new Resonance();
+
+  zyn_resonance_init(&zyn_addsynth_ptr->GlobalPar.resonance);
 
   zyn_addsynth_ptr->voices_count = voices_count;
   zyn_addsynth_ptr->voices_params_ptr = (struct zyn_addnote_voice_parameters *)malloc(sizeof(struct zyn_addnote_voice_parameters) * voices_count);
 
   for (voice_index = 0 ; voice_index < voices_count ; voice_index++)
   {
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].OscilSmp =
-      new OscilGen(sample_rate, zyn_addsynth_ptr->fft, zyn_addsynth_ptr->GlobalPar.Reson);
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].FMSmp =
-      new OscilGen(sample_rate, zyn_addsynth_ptr->fft, NULL);
+    zyn_addsynth_oscillator_init(
+      &zyn_addsynth_ptr->voices_params_ptr[voice_index].oscillator,
+      sample_rate,
+      zyn_addsynth_ptr->fft,
+      &zyn_addsynth_ptr->GlobalPar.resonance,
+      zyn_addsynth_ptr->temporary_samples_ptr,
+      &zyn_addsynth_ptr->oscillator_fft_frequencies);
+
+    zyn_addsynth_oscillator_init(
+      &zyn_addsynth_ptr->voices_params_ptr[voice_index].modulator_oscillator,
+      sample_rate,
+      zyn_addsynth_ptr->fft,
+      NULL,
+      zyn_addsynth_ptr->temporary_samples_ptr,
+      &zyn_addsynth_ptr->oscillator_fft_frequencies);
 
     zyn_addsynth_ptr->voices_params_ptr[voice_index].m_amplitude_envelope_params.init_adsr(64, true, 0, 100, 127, 100, false); 
 
@@ -154,7 +169,6 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->m_filter_velocity_sensing_amount = 0.5;
   zyn_addsynth_ptr->m_filter_velocity_scale_function = 0;
   zyn_addsynth_ptr->m_filter_params.defaults();
-  zyn_addsynth_ptr->GlobalPar.Reson->defaults();
 
   for (voice_index = 0 ; voice_index < voices_count ; voice_index++)
   {
@@ -196,9 +210,6 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFMFreqEnvelopeEnabled=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFMAmpEnvelopeEnabled=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFMVelocityScaleFunction=64; 
-
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].OscilSmp->defaults();
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].FMSmp->defaults();
 
     zyn_addsynth_ptr->voices_params_ptr[voice_index].m_filter_params.defaults();
   }
@@ -272,11 +283,6 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->notes_array[note_index].midinote = -1;
   }
 
-  *handle_ptr = (zyn_addsynth_handle)zyn_addsynth_ptr;
-
-  OscilGen::tmpsmps = new REALTYPE[OSCIL_SIZE];
-  zyn_fft_freqs_init(&OscilGen::outoscilFFTfreqs, OSCIL_SIZE / 2);
-
   // init global components
 
   zyn_addsynth_component_init_amp_globals(
@@ -330,6 +336,8 @@ zyn_addsynth_create(
       zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_VOICE_COMPONENTS_COUNT + ZYNADD_COMPONENT_VOICE_GLOBALS,
       zyn_addsynth_ptr->voices_params_ptr + voice_index);
   }
+
+  *handle_ptr = (zyn_addsynth_handle)zyn_addsynth_ptr;
 
 //  printf("zyn_addsynth_create(%08X)\n", (unsigned int)*handle_ptr);
 
@@ -458,12 +466,10 @@ zyn_addsynth_destroy(
 
   // ADnoteParameters temp begin
 
-  delete(zyn_addsynth_ptr->GlobalPar.Reson);
-
   for (voice_index = 0 ; voice_index < zyn_addsynth_ptr->voices_count ; voice_index++)
   {
-    delete (zyn_addsynth_ptr->voices_params_ptr[voice_index].OscilSmp);
-    delete (zyn_addsynth_ptr->voices_params_ptr[voice_index].FMSmp);
+    zyn_addsynth_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].oscillator);
+    zyn_addsynth_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].modulator_oscillator);
   }
 
   // ADnoteParameters temp end
@@ -471,6 +477,8 @@ zyn_addsynth_destroy(
   free(zyn_addsynth_ptr->voices_params_ptr);
 
   free(zyn_addsynth_ptr->notes_array);
+
+  free(zyn_addsynth_ptr->temporary_samples_ptr);
 
   delete zyn_addsynth_ptr;
 }
