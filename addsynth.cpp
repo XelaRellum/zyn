@@ -335,6 +335,10 @@ zyn_addsynth_create(
     zyn_addsynth_component_init_voice_globals(
       zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_VOICE_COMPONENTS_COUNT + ZYNADD_COMPONENT_VOICE_GLOBALS,
       zyn_addsynth_ptr->voices_params_ptr + voice_index);
+
+    zyn_addsynth_component_init_oscillator(
+      zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_VOICE_COMPONENTS_COUNT + ZYNADD_COMPONENT_VOICE_OSCILLATOR,
+      &zyn_addsynth_ptr->voices_params_ptr[voice_index].oscillator);
   }
 
   *handle_ptr = (zyn_addsynth_handle)zyn_addsynth_ptr;

@@ -72,8 +72,9 @@ zyn_addsynth_destroy(
 #define ZYNADD_GLOBAL_COMPONENTS_COUNT           10
 
 #define ZYNADD_COMPONENT_VOICE_GLOBALS            0
+#define ZYNADD_COMPONENT_VOICE_OSCILLATOR         1
 
-#define ZYNADD_VOICE_COMPONENTS_COUNT             1
+#define ZYNADD_VOICE_COMPONENTS_COUNT             2
 
 /* float - reused */
 #define ZYNADD_PARAMETER_REUSED_OFFSET                   100
@@ -144,6 +145,7 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_ENUM_LFO_SHAPE                      1000
 #define ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY                1001
 #define ZYNADD_PARAMETER_ENUM_ANALOG_FILTER_TYPE             1002
+#define ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION       1003
 
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
 

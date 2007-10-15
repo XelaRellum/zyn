@@ -58,6 +58,7 @@ PLUGIN_SOURCES_C += zynadd_dynparam_forest_map_top.c
 PLUGIN_SOURCES_C += zynadd_dynparam_forest_map_voice.c
 PLUGIN_SOURCES_C += portamento.c
 PLUGIN_SOURCES_C += oscillator.c
+PLUGIN_SOURCES_C += oscillator_access.c
 
 # Derived variables - do not edit
 PLUGIN_OBJECTS = $(subst .cpp,.o,$(PLUGIN_SOURCES_CXX)) $(subst .c,.o,$(PLUGIN_SOURCES_C))

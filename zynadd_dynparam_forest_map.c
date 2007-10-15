@@ -36,6 +36,7 @@
 const char * g_shape_names[ZYN_LFO_SHAPES_COUNT];
 const char * g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPES_COUNT];
 const char * g_filter_type_names[ZYN_FILTER_TYPES_COUNT];
+const char * g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTIONS_COUNT];
 
 void
 lv2dynparam_group_init(
@@ -104,4 +105,19 @@ void zynadd_init_forest_map_globals()
   g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_PKF2] = "PEAK (2 poles)";
   g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LSH2] = "Low Shelf - 2 poles";
   g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HSH2] = "High Shelf - 2 poles";
+
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_SINE] = "Sine";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_TRIANGLE] = "Triangle";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_PULSE] = "Pulse";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_SAW] = "Saw";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_POWER] = "Power";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_GAUSS] = "Gauss";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_DIODE] = "Diode";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_ABS_SINE] = "Abs sine";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_PULSE_SINE] = "Pulse sine";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_STRETCH_SINE] = "Stretch sine";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_CHIRP] = "Chirp";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_ABS_STRETCH_SINE] = "Abs stretch sine";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_CHEBYSHEV] = "Chebyshev";
+  g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_SQRT] = "Sqr";
 }

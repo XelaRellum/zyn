@@ -128,6 +128,11 @@ zyn_addsynth_component_init_portamento(
   struct zyn_component_descriptor * component_ptr,
   struct zyn_portamento * portamento_ptr);
 
+void
+zyn_addsynth_component_init_oscillator(
+  struct zyn_component_descriptor * component_ptr,
+  struct zyn_oscillator * oscillator_ptr);
+
 #if 0
 { /* Adjust editor indent */
 #endif

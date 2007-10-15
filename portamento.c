@@ -26,6 +26,8 @@
 #include "globals.h"
 #include "portamento.h"
 #include "addsynth.h"
+#include "fft.h"
+#include "oscillator.h"
 #include "addsynth_component.h"
 
 //#define LOG_LEVEL LOG_LEVEL_DEBUG
