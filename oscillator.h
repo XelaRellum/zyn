@@ -44,8 +44,8 @@ struct zyn_oscillator
     4 - dB scale (-100)*/
   unsigned char Phmagtype;
 
-  unsigned char Pcurrentbasefunc; // The base function used, one of ZYN_OSCILLATOR_BASE_FUNCTION_XXX
-  unsigned char Pbasefuncpar;//the parameter of the base function
+  unsigned int base_function; /* The base function used, one of ZYN_OSCILLATOR_BASE_FUNCTION_XXX */
+  float base_function_adjust; /* the parameter of the base function, 0..1 */
   
   unsigned char Pbasefuncmodulation;//what modulation is applied to the basefunc
   unsigned char Pbasefuncmodulationpar1,Pbasefuncmodulationpar2,Pbasefuncmodulationpar3;//the parameter of the base function modulation
@@ -88,7 +88,10 @@ struct zyn_oscillator
   zyn_fft_handle fft;
 
   //Internal Data
-  unsigned char oldbasefunc,oldbasepar,oldhmagtype;
+  unsigned int old_base_function;
+  float old_base_function_adjust;
+
+  unsigned char oldhmagtype;
 
   unsigned int old_waveshaping_function;
   float old_waveshaping_drive;

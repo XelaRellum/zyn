@@ -41,6 +41,8 @@ zyn_oscillator_get_float(
   {
   case ZYNADD_PARAMETER_FLOAT_OSCILLATOR_WAVESHAPE_DRIVE:
     return oscillator_ptr->waveshaping_drive;
+  case ZYNADD_PARAMETER_FLOAT_OSCILLATOR_BASE_FUNCTION_ADJUST:
+    return oscillator_ptr->base_function_adjust;
   }
 
   LOG_ERROR("Unknown oscillator float parameter %u", parameter);
@@ -60,6 +62,10 @@ zyn_oscillator_set_float(
     assert(value >= 0.0 && value <= 100.0);
     oscillator_ptr->waveshaping_drive = value;
     return;
+  case ZYNADD_PARAMETER_FLOAT_OSCILLATOR_BASE_FUNCTION_ADJUST:
+    assert(value >= 0.0 && value <= 1.0);
+    oscillator_ptr->base_function_adjust = value;
+    return;
   }
 
   LOG_ERROR("Unknown oscillator float parameter %u", parameter);
@@ -74,7 +80,7 @@ zyn_oscillator_get_int(
   switch (parameter)
   {
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION:
-    return oscillator_ptr->Pcurrentbasefunc;
+    return oscillator_ptr->base_function;
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_WAVESHAPE_TYPE:
     return oscillator_ptr->waveshaping_function;
   }
@@ -94,7 +100,7 @@ zyn_oscillator_set_int(
   {
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION:
     assert(value >= 0 && value < ZYN_OSCILLATOR_BASE_FUNCTIONS_COUNT);
-    oscillator_ptr->Pcurrentbasefunc = value;
+    oscillator_ptr->base_function = value;
     return;
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_WAVESHAPE_TYPE:
     assert(value >= 0 && value < ZYN_OSCILLATOR_WAVESHAPE_TYPES_COUNT);

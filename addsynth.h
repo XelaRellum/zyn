@@ -117,7 +117,8 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING          4 /* -1 .. 1 */
 
 /* float - oscillator */
-#define ZYNADD_PARAMETER_FLOAT_OSCILLATOR_WAVESHAPE_DRIVE  0 /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_OSCILLATOR_BASE_FUNCTION_ADJUST     0 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_OSCILLATOR_WAVESHAPE_DRIVE          1 /* 0 .. 100 */
 
 /* float - portamento */
 #define ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME             0 /* 0 .. 1 */

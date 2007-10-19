@@ -286,11 +286,7 @@ zyn_oscillator_get_base_function(
   float basefuncmodulationpar3;
   float t;
 
-  par = (oscillator_ptr->Pbasefuncpar + 0.5) / 128.0;
-  if (oscillator_ptr->Pbasefuncpar == 64)
-  {
-    par = 0.5;
-  }
+  par = oscillator_ptr->base_function_adjust;
     
   basefuncmodulationpar1 = oscillator_ptr->Pbasefuncmodulationpar1 / 127.0;
   basefuncmodulationpar2 = oscillator_ptr->Pbasefuncmodulationpar2 / 127.0;
@@ -340,7 +336,7 @@ zyn_oscillator_get_base_function(
   
     t = t - floor(t);
   
-    switch (oscillator_ptr->Pcurrentbasefunc)
+    switch (oscillator_ptr->base_function)
     {
     case ZYN_OSCILLATOR_BASE_FUNCTION_SINE:
       samples[i] = -sin(2.0 * PI * i / OSCIL_SIZE);
@@ -471,7 +467,7 @@ zyn_oscillator_change_base_function(
 {
   int i;
 
-  if (oscillator_ptr->Pcurrentbasefunc != 0)
+  if (oscillator_ptr->base_function != ZYN_OSCILLATOR_BASE_FUNCTION_SINE)
   {
     zyn_oscillator_get_base_function(oscillator_ptr, oscillator_ptr->temporary_samples_ptr);
     zyn_fft_smps2freqs(oscillator_ptr->fft, oscillator_ptr->temporary_samples_ptr, &oscillator_ptr->basefuncFFTfreqs);
@@ -488,8 +484,8 @@ zyn_oscillator_change_base_function(
   }
 
   oscillator_ptr->prepared = false;
-  oscillator_ptr->oldbasefunc = oscillator_ptr->Pcurrentbasefunc;
-  oscillator_ptr->oldbasepar = oscillator_ptr->Pbasefuncpar;
+  oscillator_ptr->old_base_function = oscillator_ptr->base_function;
+  oscillator_ptr->old_base_function_adjust = oscillator_ptr->base_function_adjust;
   oscillator_ptr->oldbasefuncmodulation = oscillator_ptr->Pbasefuncmodulation;
   oscillator_ptr->oldbasefuncmodulationpar1 = oscillator_ptr->Pbasefuncmodulationpar1;
   oscillator_ptr->oldbasefuncmodulationpar2 = oscillator_ptr->Pbasefuncmodulationpar2;
@@ -1212,8 +1208,8 @@ zyn_oscillator_prepare(
   int i, j, k;
   REALTYPE a, b, c, d, hmagnew;
   
-  if ((oscillator_ptr->oldbasepar != oscillator_ptr->Pbasefuncpar) ||
-      (oscillator_ptr->oldbasefunc != oscillator_ptr->Pcurrentbasefunc) ||
+  if ((oscillator_ptr->old_base_function_adjust != oscillator_ptr->base_function_adjust) ||
+      (oscillator_ptr->old_base_function != oscillator_ptr->base_function) ||
       (oscillator_ptr->oldbasefuncmodulation != oscillator_ptr->Pbasefuncmodulation) ||
       (oscillator_ptr->oldbasefuncmodulationpar1 != oscillator_ptr->Pbasefuncmodulationpar1) ||
       (oscillator_ptr->oldbasefuncmodulationpar2 != oscillator_ptr->Pbasefuncmodulationpar2) ||
@@ -1270,10 +1266,10 @@ zyn_oscillator_prepare(
     oscillator_ptr->oscilFFTfreqs.s[i] = 0.0;
   }
 
-  if (oscillator_ptr->Pcurrentbasefunc == 0)
+  if (oscillator_ptr->base_function == ZYN_OSCILLATOR_BASE_FUNCTION_SINE)
   {
     // the sine case
-    for (i=0;i<MAX_AD_HARMONICS;i++)
+    for (i = 0 ; i < MAX_AD_HARMONICS ; i++)
     {
       oscillator_ptr->oscilFFTfreqs.c[i + 1] = -oscillator_ptr->hmag[i] * sin(oscillator_ptr->hphase[i] * (i + 1)) / 2.0;
       oscillator_ptr->oscilFFTfreqs.s[i + 1] = oscillator_ptr->hmag[i] * cos(oscillator_ptr->hphase[i] * (i + 1)) / 2.0;
@@ -1346,8 +1342,8 @@ zyn_oscillator_defaults(
 {
   int i;
 
-  oscillator_ptr->oldbasefunc = 0;
-  oscillator_ptr->oldbasepar = 64;
+  oscillator_ptr->old_base_function = ZYN_OSCILLATOR_BASE_FUNCTION_SINE;
+  oscillator_ptr->old_base_function_adjust = 0.5;
   oscillator_ptr->oldhmagtype = 0;
   oscillator_ptr->old_waveshaping_function = ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE;
   oscillator_ptr->old_waveshaping_drive = 50;
@@ -1380,8 +1376,8 @@ zyn_oscillator_defaults(
     oscillator_ptr->Prand = 64; // no randomness
   }
 
-  oscillator_ptr->Pcurrentbasefunc = 0;
-  oscillator_ptr->Pbasefuncpar = 64;
+  oscillator_ptr->base_function = ZYN_OSCILLATOR_BASE_FUNCTION_SINE;
+  oscillator_ptr->base_function_adjust = 0.5;
 
   oscillator_ptr->Pbasefuncmodulation = 0;
   oscillator_ptr->Pbasefuncmodulationpar1 = 64;
@@ -1681,8 +1677,8 @@ zyn_oscillator_get(
   float sum;
   int j;
    
-  if (oscillator_ptr->oldbasepar != oscillator_ptr->Pbasefuncpar ||
-      oscillator_ptr->oldbasefunc != oscillator_ptr->Pcurrentbasefunc ||
+  if (oscillator_ptr->old_base_function_adjust != oscillator_ptr->base_function_adjust ||
+      oscillator_ptr->old_base_function != oscillator_ptr->base_function ||
       oscillator_ptr->oldhmagtype != oscillator_ptr->Phmagtype ||
       oscillator_ptr->old_waveshaping_drive != oscillator_ptr->waveshaping_drive ||
       oscillator_ptr->old_waveshaping_function != oscillator_ptr->waveshaping_function)
