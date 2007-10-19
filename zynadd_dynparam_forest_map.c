@@ -37,6 +37,7 @@ const char * g_shape_names[ZYN_LFO_SHAPES_COUNT];
 const char * g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPES_COUNT];
 const char * g_filter_type_names[ZYN_FILTER_TYPES_COUNT];
 const char * g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTIONS_COUNT];
+const char * g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPES_COUNT];
 
 void
 lv2dynparam_group_init(
@@ -120,4 +121,20 @@ void zynadd_init_forest_map_globals()
   g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_ABS_STRETCH_SINE] = "Abs stretch sine";
   g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_CHEBYSHEV] = "Chebyshev";
   g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_SQRT] = "Sqr";
+
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE] = "None";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_ATAN] = "Atan";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_ASYM1] = "Asym1";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_POW] = "Pow";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_SINE] = "Sine";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_QUANTISIZE] = "Quantisize";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_ZIGZAG] = "Zig-Zag";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_LIMITER] = "Limiter";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_UPPER_LIMITER] = "Upper limiter";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_LOWER_LIMITER] = "Lower limiter";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_INVERSE_LIMITER] = "Inverse limiter";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_CLIP] = "Clip";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_ASYM2] = "Asym2";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_POW2] = "Pow2";
+  g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_SIGMOID] = "Sigmoid";
 }

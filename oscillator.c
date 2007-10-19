@@ -510,7 +510,7 @@ zyn_oscillator_waveshape_samples(
 
   switch (type)
   {
-  case 1:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_ATAN:
     // Arctangent
     ws = pow(10, ws * ws * 3.0) - 1.0 + 0.001;
     for (i = 0 ; i < n ; i++)
@@ -518,7 +518,7 @@ zyn_oscillator_waveshape_samples(
       smps[i] = atan(smps[i] * ws) / atan(ws);
     }
     break;
-  case 2:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_ASYM1:
     // Asymmetric
     ws = ws * ws * 32.0 + 0.0001;
 
@@ -536,7 +536,7 @@ zyn_oscillator_waveshape_samples(
       smps[i] = sin(smps[i] * (0.1 + ws - ws * smps[i])) / tmpv;
     }
     break;
-  case 3:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_POW:
     // Pow
     ws = ws * ws * ws * 20.0 + 0.0001;
     for (i = 0 ; i < n ; i++)
@@ -553,7 +553,7 @@ zyn_oscillator_waveshape_samples(
       }
     }
     break;
-  case 4:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_SINE:
     // Sine
     ws = ws * ws * ws * 32.0 + 0.0001;
     if (ws < 1.57)
@@ -570,7 +570,7 @@ zyn_oscillator_waveshape_samples(
       smps[i] = sin(smps[i] * ws) / tmpv;
     }
     break;
-  case 5:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_QUANTISIZE:
     // Quantisize
     ws = ws * ws + 0.000001;
     for (i = 0 ; i < n ; i++) 
@@ -578,7 +578,7 @@ zyn_oscillator_waveshape_samples(
       smps[i] = floor(smps[i] / ws + 0.5) * ws;
     }
     break;
-  case 6:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_ZIGZAG:
     // Zigzag
     ws = ws * ws * ws * 32 + 0.0001;
     if (ws < 1.0)
@@ -595,7 +595,7 @@ zyn_oscillator_waveshape_samples(
       smps[i] = asin(sin(smps[i] * ws)) / tmpv;
     }
     break;
-  case 7:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_LIMITER:
     // Limiter
     ws = pow(2.0, -ws * ws * 8.0);
     for (i=0;i<n;i++)
@@ -618,7 +618,7 @@ zyn_oscillator_waveshape_samples(
       }
     }
     break;
-  case 8:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_UPPER_LIMITER:
     // Upper Limiter
     ws = pow(2.0, -ws * ws * 8.0);
     for (i = 0 ; i < n ; i++)
@@ -628,7 +628,7 @@ zyn_oscillator_waveshape_samples(
       smps[i]*=2.0;
     };
     break;
-  case 9:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_LOWER_LIMITER:
     // Lower Limiter
     ws=pow(2.0,-ws*ws*8.0);
     for (i=0;i<n;i++)
@@ -638,7 +638,7 @@ zyn_oscillator_waveshape_samples(
       smps[i]*=2.0;
     }
     break;
-  case 10:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_INVERSE_LIMITER:
     // Inverse Limiter
     ws = (pow(2.0, ws * 6.0) - 1.0) / pow(2.0, 6.0);
     for (i = 0 ; i < n ; i++)
@@ -661,7 +661,7 @@ zyn_oscillator_waveshape_samples(
       }
     }
     break;
-  case 11:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_CLIP:
     // Clip
     ws = pow(5, ws * ws * 1.0) - 1.0;
     for (i = 0 ; i < n ; i++)
@@ -669,7 +669,7 @@ zyn_oscillator_waveshape_samples(
       smps[i] = smps[i] * (ws + 0.5) * 0.9999 - floor(0.5 + smps[i] * (ws + 0.5) * 0.9999);
     }
     break;
-  case 12:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_ASYM2:
     // Asym2
     ws = ws * ws * ws * 30 + 0.001;
     if (ws < 0.3)
@@ -694,7 +694,7 @@ zyn_oscillator_waveshape_samples(
       }
     }
     break;
-  case 13:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_POW2:
     // Pow2
     ws = ws * ws * ws * 32.0 + 0.0001;
     if (ws < 1.0)
@@ -723,7 +723,7 @@ zyn_oscillator_waveshape_samples(
       }
     }
     break;
-  case 14:
+  case ZYN_OSCILLATOR_WAVESHAPE_TYPE_SIGMOID:
     // sigmoid
     ws = pow(ws, 5.0) * 80.0 + 0.0001;
     if (ws > 10.0)

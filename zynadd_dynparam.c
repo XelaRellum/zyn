@@ -134,6 +134,7 @@ zynadd_appear_parameter(
           parameter_ptr,
           &parameter_ptr->lv2parameter))
     {
+      LOG_ERROR("lv2dynparam_plugin_param_enum_add() failed.");
       return false;
     }
 

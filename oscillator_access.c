@@ -69,6 +69,8 @@ zyn_oscillator_get_int(
   {
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION:
     return oscillator_ptr->Pcurrentbasefunc;
+  case ZYNADD_PARAMETER_ENUM_OSCILLATOR_WAVESHAPE_TYPE:
+    return oscillator_ptr->Pwaveshapingfunction;
   }
 
   LOG_ERROR("Unknown oscillator int/enum parameter %u", parameter);
@@ -86,6 +88,9 @@ zyn_oscillator_set_int(
   {
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION:
     oscillator_ptr->Pcurrentbasefunc = value;
+    return;
+  case ZYNADD_PARAMETER_ENUM_OSCILLATOR_WAVESHAPE_TYPE:
+    oscillator_ptr->Pwaveshapingfunction = value;
     return;
   }
 
