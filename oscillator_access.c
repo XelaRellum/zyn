@@ -87,9 +87,11 @@ zyn_oscillator_set_int(
   switch (parameter)
   {
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION:
+    assert(value >= 0 && value < ZYN_OSCILLATOR_BASE_FUNCTIONS_COUNT);
     oscillator_ptr->Pcurrentbasefunc = value;
     return;
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_WAVESHAPE_TYPE:
+    assert(value >= 0 && value < ZYN_OSCILLATOR_WAVESHAPE_TYPES_COUNT);
     oscillator_ptr->Pwaveshapingfunction = value;
     return;
   }
