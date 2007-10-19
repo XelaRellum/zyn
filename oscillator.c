@@ -771,7 +771,7 @@ zyn_oscillator_waveshape(
   oscillator_ptr->oldwaveshapingfunction = oscillator_ptr->Pwaveshapingfunction;
   oscillator_ptr->oldwaveshaping = oscillator_ptr->Pwaveshaping;
 
-  if (oscillator_ptr->Pwaveshapingfunction == 0)
+  if (oscillator_ptr->Pwaveshapingfunction == ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE)
   {
     return;
   }
@@ -1391,7 +1391,7 @@ zyn_oscillator_defaults(
   oscillator_ptr->Pmodulationpar2 = 64;
   oscillator_ptr->Pmodulationpar3 = 32;
 
-  oscillator_ptr->Pwaveshapingfunction = 0;
+  oscillator_ptr->Pwaveshapingfunction = ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE;
   oscillator_ptr->Pwaveshaping = 64;
   oscillator_ptr->Pfiltertype = 0;
   oscillator_ptr->Pfilterpar1 = 64;
