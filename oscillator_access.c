@@ -61,10 +61,13 @@ zyn_oscillator_set_float(
   case ZYNADD_PARAMETER_FLOAT_OSCILLATOR_WAVESHAPE_DRIVE:
     assert(value >= 0.0 && value <= 100.0);
     oscillator_ptr->waveshaping_drive = value;
+    oscillator_ptr->prepared = false;
     return;
   case ZYNADD_PARAMETER_FLOAT_OSCILLATOR_BASE_FUNCTION_ADJUST:
     assert(value >= 0.0 && value <= 1.0);
     oscillator_ptr->base_function_adjust = value;
+    oscillator_ptr->prepared = false;
+    oscillator_ptr->base_function_needs_prepare = true;
     return;
   }
 
@@ -101,10 +104,13 @@ zyn_oscillator_set_int(
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION:
     assert(value >= 0 && value < ZYN_OSCILLATOR_BASE_FUNCTIONS_COUNT);
     oscillator_ptr->base_function = value;
+    oscillator_ptr->prepared = false;
+    oscillator_ptr->base_function_needs_prepare = true;
     return;
   case ZYNADD_PARAMETER_ENUM_OSCILLATOR_WAVESHAPE_TYPE:
     assert(value >= 0 && value < ZYN_OSCILLATOR_WAVESHAPE_TYPES_COUNT);
     oscillator_ptr->waveshaping_function = value;
+    oscillator_ptr->prepared = false;
     return;
   }
 

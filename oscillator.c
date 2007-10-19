@@ -484,8 +484,7 @@ zyn_oscillator_change_base_function(
   }
 
   oscillator_ptr->prepared = false;
-  oscillator_ptr->old_base_function = oscillator_ptr->base_function;
-  oscillator_ptr->old_base_function_adjust = oscillator_ptr->base_function_adjust;
+  oscillator_ptr->base_function_needs_prepare = false;
   oscillator_ptr->oldbasefuncmodulation = oscillator_ptr->Pbasefuncmodulation;
   oscillator_ptr->oldbasefuncmodulationpar1 = oscillator_ptr->Pbasefuncmodulationpar1;
   oscillator_ptr->oldbasefuncmodulationpar2 = oscillator_ptr->Pbasefuncmodulationpar2;
@@ -765,9 +764,6 @@ zyn_oscillator_waveshape(
   int i;
   float tmp;
   float max;
-
-  oscillator_ptr->old_waveshaping_function = oscillator_ptr->waveshaping_function;
-  oscillator_ptr->old_waveshaping_drive = oscillator_ptr->waveshaping_drive;
 
   if (oscillator_ptr->waveshaping_function == ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE)
   {
@@ -1208,8 +1204,7 @@ zyn_oscillator_prepare(
   int i, j, k;
   REALTYPE a, b, c, d, hmagnew;
   
-  if ((oscillator_ptr->old_base_function_adjust != oscillator_ptr->base_function_adjust) ||
-      (oscillator_ptr->old_base_function != oscillator_ptr->base_function) ||
+  if (oscillator_ptr->base_function_needs_prepare ||
       (oscillator_ptr->oldbasefuncmodulation != oscillator_ptr->Pbasefuncmodulation) ||
       (oscillator_ptr->oldbasefuncmodulationpar1 != oscillator_ptr->Pbasefuncmodulationpar1) ||
       (oscillator_ptr->oldbasefuncmodulationpar2 != oscillator_ptr->Pbasefuncmodulationpar2) ||
@@ -1342,11 +1337,7 @@ zyn_oscillator_defaults(
 {
   int i;
 
-  oscillator_ptr->old_base_function = ZYN_OSCILLATOR_BASE_FUNCTION_SINE;
-  oscillator_ptr->old_base_function_adjust = 0.5;
   oscillator_ptr->oldhmagtype = 0;
-  oscillator_ptr->old_waveshaping_function = ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE;
-  oscillator_ptr->old_waveshaping_drive = 50;
   oscillator_ptr->oldbasefuncmodulation = 0;
   oscillator_ptr->oldharmonicshift = 0;
   oscillator_ptr->oldbasefuncmodulationpar1 = 0;
@@ -1418,6 +1409,7 @@ zyn_oscillator_defaults(
   }
 
   oscillator_ptr->prepared = false;
+  oscillator_ptr->base_function_needs_prepare = true;
   oscillator_ptr->oldfilterpars = 0;
   oscillator_ptr->oldsapars = 0;
 
@@ -1677,11 +1669,7 @@ zyn_oscillator_get(
   float sum;
   int j;
    
-  if (oscillator_ptr->old_base_function_adjust != oscillator_ptr->base_function_adjust ||
-      oscillator_ptr->old_base_function != oscillator_ptr->base_function ||
-      oscillator_ptr->oldhmagtype != oscillator_ptr->Phmagtype ||
-      oscillator_ptr->old_waveshaping_drive != oscillator_ptr->waveshaping_drive ||
-      oscillator_ptr->old_waveshaping_function != oscillator_ptr->waveshaping_function)
+  if (oscillator_ptr->oldhmagtype != oscillator_ptr->Phmagtype)
   {
     oscillator_ptr->prepared = false;
   }
