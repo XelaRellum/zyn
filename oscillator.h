@@ -63,7 +63,10 @@ struct zyn_oscillator
 
   unsigned char Pfiltertype,Pfilterpar1,Pfilterpar2;
   unsigned char Pfilterbeforews;
-  unsigned char Psatype,Psapar;//spectrum adjust
+
+  /* spectrum adjust */
+  unsigned int spectrum_adjust_type; /* one of ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_XXX */
+  float spectrum_adjust;  /* 0..100 */
 
   unsigned char Pamprandpower, Pamprandtype;//amplitude randomness
   int Pharmonicshift;//how the harmonics are shifted
@@ -93,7 +96,7 @@ struct zyn_oscillator
 
   unsigned char oldhmagtype;
 
-  int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldbasefuncmodulationpar3,oldharmonicshift;
+  int oldfilterpars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldbasefuncmodulationpar3,oldharmonicshift;
   int oldmodulation,oldmodulationpar1,oldmodulationpar2,oldmodulationpar3;
 
   // Base Function Frequencies

@@ -1121,15 +1121,16 @@ zyn_oscillator_spectrum_adjust(
   float mag;
   float phase;
 
-  if (oscillator_ptr->Psatype == 0)
+  if (oscillator_ptr->spectrum_adjust_type == ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_NONE)
   {
     return;
   }
 
-  par = oscillator_ptr->Psapar / 127.0;
-  switch (oscillator_ptr->Psatype)
+  par = oscillator_ptr->spectrum_adjust / 100.0;
+
+  switch (oscillator_ptr->spectrum_adjust_type)
   {
-  case 1:
+  case ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_POW:
     par = 1.0 - par * 2.0;
     if (par >= 0.0)
     {
@@ -1140,12 +1141,14 @@ zyn_oscillator_spectrum_adjust(
       par = pow(8.0, par);
     }
     break;
-  case 2:
+  case ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_THERSHOLD_DOWN:
     par = pow(10.0, (1.0 - par) * 3.0) * 0.25;
     break;
-  case 3:
+  case ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_THERSHOLD_UP:
     par = pow(10.0, (1.0 - par) * 3.0) * 0.25;
     break;
+  default:
+    assert(0);
   }
 
   max = 0.0;
@@ -1169,25 +1172,28 @@ zyn_oscillator_spectrum_adjust(
     mag = sqrt(pow(oscillator_ptr->oscilFFTfreqs.s[i], 2) + pow(oscillator_ptr->oscilFFTfreqs.c[i], 2.0)) / max;
     phase = atan2(oscillator_ptr->oscilFFTfreqs.s[i], oscillator_ptr->oscilFFTfreqs.c[i]);
   
-    switch (oscillator_ptr->Psatype)
+    switch (oscillator_ptr->spectrum_adjust_type)
     {
-    case 1:
+    case ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_POW:
       mag = pow(mag, par);
       break;
-    case 2:
+    case ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_THERSHOLD_DOWN:
       if (mag < par)
       {
         mag = 0.0;
       }
       break;
-    case 3:
+    case ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_THERSHOLD_UP:
       mag /= par;
       if (mag > 1.0)
       {
         mag = 1.0;
       }
       break;
+    default:
+      assert(0);
     }
+
     oscillator_ptr->oscilFFTfreqs.c[i] = mag * cos(phase);
     oscillator_ptr->oscilFFTfreqs.s[i] = mag * sin(phase);
   }  
@@ -1386,8 +1392,8 @@ zyn_oscillator_defaults(
   oscillator_ptr->Pfilterpar1 = 64;
   oscillator_ptr->Pfilterpar2 = 64;
   oscillator_ptr->Pfilterbeforews = 0;
-  oscillator_ptr->Psatype = 0;
-  oscillator_ptr->Psapar = 64;
+  oscillator_ptr->spectrum_adjust_type = ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_NONE;
+  oscillator_ptr->spectrum_adjust = 50;
 
   oscillator_ptr->Pamprandpower = 64;
   oscillator_ptr->Pamprandtype = 0;
@@ -1411,7 +1417,6 @@ zyn_oscillator_defaults(
   oscillator_ptr->prepared = false;
   oscillator_ptr->base_function_needs_prepare = true;
   oscillator_ptr->oldfilterpars = 0;
-  oscillator_ptr->oldsapars = 0;
 
   zyn_oscillator_prepare(oscillator_ptr);
 }
@@ -1683,14 +1688,6 @@ zyn_oscillator_get(
   {
     oscillator_ptr->prepared = false;
     oscillator_ptr->oldfilterpars = newpars;
-  }
-
-  newpars = oscillator_ptr->Psatype * 256 + oscillator_ptr->Psapar;
-
-  if (oscillator_ptr->oldsapars != newpars)
-  {
-    oscillator_ptr->prepared = false;
-    oscillator_ptr->oldsapars = newpars;
   }
 
   if (oscillator_ptr->oldbasefuncmodulation != oscillator_ptr->Pbasefuncmodulation ||

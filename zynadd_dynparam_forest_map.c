@@ -38,6 +38,7 @@ const char * g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPES_COUNT];
 const char * g_filter_type_names[ZYN_FILTER_TYPES_COUNT];
 const char * g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTIONS_COUNT];
 const char * g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPES_COUNT];
+const char * g_oscillator_spectrum_adjust_type_names[ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPES_COUNT];
 
 void
 lv2dynparam_group_init(
@@ -137,4 +138,9 @@ void zynadd_init_forest_map_globals()
   g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_ASYM2] = "Asym2";
   g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_POW2] = "Pow2";
   g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPE_SIGMOID] = "Sigmoid";
+
+  g_oscillator_spectrum_adjust_type_names[ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_NONE] = "None";
+  g_oscillator_spectrum_adjust_type_names[ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_POW] = "Pow";
+  g_oscillator_spectrum_adjust_type_names[ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_THERSHOLD_DOWN] = "Thershold down";
+  g_oscillator_spectrum_adjust_type_names[ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_THERSHOLD_UP] = "Thershold up";
 }

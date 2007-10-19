@@ -26,6 +26,7 @@ extern const char * g_analog_filter_type_names[];
 extern const char * g_filter_type_names[];
 extern const char * g_oscillator_base_function_names[];
 extern const char * g_oscillator_waveshape_type_names[];
+extern const char * g_oscillator_spectrum_adjust_type_names[];
 
 #define ZYN_MAX_HINTS 10
 
