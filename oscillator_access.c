@@ -39,6 +39,8 @@ zyn_oscillator_get_float(
 {
   switch (parameter)
   {
+  case ZYNADD_PARAMETER_FLOAT_OSCILLATOR_WAVESHAPE_DRIVE:
+    return oscillator_ptr->waveshaping_drive;
   }
 
   LOG_ERROR("Unknown oscillator float parameter %u", parameter);
@@ -54,6 +56,10 @@ zyn_oscillator_set_float(
 {
   switch (parameter)
   {
+  case ZYNADD_PARAMETER_FLOAT_OSCILLATOR_WAVESHAPE_DRIVE:
+    assert(value >= 0.0 && value <= 100.0);
+    oscillator_ptr->waveshaping_drive = value;
+    return;
   }
 
   LOG_ERROR("Unknown oscillator float parameter %u", parameter);
