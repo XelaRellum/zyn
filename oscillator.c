@@ -500,13 +500,15 @@ void
 zyn_oscillator_waveshape_samples(
   int n,
   zyn_sample_type *smps,
-  unsigned char type,
-  unsigned char drive)
+  unsigned int type,
+  float drive)
 {
   int i;
-  float ws = drive / 127.0;
+  float ws;
   float tmpv;
   zyn_sample_type tmp;
+
+  ws = drive / 100.0;
 
   switch (type)
   {
@@ -768,10 +770,10 @@ zyn_oscillator_waveshape(
   float tmp;
   float max;
 
-  oscillator_ptr->oldwaveshapingfunction = oscillator_ptr->Pwaveshapingfunction;
-  oscillator_ptr->oldwaveshaping = oscillator_ptr->Pwaveshaping;
+  oscillator_ptr->old_waveshaping_function = oscillator_ptr->waveshaping_function;
+  oscillator_ptr->old_waveshaping_drive = oscillator_ptr->waveshaping_drive;
 
-  if (oscillator_ptr->Pwaveshapingfunction == ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE)
+  if (oscillator_ptr->waveshaping_function == ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE)
   {
     return;
   }
@@ -817,8 +819,8 @@ zyn_oscillator_waveshape(
   zyn_oscillator_waveshape_samples(
     OSCIL_SIZE,
     oscillator_ptr->temporary_samples_ptr,
-    oscillator_ptr->Pwaveshapingfunction,
-    oscillator_ptr->Pwaveshaping);
+    oscillator_ptr->waveshaping_function,
+    oscillator_ptr->waveshaping_drive);
 
   // perform FFT
   zyn_fft_smps2freqs(oscillator_ptr->fft, oscillator_ptr->temporary_samples_ptr, &oscillator_ptr->oscilFFTfreqs);
@@ -1347,8 +1349,8 @@ zyn_oscillator_defaults(
   oscillator_ptr->oldbasefunc = 0;
   oscillator_ptr->oldbasepar = 64;
   oscillator_ptr->oldhmagtype = 0;
-  oscillator_ptr->oldwaveshapingfunction = 0;
-  oscillator_ptr->oldwaveshaping = 64;
+  oscillator_ptr->old_waveshaping_function = ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE;
+  oscillator_ptr->old_waveshaping_drive = 50;
   oscillator_ptr->oldbasefuncmodulation = 0;
   oscillator_ptr->oldharmonicshift = 0;
   oscillator_ptr->oldbasefuncmodulationpar1 = 0;
@@ -1391,8 +1393,8 @@ zyn_oscillator_defaults(
   oscillator_ptr->Pmodulationpar2 = 64;
   oscillator_ptr->Pmodulationpar3 = 32;
 
-  oscillator_ptr->Pwaveshapingfunction = ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE;
-  oscillator_ptr->Pwaveshaping = 64;
+  oscillator_ptr->waveshaping_function = ZYN_OSCILLATOR_WAVESHAPE_TYPE_NONE;
+  oscillator_ptr->waveshaping_drive = 50;
   oscillator_ptr->Pfiltertype = 0;
   oscillator_ptr->Pfilterpar1 = 64;
   oscillator_ptr->Pfilterpar2 = 64;
@@ -1682,8 +1684,8 @@ zyn_oscillator_get(
   if (oscillator_ptr->oldbasepar != oscillator_ptr->Pbasefuncpar ||
       oscillator_ptr->oldbasefunc != oscillator_ptr->Pcurrentbasefunc ||
       oscillator_ptr->oldhmagtype != oscillator_ptr->Phmagtype ||
-      oscillator_ptr->oldwaveshaping != oscillator_ptr->Pwaveshaping ||
-      oscillator_ptr->oldwaveshapingfunction != oscillator_ptr->Pwaveshapingfunction)
+      oscillator_ptr->old_waveshaping_drive != oscillator_ptr->waveshaping_drive ||
+      oscillator_ptr->old_waveshaping_function != oscillator_ptr->waveshaping_function)
   {
     oscillator_ptr->prepared = false;
   }

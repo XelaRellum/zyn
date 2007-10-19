@@ -55,7 +55,10 @@ struct zyn_oscillator
     63..0 - block type randomness - 0 is maximum
     65..127 - each harmonic randomness - 127 is maximum*/
   unsigned char Prand;
-  unsigned char Pwaveshaping,Pwaveshapingfunction;
+
+  float waveshaping_drive;      /* 0..100 */
+  unsigned int waveshaping_function; /* waveshape type, one of ZYN_OSCILLATOR_WAVESHAPE_TYPE_XXX */
+
   unsigned char Pfiltertype,Pfilterpar1,Pfilterpar2;
   unsigned char Pfilterbeforews;
   unsigned char Psatype,Psapar;//spectrum adjust
@@ -85,7 +88,11 @@ struct zyn_oscillator
   zyn_fft_handle fft;
 
   //Internal Data
-  unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping;
+  unsigned char oldbasefunc,oldbasepar,oldhmagtype;
+
+  unsigned int old_waveshaping_function;
+  float old_waveshaping_drive;
+
   int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldbasefuncmodulationpar3,oldharmonicshift;
   int oldmodulation,oldmodulationpar1,oldmodulationpar2,oldmodulationpar3;
 
