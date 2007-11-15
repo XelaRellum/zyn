@@ -58,6 +58,7 @@ zynadd_instantiate(
 {
   struct zynadd * zynadd_ptr;
   struct lv2_rtsafe_memory_pool_provider * rtmempool_ptr;
+  const LV2_Feature * const * feature_ptr_ptr;
 
   LOG_DEBUG("zynadd_create_plugin_instance() called.");
   LOG_DEBUG("sample_rate = %f", sample_rate);
@@ -65,16 +66,17 @@ zynadd_instantiate(
 
   rtmempool_ptr = NULL;
 
-  while (*host_features)
+  feature_ptr_ptr = host_features;
+  while (*feature_ptr_ptr)
   {
-    LOG_DEBUG("Host feature <%s> detected", (*host_features)->URI);
+    LOG_DEBUG("Host feature <%s> detected", (*feature_ptr_ptr)->URI);
 
-    if (strcmp((*host_features)->URI, LV2_RTSAFE_MEMORY_POOL_URI) == 0)
+    if (strcmp((*feature_ptr_ptr)->URI, LV2_RTSAFE_MEMORY_POOL_URI) == 0)
     {
-      rtmempool_ptr = (*host_features)->data;
+      rtmempool_ptr = (*feature_ptr_ptr)->data;
     }
 
-    host_features++;
+    feature_ptr_ptr++;
   }
 
   if (rtmempool_ptr == NULL)
