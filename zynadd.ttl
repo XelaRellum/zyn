@@ -10,6 +10,7 @@
   doap:license <http://usefulinc.com/doap/licenses/gpl>;
 #  ll:standaloneGui <zynadd_gtk>;
   lv2:optionalFeature <http://home.gna.org/lv2dynparam/v1>;
+  lv2:requiredFeature <http://home.gna.org/lv2dynparam/rtmempool/v1>;
   ll:pegName "peg";  
 
   lv2:port [

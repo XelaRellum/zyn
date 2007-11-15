@@ -32,6 +32,7 @@
 #include "zynadd.h"
 #include "addsynth.h"
 #include "lv2dynparam/lv2dynparam.h"
+#include "lv2dynparam/lv2_rtmempool.h"
 #include "lv2dynparam/plugin.h"
 #include "list.h"
 #include "zynadd_internal.h"
@@ -56,22 +57,30 @@ zynadd_instantiate(
   const LV2_Feature * const * host_features)
 {
   struct zynadd * zynadd_ptr;
-  const LV2_Feature * feature_ptr;
+  struct lv2_rtsafe_memory_pool_provider * rtmempool_ptr;
 
   LOG_DEBUG("zynadd_create_plugin_instance() called.");
   LOG_DEBUG("sample_rate = %f", sample_rate);
   LOG_DEBUG("bundle_path = \"%s\"", bundle_path);
 
-//  if (host_features != NULL && *host_features != NULL)
+  rtmempool_ptr = NULL;
+
+  while (*host_features)
   {
-    feature_ptr = *host_features;
-    while (feature_ptr)
+    LOG_DEBUG("Host feature <%s> detected", (*host_features)->URI);
+
+    if (strcmp((*host_features)->URI, LV2_RTSAFE_MEMORY_POOL_URI) == 0)
     {
-//      printf("Host feature <%s> detected\n", feature_ptr->URI);
-      feature_ptr++;
+      rtmempool_ptr = (*host_features)->data;
     }
 
-//    printf("end of host features.\n");
+    host_features++;
+  }
+
+  if (rtmempool_ptr == NULL)
+  {
+    LOG_ERROR(LV2_RTSAFE_MEMORY_POOL_URI " extension is required");
+    goto fail;
   }
 
   zynadd_ptr = malloc(sizeof(struct zynadd));
