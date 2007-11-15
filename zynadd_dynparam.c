@@ -433,6 +433,7 @@ zynadd_dynparam_init(
 
   if (!lv2dynparam_plugin_instantiate(
         (LV2_Handle)zynadd_ptr,
+        zynadd_ptr->host_features,
         "zynadd",
         &zynadd_ptr->dynparams))
   {

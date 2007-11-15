@@ -80,6 +80,8 @@ zynadd_instantiate(
     goto fail;
   }
   
+  zynadd_ptr->host_features = host_features;
+
   zynadd_ptr->bundle_path = strdup(bundle_path);
   if (zynadd_ptr->bundle_path == NULL)
   {

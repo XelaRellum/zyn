@@ -98,6 +98,8 @@ struct zynadd
 
   struct list_head groups;
   struct list_head parameters;
+
+  const LV2_Feature * const * host_features;
 };
 
 bool zynadd_dynparam_init(struct zynadd * zynadd_ptr);
