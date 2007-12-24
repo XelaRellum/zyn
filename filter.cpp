@@ -37,7 +37,6 @@ void
 Filter::init(float sample_rate, FilterParams *pars)
 {
   unsigned char Ftype=pars->Ptype;
-  unsigned char Fstages=pars->Pstages;
 
   category=pars->Pcategory;
 
@@ -47,7 +46,7 @@ Filter::init(float sample_rate, FilterParams *pars)
     filter = new FormantFilter(sample_rate, pars);
     break;
   case ZYN_FILTER_TYPE_STATE_VARIABLE:
-    filter = new SVFilter(sample_rate, Ftype, 1000.0, pars->getq(), Fstages);
+    filter = new SVFilter(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
     filter->outgain = dB2rap(pars->m_gain);
     if (filter->outgain>1.0)
     {
@@ -55,7 +54,7 @@ Filter::init(float sample_rate, FilterParams *pars)
     }
     break;
   case ZYN_FILTER_TYPE_ANALOG:
-    m_analog_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), Fstages);
+    m_analog_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
     filter = &m_analog_filter;
     if (Ftype >= ZYN_FILTER_ANALOG_TYPE_PKF2 &&
         Ftype <= ZYN_FILTER_ANALOG_TYPE_HSH2)

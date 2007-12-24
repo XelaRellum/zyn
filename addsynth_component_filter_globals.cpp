@@ -107,7 +107,7 @@ zyn_component_filter_globals_get_int(
   switch (parameter)
   {
   case ZYNADD_PARAMETER_INT_STAGES:
-    return -1;
+    return zyn_addsynth_ptr->m_filter_params.m_additional_stages + 1;
   case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
     return ZYN_FILTER_TYPE_ANALOG;
   case ZYNADD_PARAMETER_ENUM_ANALOG_FILTER_TYPE:
@@ -129,6 +129,9 @@ zyn_component_filter_globals_set_int(
   switch (parameter)
   {
   case ZYNADD_PARAMETER_INT_STAGES:
+    assert(value > 0);
+    assert(value <= MAX_FILTER_STAGES);
+    zyn_addsynth_ptr->m_filter_params.m_additional_stages = value - 1;
     return;
   case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
     return;

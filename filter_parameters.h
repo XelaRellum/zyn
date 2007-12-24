@@ -43,7 +43,7 @@ public:
   unsigned char Ptype;// Filter type  (for analog lpf,hpf,bpf..)
   unsigned char Pfreq;// Frequency (64-central frequency)
   unsigned char Pq;   // Q parameters (resonance or bandwidth)
-  unsigned char Pstages; //filter stages+1
+  unsigned char m_additional_stages; // filter stages, 0..4, 0 for one stage, 1 for two stages, etc. up to five stages
   float m_frequency_tracking;   //how the filter frequency is changing according the note frequency, -1 .. 1
   float m_gain;                 // filter's output gain, in dB, -30 .. 30
   

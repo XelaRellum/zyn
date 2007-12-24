@@ -46,7 +46,7 @@ void FilterParams::defaults(){
   Pfreq=Dfreq;
   Pq=Dq;
 
-  Pstages=0;
+  m_additional_stages = 0;
   m_frequency_tracking = 0;
   m_gain = 0;
   Pcategory=0;
@@ -125,7 +125,8 @@ REALTYPE FilterParams::getfreqpos(REALTYPE freq){
 /*
  * Get the freq. response of the formant filter
  */
-void FilterParams::formantfilterH(int nvowel,int nfreqs,REALTYPE *freqs){
+void FilterParams::formantfilterH(int nvowel,int nfreqs,REALTYPE *freqs)
+{
   REALTYPE c[3],d[3];
   REALTYPE filter_freq,filter_q,filter_amp;
   REALTYPE omega,sn,cs,alpha;
@@ -133,11 +134,16 @@ void FilterParams::formantfilterH(int nvowel,int nfreqs,REALTYPE *freqs){
   for (int i=0;i<nfreqs;i++) freqs[i]=0.0;
 
   //for each formant...
-  for (int nformant=0;nformant<Pnumformants;nformant++){
+  for (int nformant=0;nformant<Pnumformants;nformant++)
+  {
     //compute formant parameters(frequency,amplitude,etc.)
     filter_freq=getformantfreq(Pvowels[nvowel].formants[nformant].freq);
     filter_q=getformantq(Pvowels[nvowel].formants[nformant].q)*getq();
-    if (Pstages>0) filter_q=(filter_q>1.0 ? pow(filter_q,1.0/(Pstages+1)) : filter_q);
+
+    if (m_additional_stages > 0)
+    {
+      filter_q = (filter_q > 1.0 ? pow(filter_q, 1.0 / (m_additional_stages + 1)) : filter_q);
+    }
 
     filter_amp=getformantamp(Pvowels[nvowel].formants[nformant].amp);
 
@@ -187,7 +193,7 @@ void FilterParams::formantfilterH(int nvowel,int nfreqs,REALTYPE *freqs){
       };
       h=h/(x*x+y*y);
       
-      freqs[i]+=pow(h,(Pstages+1.0)/2.0)*filter_amp;
+      freqs[i] += pow(h, (m_additional_stages + 1.0) / 2.0) * filter_amp;
     };
   };
   for (int i=0;i<nfreqs;i++) {
