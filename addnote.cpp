@@ -35,6 +35,8 @@
 #include "lfo.h"
 #include "filter_base.h"
 #include "analog_filter.h"
+#include "sv_filter.h"
+#include "formant_filter.h"
 #include "filter.h"
 #include "envelope.h"
 #include "addsynth.h"

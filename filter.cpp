@@ -28,10 +28,9 @@
 #include "filter_base.h"
 #include "filter_parameters.h"
 #include "analog_filter.h"
-#include "filter.h"
-#include "analog_filter.h"
-#include "formant_filter.h"
 #include "sv_filter.h"
+#include "formant_filter.h"
+#include "filter.h"
 
 void
 Filter::init(float sample_rate, FilterParams *pars)
@@ -42,19 +41,19 @@ Filter::init(float sample_rate, FilterParams *pars)
 
   switch (m_category)
   {
-#if 0
   case ZYN_FILTER_TYPE_FORMANT:
-    m_filter = new FormantFilter(sample_rate, pars);
+    m_formant_filter.init(sample_rate, pars);
+    m_filter = &m_formant_filter;
     break;
   case ZYN_FILTER_TYPE_STATE_VARIABLE:
-    m_filter = new SVFilter(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
+    m_sv_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
+    m_filter = &m_sv_filter;
     m_filter->outgain = dB2rap(pars->m_gain);
     if (m_filter->outgain > 1.0)
     {
       m_filter->outgain = sqrt(m_filter->outgain);
     }
     break;
-#endif
   case ZYN_FILTER_TYPE_ANALOG:
     m_analog_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
     m_filter = &m_analog_filter;
@@ -70,19 +69,6 @@ Filter::init(float sample_rate, FilterParams *pars)
     break;
   default:
     assert(0);
-  }
-}
-
-Filter::Filter()
-{
-  m_filter = NULL;
-}
-
-Filter::~Filter()
-{
-  if (m_filter != NULL)
-  {
-//    delete m_filter;
   }
 }
 

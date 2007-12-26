@@ -29,7 +29,7 @@
 #include "filter_parameters.h"
 #include "formant_filter.h"
 
-FormantFilter::FormantFilter(float sample_rate, FilterParams *pars)
+void FormantFilter::init(float sample_rate, FilterParams *pars)
 {
   int i, j;
 
@@ -37,14 +37,10 @@ FormantFilter::FormantFilter(float sample_rate, FilterParams *pars)
 
   for (i = 0 ; i < numformants ; i++)
   {
-    formant[i] = new AnalogFilter();
-    formant[i]->init(sample_rate, ZYN_FILTER_ANALOG_TYPE_BPF2, 1000.0, 10.0, pars->m_additional_stages);
+    formant[i].init(sample_rate, ZYN_FILTER_ANALOG_TYPE_BPF2, 1000.0, 10.0, pars->m_additional_stages);
   }
 
   cleanup();
-
-  inbuffer = new float[SOUND_BUFFER_SIZE];
-  tmpbuf = new float[SOUND_BUFFER_SIZE];
 
   for (j = 0 ; j < FF_MAX_VOWELS ; j++)
   {
@@ -99,19 +95,13 @@ FormantFilter::FormantFilter(float sample_rate, FilterParams *pars)
   firsttime = 1;
 }
 
-FormantFilter::~FormantFilter(){
-  for (int i=0;i<numformants;i++) delete(formant[i]);
-  delete (inbuffer);
-  delete (tmpbuf);
-};
-
 void FormantFilter::cleanup()
 {
   int i;
 
   for (i = 0 ; i < numformants ; i++)
   {
-    formant[i]->cleanup();
+    formant[i].cleanup();
   }
 }
 
@@ -146,7 +136,7 @@ void FormantFilter::setpos(float input){
 	    currentformants[i].freq=formantpar[p1][i].freq*(1.0-pos)+formantpar[p2][i].freq*pos;
 	    currentformants[i].amp=formantpar[p1][i].amp*(1.0-pos)+formantpar[p2][i].amp*pos;
 	    currentformants[i].q=formantpar[p1][i].q*(1.0-pos)+formantpar[p2][i].q*pos;	
-	    formant[i]->setfreq_and_q(currentformants[i].freq,currentformants[i].q*Qfactor);
+	    formant[i].setfreq_and_q(currentformants[i].freq,currentformants[i].q*Qfactor);
 	    oldformantamp[i]=currentformants[i].amp;
     };
     firsttime=0;
@@ -161,7 +151,7 @@ void FormantFilter::setpos(float input){
 	    currentformants[i].q=currentformants[i].q*(1.0-formantslowness)
         +(formantpar[p1][i].q*(1.0-pos)+formantpar[p2][i].q*pos)*formantslowness;
 
-	    formant[i]->setfreq_and_q(currentformants[i].freq,currentformants[i].q*Qfactor);
+	    formant[i].setfreq_and_q(currentformants[i].freq,currentformants[i].q*Qfactor);
     };
   };
     
@@ -174,7 +164,7 @@ void FormantFilter::setfreq(float frequency){
 
 void FormantFilter::setq(float q_){
   Qfactor=q_;
-  for (int i=0;i<numformants;i++) formant[i]->setq(Qfactor*currentformants[i].q);
+  for (int i=0;i<numformants;i++) formant[i].setq(Qfactor*currentformants[i].q);
 };
 
 void FormantFilter::setfreq_and_q(float frequency,float q_){    
@@ -192,7 +182,7 @@ void FormantFilter::filterout(float *smp){
     
   for (j=0;j<numformants;j++) {
     for (i=0;i<SOUND_BUFFER_SIZE;i++) tmpbuf[i]=inbuffer[i]*outgain;
-    formant[j]->filterout(tmpbuf);
+    formant[j].filterout(tmpbuf);
 
     if (ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j],currentformants[j].amp))
       for (i=0;i<SOUND_BUFFER_SIZE;i++) smp[i]+=tmpbuf[i]*

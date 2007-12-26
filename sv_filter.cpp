@@ -27,7 +27,8 @@
 #include "filter_base.h"
 #include "sv_filter.h"
 
-SVFilter::SVFilter(float sample_rate, unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages){
+void SVFilter::init(float sample_rate, unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages)
+{
   m_sample_rate = sample_rate;
     stages=Fstages;
     type=Ftype;
@@ -40,9 +41,6 @@ SVFilter::SVFilter(float sample_rate, unsigned char Ftype,REALTYPE Ffreq, REALTY
     if (stages>=MAX_FILTER_STAGES) stages=MAX_FILTER_STAGES;
     cleanup();
     setfreq_and_q(Ffreq,Fq);
-};
-
-SVFilter::~SVFilter(){
 };
 
 void SVFilter::cleanup(){

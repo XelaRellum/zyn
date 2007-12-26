@@ -26,8 +26,8 @@
 class Filter
 {
 public:
-  Filter();
-  ~Filter();  
+  Filter() {};
+  ~Filter() {};
 
   void init(float sample_rate, FilterParams *pars);
 
@@ -43,6 +43,8 @@ private:
   unsigned char m_category;
 
   AnalogFilter m_analog_filter;
+  SVFilter m_sv_filter;
+  FormantFilter m_formant_filter;
 };
 
 #endif

@@ -31,8 +31,10 @@ struct zyn_formant
 class FormantFilter : public Filter_
 {
 public:
-  FormantFilter(float sample_rate, FilterParams *pars);
-  ~FormantFilter(); 
+  FormantFilter() {};
+  ~FormantFilter() {};
+
+  void init(float sample_rate, FilterParams *pars);
   void filterout(float *smp);
   void setfreq(float frequency);
   void setfreq_and_q(float frequency,float q_);
@@ -40,8 +42,9 @@ public:
 
   void cleanup();
 private:
-  AnalogFilter *formant[FF_MAX_FORMANTS];
-  float *inbuffer,*tmpbuf;
+  AnalogFilter formant[FF_MAX_FORMANTS];
+  float inbuffer[SOUND_BUFFER_SIZE];
+  float tmpbuf[SOUND_BUFFER_SIZE];
 
   struct zyn_formant formantpar[FF_MAX_VOWELS][FF_MAX_FORMANTS];
   struct zyn_formant currentformants[FF_MAX_FORMANTS];
