@@ -23,6 +23,7 @@
 
 extern const char * g_shape_names[];
 extern const char * g_analog_filter_type_names[];
+extern const char * g_sv_filter_type_names[];
 extern const char * g_filter_type_names[];
 extern const char * g_oscillator_base_function_names[];
 extern const char * g_oscillator_waveshape_type_names[];

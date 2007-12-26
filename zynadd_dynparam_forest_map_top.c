@@ -123,7 +123,9 @@
 #define LV2DYNPARAM_PARAMETER_PITCH_BEND_RANGE                      78
 #define LV2DYNPARAM_PARAMETER_PITCH_BEND                            79
 
-#define LV2DYNPARAM_PARAMETERS_COUNT                                80
+#define LV2DYNPARAM_PARAMETER_GLOBAL_SV_FILTER_TYPE                 80
+
+#define LV2DYNPARAM_PARAMETERS_COUNT                                81
 
 #define LV2DYNPARAM_GROUP_AMP                                        0
 #define LV2DYNPARAM_GROUP_FILTER                                     1
@@ -143,7 +145,7 @@
 #define LV2DYNPARAM_GROUP_FILTER_FILTERS                            13
 #define LV2DYNPARAM_GROUP_FILTER_ANALOG                             14
 #define LV2DYNPARAM_GROUP_FILTER_FORMANT                            15
-#define LV2DYNPARAM_GROUP_FILTER_SVF                                16
+#define LV2DYNPARAM_GROUP_FILTER_SV                                 16
 #define LV2DYNPARAM_GROUP_FILTER_ENV                                17
 #define LV2DYNPARAM_GROUP_FILTER_LFO                                18
 #define LV2DYNPARAM_GROUP_FILTER_LFO_START_PHASE                    19
@@ -256,8 +258,9 @@ void zynadd_init_top_forest_map()
       {
       }
 
-      LV2DYNPARAM_GROUP_INIT(FILTER_FILTERS, FILTER_SVF, "State variable", NULL);
+      LV2DYNPARAM_GROUP_INIT(FILTER_FILTERS, FILTER_SV, "State variable", NULL);
       {
+        LV2DYNPARAM_PARAMETER_INIT_ENUM(FILTER_SV, GLOBAL_SV_FILTER_TYPE, FILTER_GLOBALS, SV_FILTER_TYPE, "Filter type", g_sv_filter_type_names, ZYN_FILTER_SV_TYPES_COUNT, ALWAYS, NULL);
       }
     }
 

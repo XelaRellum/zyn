@@ -114,6 +114,8 @@ zyn_component_filter_globals_get_int(
     return ZYN_FILTER_TYPE_ANALOG;
   case ZYNADD_PARAMETER_ENUM_ANALOG_FILTER_TYPE:
     return ZYN_FILTER_ANALOG_TYPE_LPF1;
+  case ZYNADD_PARAMETER_ENUM_SV_FILTER_TYPE:
+    return ZYN_FILTER_SV_TYPE_LOWPASS;
   }
 
   LOG_ERROR("Unknown int filter parameter %u", parameter);
@@ -138,6 +140,8 @@ zyn_component_filter_globals_set_int(
   case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
     return;
   case ZYNADD_PARAMETER_ENUM_ANALOG_FILTER_TYPE:
+    return;
+  case ZYNADD_PARAMETER_ENUM_SV_FILTER_TYPE:
     return;
   }
 

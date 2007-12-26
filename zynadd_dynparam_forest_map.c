@@ -35,6 +35,7 @@
 
 const char * g_shape_names[ZYN_LFO_SHAPES_COUNT];
 const char * g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPES_COUNT];
+const char * g_sv_filter_type_names[ZYN_FILTER_SV_TYPES_COUNT];
 const char * g_filter_type_names[ZYN_FILTER_TYPES_COUNT];
 const char * g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTIONS_COUNT];
 const char * g_oscillator_waveshape_type_names[ZYN_OSCILLATOR_WAVESHAPE_TYPES_COUNT];
@@ -107,6 +108,11 @@ void zynadd_init_forest_map_globals()
   g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_PKF2] = "Peak - 2 poles";
   g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LSH2] = "Low Shelf - 2 poles";
   g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HSH2] = "High Shelf - 2 poles";
+
+  g_sv_filter_type_names[ZYN_FILTER_SV_TYPE_LOWPASS] = "Low-pass";
+  g_sv_filter_type_names[ZYN_FILTER_SV_TYPE_HIGHPASS] = "High-pass";
+  g_sv_filter_type_names[ZYN_FILTER_SV_TYPE_BANDPASS] = "Band-pass";
+  g_sv_filter_type_names[ZYN_FILTER_SV_TYPE_NOTCH] = "Notch";
 
   g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_SINE] = "Sine";
   g_oscillator_base_function_names[ZYN_OSCILLATOR_BASE_FUNCTION_TRIANGLE] = "Triangle";
