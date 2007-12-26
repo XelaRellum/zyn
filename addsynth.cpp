@@ -79,7 +79,7 @@ zyn_addsynth_create(
     
   zyn_addsynth_ptr->m_amplitude_envelope_params.init_adsr(64, true, 0, 40, 127, 25, false);
 
-  zyn_addsynth_ptr->m_filter_params.init(sample_rate, 2, 94, 40);
+  zyn_addsynth_ptr->m_filter_params.init(sample_rate, ZYN_FILTER_ANALOG_TYPE_LPF2, 94, 40);
   zyn_addsynth_ptr->m_filter_envelope_params.init_adsr_filter(0, true, 64, 40, 64, 70, 60, 64);
 
   zyn_resonance_init(&zyn_addsynth_ptr->GlobalPar.resonance);
@@ -133,7 +133,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params_ptr[voice_index].frequency_lfo_params.stretch = 0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].frequency_lfo_params.shape = ZYN_LFO_SHAPE_TYPE_SINE;
 
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].m_filter_params.init(sample_rate, 2, 50, 60);
+    zyn_addsynth_ptr->voices_params_ptr[voice_index].m_filter_params.init(sample_rate, ZYN_FILTER_ANALOG_TYPE_LPF2, 50, 60);
     zyn_addsynth_ptr->voices_params_ptr[voice_index].m_filter_envelope_params.init_adsr_filter(0, false, 90, 70, 40, 70, 10, 40);
 
     zyn_addsynth_ptr->voices_params_ptr[voice_index].filter_lfo_params.frequency = 50.0 / 127.0;
