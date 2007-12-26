@@ -22,16 +22,17 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "globals.h"
 #include "filter_base.h"
 #include "sv_filter.h"
 
-void SVFilter::init(float sample_rate, unsigned char Ftype, REALTYPE Ffreq, REALTYPE Fq, unsigned char Fstages)
+void SVFilter::init(float sample_rate, int type, REALTYPE Ffreq, REALTYPE Fq, unsigned char Fstages)
 {
   m_sample_rate = sample_rate;
   stages = Fstages;
-  type = Ftype;
+  m_type = type;
   freq = Ffreq;
   q = Fq;
   gain = 1.0;
@@ -131,9 +132,9 @@ void SVFilter::setq(REALTYPE q_)
   computefiltercoefs();
 }
 
-void SVFilter::settype(int type_)
+void SVFilter::settype(int type)
 {
-  type = type_;
+  m_type = type;
 
   computefiltercoefs();
 }
@@ -163,20 +164,23 @@ void SVFilter::singlefilterout(REALTYPE *smp,fstage &x,parameters &par)
   int i;
   REALTYPE *out=NULL;
 
-  switch(type)
+  switch(m_type)
   {
-  case 0:
+  case ZYN_FILTER_SV_TYPE_LOWPASS:
     out = &x.low;
     break;
-  case 1:
+  case ZYN_FILTER_SV_TYPE_HIGHPASS:
     out = &x.high;
     break;
-  case 2:
+  case ZYN_FILTER_SV_TYPE_BANDPASS:
     out = &x.band;
     break;
-  case 3:
+  case ZYN_FILTER_SV_TYPE_NOTCH:
     out = &x.notch;
     break;
+  default:
+    assert(0);
+    return;
   }
 
   for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)

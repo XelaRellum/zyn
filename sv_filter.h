@@ -29,7 +29,7 @@ public:
   SVFilter() {};
   ~SVFilter() {};
 
-  void init(float sample_rate, unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages);
+  void init(float sample_rate, int type, REALTYPE Ffreq, REALTYPE Fq, unsigned char Fstages);
   void filterout(REALTYPE *smp);
   void setfreq(REALTYPE frequency);
   void setfreq_and_q(REALTYPE frequency,REALTYPE q_);
@@ -55,7 +55,7 @@ private:
 
   void singlefilterout(REALTYPE *smp,fstage &x,parameters &par);
   void computefiltercoefs();
-  int type;//The type of the filter (LPF1,HPF1,LPF2,HPF2...)
+  int m_type;                   // The type of the filter, one of ZYN_FILTER_SV_TYPE_XXX
   int stages;//how many times the filter is applied (0->1,1->2,etc.)
   REALTYPE freq;//Frequency given in Hz
   REALTYPE q; //Q factor (resonance or Q factor)
