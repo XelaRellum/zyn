@@ -78,8 +78,6 @@ public:
   REALTYPE getformantamp(unsigned char amp);
   REALTYPE getformantq(unsigned char q);
 
-  bool changed;
-  
 private:
   void defaults(int n);
 

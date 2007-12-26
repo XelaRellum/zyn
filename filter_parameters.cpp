@@ -37,7 +37,6 @@ void FilterParams::init(
   Dfreq=Pfreq_;
   Dq=Pq_;
 
-  changed=false;
   defaults();    
 }
 
