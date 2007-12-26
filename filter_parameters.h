@@ -39,7 +39,7 @@ public:
   REALTYPE getq();
   REALTYPE getfreqtracking(REALTYPE notefreq);
   
-  unsigned char Pcategory;//Filter category (Analog/Formant/StVar)
+  unsigned char m_category;     // Filter category, one of ZYN_FILTER_TYPE_XXX
   unsigned char Ptype;// Filter type  (for analog lpf,hpf,bpf..)
   unsigned char Pfreq;// Frequency (64-central frequency)
   unsigned char Pq;   // Q parameters (resonance or bandwidth)

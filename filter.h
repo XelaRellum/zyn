@@ -39,8 +39,8 @@ public:
   float getrealfreq(float freqpitch);
 
 private:
-  Filter_ *filter;
-  unsigned char category;
+  Filter_ *m_filter;
+  unsigned char m_category;
 
   AnalogFilter m_analog_filter;
 };

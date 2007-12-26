@@ -49,7 +49,7 @@ void FilterParams::defaults(){
   m_additional_stages = 0;
   m_frequency_tracking = 0;
   m_gain = 0;
-  Pcategory=0;
+  m_category = ZYN_FILTER_TYPE_ANALOG;
     
   Pnumformants=3;
   Pformantslowness=64;

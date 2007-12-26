@@ -38,32 +38,34 @@ Filter::init(float sample_rate, FilterParams *pars)
 {
   unsigned char Ftype=pars->Ptype;
 
-  category=pars->Pcategory;
+  m_category = pars->m_category;
 
-  switch (category)
+  switch (m_category)
   {
+#if 0
   case ZYN_FILTER_TYPE_FORMANT:
-    filter = new FormantFilter(sample_rate, pars);
+    m_filter = new FormantFilter(sample_rate, pars);
     break;
   case ZYN_FILTER_TYPE_STATE_VARIABLE:
-    filter = new SVFilter(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
-    filter->outgain = dB2rap(pars->m_gain);
-    if (filter->outgain>1.0)
+    m_filter = new SVFilter(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
+    m_filter->outgain = dB2rap(pars->m_gain);
+    if (m_filter->outgain > 1.0)
     {
-      filter->outgain = sqrt(filter->outgain);
+      m_filter->outgain = sqrt(m_filter->outgain);
     }
     break;
+#endif
   case ZYN_FILTER_TYPE_ANALOG:
     m_analog_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
-    filter = &m_analog_filter;
+    m_filter = &m_analog_filter;
     if (Ftype >= ZYN_FILTER_ANALOG_TYPE_PKF2 &&
         Ftype <= ZYN_FILTER_ANALOG_TYPE_HSH2)
     {
-      filter->setgain(pars->m_gain);
+      m_filter->setgain(pars->m_gain);
     }
     else
     {
-      filter->outgain = dB2rap(pars->m_gain);
+      m_filter->outgain = dB2rap(pars->m_gain);
     }
     break;
   default:
@@ -73,42 +75,42 @@ Filter::init(float sample_rate, FilterParams *pars)
 
 Filter::Filter()
 {
-  filter = NULL;
+  m_filter = NULL;
 }
 
 Filter::~Filter()
 {
-  if (filter != NULL)
+  if (m_filter != NULL)
   {
-    delete filter;
+//    delete m_filter;
   }
 }
 
 void Filter::filterout(REALTYPE *smp)
 {
-  filter->filterout(smp);
+  m_filter->filterout(smp);
 }
 
 void Filter::setfreq(REALTYPE frequency)
 {
-  filter->setfreq(frequency);
+  m_filter->setfreq(frequency);
 }
 
 void Filter::setfreq_and_q(REALTYPE frequency,REALTYPE q_)
 {
-  filter->setfreq_and_q(frequency,q_);
+  m_filter->setfreq_and_q(frequency,q_);
 }
 
 void Filter::setq(REALTYPE q_)
 {
-  filter->setq(q_);
+  m_filter->setq(q_);
 }
 
 REALTYPE
 Filter::getrealfreq(REALTYPE freqpitch)
 {
-  if (category == ZYN_FILTER_TYPE_ANALOG ||
-      category == ZYN_FILTER_TYPE_STATE_VARIABLE)
+  if (m_category == ZYN_FILTER_TYPE_ANALOG ||
+      m_category == ZYN_FILTER_TYPE_STATE_VARIABLE)
   {
     return pow(2.0,freqpitch+9.96578428); // log2(1000)=9.95748
   }
