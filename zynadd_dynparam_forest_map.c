@@ -98,13 +98,13 @@ void zynadd_init_forest_map_globals()
   g_filter_type_names[ZYN_FILTER_TYPE_FORMANT] = "Formant";
   g_filter_type_names[ZYN_FILTER_TYPE_STATE_VARIABLE] = "State variable";
 
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LPF1] = "LPF 1 pole";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HPF1] = "HPF 1 pole";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LPF2] = "LPF 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HPF2] = "HPF 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_BPF2] = "BPF 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_NF2] = "NOTCH 2 poles";
-  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_PKF2] = "PEAK (2 poles)";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LPF1] = "Low-pass - 1 pole";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HPF1] = "High-pass - 1 pole";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LPF2] = "Low-pass - 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HPF2] = "High-pass - 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_BPF2] = "Band-pass - 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_NF2] = "Notch - 2 poles";
+  g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_PKF2] = "Peak - 2 poles";
   g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_LSH2] = "Low Shelf - 2 poles";
   g_analog_filter_type_names[ZYN_FILTER_ANALOG_TYPE_HSH2] = "High Shelf - 2 poles";
 
