@@ -51,6 +51,7 @@ private:
     REALTYPE f,q,q_sqrt;
   }par,ipar;
 
+  REALTYPE m_ismp[SOUND_BUFFER_SIZE]; // used for interpolation
 
   void singlefilterout(REALTYPE *smp,fstage &x,parameters &par);
   void computefiltercoefs();

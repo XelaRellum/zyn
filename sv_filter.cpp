@@ -193,23 +193,22 @@ void SVFilter::singlefilterout(REALTYPE *smp,fstage &x,parameters &par)
 void SVFilter::filterout(REALTYPE *smp)
 {
   int i;
-  REALTYPE *ismp=NULL;
+  REALTYPE x;
 
   if (needsinterpolation != 0)
   {
-    ismp = new REALTYPE[SOUND_BUFFER_SIZE];
-    for (i=0 ; i < SOUND_BUFFER_SIZE;i++)
+    for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
     {
-      ismp[i] = smp[i];
+      m_ismp[i] = smp[i];
     }
 
     for (i=0 ; i < stages + 1 ; i++)
     {
-      singlefilterout(ismp, st[i], ipar);
+      singlefilterout(m_ismp, st[i], ipar);
     }
   }
 
-  for (i=0;i<stages+1;i++)
+  for (i = 0 ; i < stages + 1 ; i++)
   {
     singlefilterout(smp, st[i], par);
   }
@@ -218,11 +217,9 @@ void SVFilter::filterout(REALTYPE *smp)
   {
     for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
     {
-      REALTYPE x = i / (REALTYPE)SOUND_BUFFER_SIZE;
-      smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
+      x = i / (REALTYPE)SOUND_BUFFER_SIZE;
+      smp[i] = m_ismp[i] * (1.0 - x) + smp[i] * x;
     }
-
-    delete (ismp);
 
     needsinterpolation = 0;
   }
