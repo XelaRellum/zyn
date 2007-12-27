@@ -61,6 +61,10 @@ zyn_addsynth_create(
 
 //  printf("zyn_addsynth_create\n");
   zyn_addsynth_ptr = (struct zyn_addsynth *)malloc(sizeof(struct zyn_addsynth));
+  if (zyn_addsynth_ptr == NULL)
+  {
+    goto fail;
+  }
 
   zyn_addsynth_ptr->sample_rate = sample_rate;
 
@@ -80,6 +84,11 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->m_amplitude_envelope_params.init_adsr(64, true, 0, 40, 127, 25, false);
 
   zyn_addsynth_ptr->m_filter_params.init(sample_rate, ZYN_FILTER_ANALOG_TYPE_LPF2, 94, 40);
+  if (!zyn_filter_sv_create(sample_rate, &zyn_addsynth_ptr->m_filter_sv))
+  {
+    goto fail_free_synth;
+  }
+
   zyn_addsynth_ptr->m_filter_envelope_params.init_adsr_filter(0, true, 64, 40, 64, 70, 60, 64);
 
   zyn_resonance_init(&zyn_addsynth_ptr->GlobalPar.resonance);
@@ -348,6 +357,11 @@ zyn_addsynth_create(
 //  printf("zyn_addsynth_create(%08X)\n", (unsigned int)*handle_ptr);
 
   return true;
+
+fail_free_synth:
+
+fail:
+  return false;
 }
 
 #define zyn_addsynth_ptr ((struct zyn_addsynth *)handle)
@@ -477,6 +491,8 @@ zyn_addsynth_destroy(
     zyn_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].oscillator);
     zyn_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].modulator_oscillator);
   }
+
+  zyn_filter_sv_destroy(zyn_addsynth_ptr->m_filter_sv);
 
   // ADnoteParameters temp end
 

@@ -53,6 +53,18 @@ mix_add_two_buffers(
   zyn_sample_type * buffer2,
   size_t size);
 
+void
+copy_buffer(
+  zyn_sample_type * buffer_dest,
+  zyn_sample_type * buffer_src,
+  size_t size);
+
+void
+multiply_buffer(
+  zyn_sample_type * buffer,
+  float multiplyer,
+  size_t size);
+
 /*
  * Random generator (0.0..1.0)
  */

@@ -96,6 +96,14 @@ ADnote::ADnote(
   m_note_enabled = false;
 
   m_synth_ptr = synth_ptr;
+
+  if (!zyn_filter_sv_processor_create(synth_ptr->m_filter_sv, &m_filter_sv_processor_left))
+  {
+  }
+
+  if (!zyn_filter_sv_processor_create(synth_ptr->m_filter_sv, &m_filter_sv_processor_right))
+  {
+  }
 }
 
 void
@@ -561,6 +569,9 @@ ADnote::~ADnote()
   {
     KillNote();
   }
+
+  zyn_filter_sv_processor_destroy(m_filter_sv_processor_left);
+  zyn_filter_sv_processor_destroy(m_filter_sv_processor_right);
 
   free(m_old_amplitude_ptr);
   free(m_new_amplitude_ptr);

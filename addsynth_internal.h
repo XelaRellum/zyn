@@ -21,6 +21,8 @@
 #ifndef ADDSYNTH_INTERNAL_H__9870368A_F1C9_4F0D_ADC1_B07ECFF2F9C7__INCLUDED
 #define ADDSYNTH_INTERNAL_H__9870368A_F1C9_4F0D_ADC1_B07ECFF2F9C7__INCLUDED
 
+#include "filter_sv.h"
+
 class ADnote;
 
 struct note_channel
@@ -246,6 +248,7 @@ struct zyn_addsynth
   EnvelopeParams m_amplitude_envelope_params;
 
   FilterParams m_filter_params;
+  zyn_filter_sv_handle m_filter_sv;
 
   // Velocity sensing amount of the Filter, 0 .. 1
   float m_filter_velocity_sensing_amount;

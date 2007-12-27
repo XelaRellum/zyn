@@ -23,6 +23,8 @@
 #ifndef AD_NOTE_H
 #define AD_NOTE_H
 
+#include "filter_sv.h"
+
 //Globals
 
 //FM amplitude tune
@@ -146,6 +148,8 @@ private:
 
   Filter m_filter_left;
   Filter m_filter_right;
+  zyn_filter_sv_processor_handle m_filter_sv_processor_left;
+  zyn_filter_sv_processor_handle m_filter_sv_processor_right;
 
   float m_filter_center_pitch;  // octaves
   float m_filter_q_factor;

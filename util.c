@@ -138,6 +138,32 @@ mix_add_two_buffers(
   }
 }
 
+void
+copy_buffer(
+  zyn_sample_type * buffer_dest,
+  zyn_sample_type * buffer_src,
+  size_t size)
+{
+  while (size)
+  {
+    size--;
+    buffer_dest[size] = buffer_src[size];
+  }
+}
+
+void
+multiply_buffer(
+  zyn_sample_type * buffer,
+  float multiplyer,
+  size_t size)
+{
+  while (size)
+  {
+    size--;
+    buffer[size] *= multiplyer;
+  }
+}
+
 float
 zyn_random()
 {
