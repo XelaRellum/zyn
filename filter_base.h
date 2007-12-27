@@ -32,7 +32,7 @@ public:
   virtual void setfreq_and_q(REALTYPE frequency,REALTYPE q_){};
   virtual void setq(REALTYPE q_){};
   virtual void setgain(REALTYPE dBgain){};
-  REALTYPE outgain;
+  REALTYPE m_outgain;
 };
 
 #endif

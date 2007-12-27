@@ -28,15 +28,15 @@
 #include "filter_base.h"
 #include "sv_filter.h"
 
-void SVFilter::init(float sample_rate, int type, REALTYPE Ffreq, REALTYPE Fq, unsigned char Fstages)
+void SVFilter::init(float sample_rate, int type, REALTYPE Ffreq, REALTYPE Fq, unsigned char Fstages, float gain)
 {
   m_sample_rate = sample_rate;
   stages = Fstages;
   m_type = type;
   freq = Ffreq;
   q = Fq;
-  gain = 1.0;
-  outgain = 1.0;
+  m_gain = 1.0;
+  m_outgain = 1.0;
   needsinterpolation = 0;
   firsttime = 1;
 
@@ -47,6 +47,12 @@ void SVFilter::init(float sample_rate, int type, REALTYPE Ffreq, REALTYPE Fq, un
 
   cleanup();
   setfreq_and_q(Ffreq,Fq);
+
+  m_outgain = dB2rap(gain);
+  if (m_outgain > 1.0)
+  {
+    m_outgain = sqrt(m_outgain);
+  }
 }
 
 void SVFilter::cleanup()
@@ -141,7 +147,7 @@ void SVFilter::settype(int type)
 
 void SVFilter::setgain(REALTYPE dBgain)
 {
-  gain = dB2rap(dBgain);
+  m_gain = dB2rap(dBgain);
   computefiltercoefs();
 }
 
@@ -230,6 +236,6 @@ void SVFilter::filterout(REALTYPE *smp)
 
   for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
   {
-    smp[i] *= outgain;
+    smp[i] *= m_outgain;
   }
 }

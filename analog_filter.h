@@ -35,7 +35,7 @@ public:
   AnalogFilter() {};
   ~AnalogFilter() {};
 
-  void init(float sample_rate, unsigned char type, float freq, float q_factor, unsigned char stages);
+  void init(float sample_rate, unsigned char type, float freq, float q_factor, unsigned char stages, float gain);
   void filterout(float *smp);
   void setfreq(float frequency);
   void setfreq_and_q(float frequency,float q_);

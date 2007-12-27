@@ -46,26 +46,12 @@ Filter::init(float sample_rate, FilterParams *pars)
     m_filter = &m_formant_filter;
     break;
   case ZYN_FILTER_TYPE_STATE_VARIABLE:
-    m_sv_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
+    m_sv_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages, pars->m_gain);
     m_filter = &m_sv_filter;
-    m_filter->outgain = dB2rap(pars->m_gain);
-    if (m_filter->outgain > 1.0)
-    {
-      m_filter->outgain = sqrt(m_filter->outgain);
-    }
     break;
   case ZYN_FILTER_TYPE_ANALOG:
-    m_analog_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages);
+    m_analog_filter.init(sample_rate, Ftype, 1000.0, pars->getq(), pars->m_additional_stages, pars->m_gain);
     m_filter = &m_analog_filter;
-    if (Ftype >= ZYN_FILTER_ANALOG_TYPE_PKF2 &&
-        Ftype <= ZYN_FILTER_ANALOG_TYPE_HSH2)
-    {
-      m_filter->setgain(pars->m_gain);
-    }
-    else
-    {
-      m_filter->outgain = dB2rap(pars->m_gain);
-    }
     break;
   default:
     assert(0);

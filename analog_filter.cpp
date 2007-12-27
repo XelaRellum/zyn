@@ -34,7 +34,8 @@ AnalogFilter::init(
   unsigned char Ftype,
   float Ffreq,
   float Fq,
-  unsigned char Fstages)
+  unsigned char Fstages,
+  float gain)
 {
   int i;
 
@@ -75,7 +76,17 @@ AnalogFilter::init(
   m_first_time = true;
 
   m_d[0] = 0;                   // this is not used
-  outgain = 1.0;
+  m_outgain = 1.0;
+
+  if (Ftype >= ZYN_FILTER_ANALOG_TYPE_PKF2 &&
+      Ftype <= ZYN_FILTER_ANALOG_TYPE_HSH2)
+  {
+    setgain(gain);
+  }
+  else
+  {
+    m_outgain = dB2rap(gain);
+  }
 }
 
 void
@@ -563,7 +574,7 @@ void AnalogFilter::filterout(float *smp)
 
   for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
   {
-    smp[i] *= outgain;
+    smp[i] *= m_outgain;
   }
 }
 

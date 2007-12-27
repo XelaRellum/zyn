@@ -29,7 +29,7 @@ public:
   SVFilter() {};
   ~SVFilter() {};
 
-  void init(float sample_rate, int type, REALTYPE Ffreq, REALTYPE Fq, unsigned char Fstages);
+  void init(float sample_rate, int type, REALTYPE Ffreq, REALTYPE Fq, unsigned char Fstages, float gain);
   void filterout(REALTYPE *smp);
   void setfreq(REALTYPE frequency);
   void setfreq_and_q(REALTYPE frequency,REALTYPE q_);
@@ -59,7 +59,7 @@ private:
   int stages;//how many times the filter is applied (0->1,1->2,etc.)
   REALTYPE freq;//Frequency given in Hz
   REALTYPE q; //Q factor (resonance or Q factor)
-  REALTYPE gain;//the gain of the filter (if are shelf/peak) filters
+  REALTYPE m_gain;//the gain of the filter (if are shelf/peak) filters
     
   int abovenq;//this is 1 if the frequency is above the nyquist
   int oldabovenq;

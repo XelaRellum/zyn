@@ -37,7 +37,7 @@ void FormantFilter::init(float sample_rate, FilterParams *pars)
 
   for (i = 0 ; i < numformants ; i++)
   {
-    formant[i].init(sample_rate, ZYN_FILTER_ANALOG_TYPE_BPF2, 1000.0, 10.0, pars->m_additional_stages);
+    formant[i].init(sample_rate, ZYN_FILTER_ANALOG_TYPE_BPF2, 1000.0, 10.0, pars->m_additional_stages, 0.0);
   }
 
   cleanup();
@@ -85,7 +85,7 @@ void FormantFilter::init(float sample_rate, FilterParams *pars)
     sequencestretch *= -1.0;
   }
 
-  outgain = dB2rap(pars->m_gain);
+  m_outgain = dB2rap(pars->m_gain);
 
   oldinput = -1.0;
 
@@ -181,7 +181,7 @@ void FormantFilter::filterout(float *smp){
   };
     
   for (j=0;j<numformants;j++) {
-    for (i=0;i<SOUND_BUFFER_SIZE;i++) tmpbuf[i]=inbuffer[i]*outgain;
+    for (i=0;i<SOUND_BUFFER_SIZE;i++) tmpbuf[i]=inbuffer[i]*m_outgain;
     formant[j].filterout(tmpbuf);
 
     if (ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j],currentformants[j].amp))
