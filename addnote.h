@@ -153,7 +153,6 @@ private:
 
   float m_filter_center_pitch;  // octaves
   float m_filter_q_factor;
-  float m_filter_frequency_tracking;
     
   Envelope m_amplitude_envelope;
   Envelope m_filter_envelope;

@@ -141,6 +141,7 @@ ADnote::note_on(
     m_synth_ptr->m_filter_params.getfreq() + // center freq
     m_synth_ptr->m_filter_velocity_sensing_amount * 6.0 * // velocity sensing
     (zyn_velocity_scale(m_velocity, m_synth_ptr->m_filter_velocity_scale_function) - 1);
+  m_filter_center_pitch += m_synth_ptr->m_filter_params.getfreqtracking(m_basefreq);
 
   if (m_synth_ptr->GlobalPar.PPunchStrength != 0)
   {
@@ -337,7 +338,6 @@ ADnote::note_on(
     ZYN_LFO_TYPE_FILTER);
 
   m_filter_q_factor = m_synth_ptr->m_filter_params.getq();
-  m_filter_frequency_tracking = m_synth_ptr->m_filter_params.getfreqtracking(m_basefreq);
 
   // Forbids the Modulation Voice to be greater or equal than voice
   for (i = 0 ; i < m_synth_ptr->voices_count ; i++)
@@ -699,9 +699,7 @@ ADnote::computecurrentparameters()
   float FMfreq;
   float FMrelativepitch;
   float globalpitch;
-  float globalfilterpitch;
   float temp_filter_frequency;
-  float global_filter_q;
 
   globalpitch =
     0.01 * (m_frequency_envelope.envout() +
@@ -714,25 +712,12 @@ ADnote::computecurrentparameters()
     m_amplitude_envelope.envout_dB() *
     m_amplitude_lfo.amplfoout();
 
-  globalfilterpitch =
-    m_filter_envelope.envout() +
-    m_filter_lfo.lfoout() +
-    m_filter_center_pitch;
+  temp_filter_frequency = m_filter_left.getrealfreq(m_filter_center_pitch + m_filter_envelope.envout() + m_filter_lfo.lfoout());
 
-  temp_filter_frequency =
-    globalfilterpitch +
-    //m_ctl->filtercutoff.relfreq + // (value-64.0)*filtercutoff.depth/4096.0*3.321928;//3.3219..=ln2(10)
-    m_filter_frequency_tracking;
-
-  temp_filter_frequency = m_filter_left.getrealfreq(temp_filter_frequency);
-
-  global_filter_q = m_filter_q_factor;
-  //global_filter_q *= m_ctl->filterq.relq; // filterq.relq=pow(30.0,(value-64.0)/64.0*(filterq.depth/64.0));
-
-  m_filter_left.setfreq_and_q(temp_filter_frequency, global_filter_q);
+  m_filter_left.setfreq_and_q(temp_filter_frequency, m_filter_q_factor);
   if (m_stereo)
   {
-    m_filter_right.setfreq_and_q(temp_filter_frequency, global_filter_q);
+    m_filter_right.setfreq_and_q(temp_filter_frequency, m_filter_q_factor);
   }
 
   // compute the portamento, if it is used by this note
