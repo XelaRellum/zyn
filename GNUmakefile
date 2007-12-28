@@ -125,6 +125,7 @@ install: $(PLUGIN_NAME).lv2
 	@./install_lv2.sh zynadd.lv2
 
 .install_timestamp: $(PLUGIN_NAME).lv2
+	@echo "Installing..."
 	@sudo ./install_lv2.sh zynadd.lv2
 	@touch .install_timestamp
 
