@@ -89,6 +89,7 @@ zyn_addsynth_create(
     
   zyn_addsynth_ptr->m_amplitude_envelope_params.init_adsr(64, true, 0, 40, 127, 25, false);
 
+  zyn_addsynth_ptr->filter_type = ZYN_FILTER_TYPE_ANALOG;
   zyn_addsynth_ptr->m_filter_params.init(sample_rate, ZYN_FILTER_ANALOG_TYPE_LPF2, 94, 40);
   if (!zyn_filter_sv_create(sample_rate, ZYN_GLOBAL_FILTER_INITIAL_FREQUENCY, ZYN_GLOBAL_FILTER_INITIAL_Q, &zyn_addsynth_ptr->m_filter_sv))
   {

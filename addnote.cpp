@@ -104,8 +104,6 @@ ADnote::ADnote(
   if (!zyn_filter_sv_processor_create(synth_ptr->m_filter_sv, &m_filter_sv_processor_right))
   {
   }
-
-  m_filter_category = ZYN_FILTER_TYPE_STATE_VARIABLE;
 }
 
 void
@@ -139,6 +137,8 @@ ADnote::note_on(
   m_time = 0.0;
 
   m_panning = (panorama + 1.0) / 2; // -1..1 -> 0 - 1
+
+  m_filter_category = m_synth_ptr->filter_type;
 
   if (m_filter_category == ZYN_FILTER_TYPE_STATE_VARIABLE)
   {

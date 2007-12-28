@@ -72,7 +72,7 @@ zyn_component_filter_globals_get_int(
   switch (parameter)
   {
   case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
-    return ZYN_FILTER_TYPE_STATE_VARIABLE;
+    return zyn_addsynth_ptr->filter_type;
   }
 
   LOG_ERROR("Unknown filter global int/enum parameter %u", parameter);
@@ -90,6 +90,9 @@ zyn_component_filter_globals_set_int(
   switch (parameter)
   {
   case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
+    assert(value >= 0 && value < ZYN_FILTER_TYPES_COUNT);
+    zyn_addsynth_ptr->filter_type = value;
+    zyn_addsynth_ptr->m_filter_params.m_category = ZYN_FILTER_TYPE_ANALOG; /* XXX */
     return;
   }
 

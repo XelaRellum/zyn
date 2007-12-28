@@ -247,6 +247,7 @@ struct zyn_addsynth
 
   EnvelopeParams m_amplitude_envelope_params;
 
+  int filter_type;              /* filter category/supertype, one of ZYN_FILTER_TYPE_XXX */
   FilterParams m_filter_params;
   zyn_filter_sv_handle m_filter_sv;
 
