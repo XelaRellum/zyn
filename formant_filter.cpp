@@ -33,129 +33,129 @@ void FormantFilter::init(float sample_rate, FilterParams *pars)
 {
   int i, j;
 
-  numformants = pars->Pnumformants;
+  m_numformants = pars->Pnumformants;
 
-  for (i = 0 ; i < numformants ; i++)
+  for (i = 0 ; i < m_numformants ; i++)
   {
-    formant[i].init(sample_rate, ZYN_FILTER_ANALOG_TYPE_BPF2, 1000.0, 10.0, pars->m_additional_stages, 0.0);
+    m_formants[i].init(sample_rate, ZYN_FILTER_ANALOG_TYPE_BPF2, 1000.0, 10.0, pars->m_additional_stages, 0.0);
   }
 
   cleanup();
 
   for (j = 0 ; j < FF_MAX_VOWELS ; j++)
   {
-    for (i = 0 ; i < numformants ; i++)
+    for (i = 0 ; i < m_numformants ; i++)
     {
-	    formantpar[j][i].freq = pars->getformantfreq(pars->Pvowels[j].formants[i].freq);
-	    formantpar[j][i].amp = pars->getformantamp(pars->Pvowels[j].formants[i].amp);
-	    formantpar[j][i].q = pars->getformantq(pars->Pvowels[j].formants[i].q);
+	    m_formantpar[j][i].frequency = pars->getformantfreq(pars->Pvowels[j].formants[i].freq);
+	    m_formantpar[j][i].amplitude = pars->getformantamp(pars->Pvowels[j].formants[i].amp);
+	    m_formantpar[j][i].q_factor = pars->getformantq(pars->Pvowels[j].formants[i].q);
     }
   }
 
   for (i = 0 ; i < FF_MAX_FORMANTS ; i++)
   {
-    oldformantamp[i] = 1.0;
+    m_oldformantamp[i] = 1.0;
   }
 
-  for (i = 0 ; i < numformants ; i++)
+  for (i = 0 ; i < m_numformants ; i++)
   {
-    currentformants[i].freq = 1000.0;
-    currentformants[i].amp = 1.0;
-    currentformants[i].q = 2.0;
+    m_currentformants[i].frequency = 1000.0;
+    m_currentformants[i].amplitude = 1.0;
+    m_currentformants[i].q_factor = 2.0;
   }
 
-  formantslowness = pow(1.0 - pars->Pformantslowness / 128.0, 3.0);
+  m_formantslowness = pow(1.0 - pars->Pformantslowness / 128.0, 3.0);
 
-  sequencesize = pars->Psequencesize;
-  if (sequencesize == 0)
+  m_sequencesize = pars->Psequencesize;
+  if (m_sequencesize == 0)
   {
-    sequencesize = 1;
+    m_sequencesize = 1;
   }
 
-  for (i = 0 ; i < sequencesize ; i++)
+  for (i = 0 ; i < m_sequencesize ; i++)
   {
-    sequence[i].nvowel = pars->Psequence[i].nvowel;
+    m_sequence[i].nvowel = pars->Psequence[i].nvowel;
   }
     
-  vowelclearness = pow(10.0, (pars->Pvowelclearness - 32.0) / 48.0);
+  m_vowelclearness = pow(10.0, (pars->Pvowelclearness - 32.0) / 48.0);
 
-  sequencestretch = pow(0.1, (pars->Psequencestretch - 32.0) / 48.0);
+  m_sequencestretch = pow(0.1, (pars->Psequencestretch - 32.0) / 48.0);
   if (pars->Psequencereversed)
   {
-    sequencestretch *= -1.0;
+    m_sequencestretch *= -1.0;
   }
 
   m_outgain = dB2rap(pars->m_gain);
 
-  oldinput = -1.0;
+  m_oldinput = -1.0;
 
-  Qfactor = 1.0;
-  oldQfactor = Qfactor;
+  m_Qfactor = 1.0;
+  m_oldQfactor = m_Qfactor;
 
-  firsttime = 1;
+  m_firsttime = 1;
 }
 
 void FormantFilter::cleanup()
 {
   int i;
 
-  for (i = 0 ; i < numformants ; i++)
+  for (i = 0 ; i < m_numformants ; i++)
   {
-    formant[i].cleanup();
+    m_formants[i].cleanup();
   }
 }
 
 void FormantFilter::setpos(float input){
   int p1,p2;
     
-  if (firsttime!=0) slowinput=input;
-	else slowinput=slowinput*(1.0-formantslowness)+input*formantslowness;
+  if (m_firsttime!=0) m_slowinput=input;
+	else m_slowinput=m_slowinput*(1.0-m_formantslowness)+input*m_formantslowness;
 
-  if ((fabs(oldinput-input)<0.001)&&(fabs(slowinput-input)<0.001)&&
-      (fabs(Qfactor-oldQfactor)<0.001)) {
-//	oldinput=input; daca setez asta, o sa faca probleme la schimbari foarte lente
-    firsttime=0;
+  if ((fabs(m_oldinput-input)<0.001)&&(fabs(m_slowinput-input)<0.001)&&
+      (fabs(m_Qfactor-m_oldQfactor)<0.001)) {
+//	m_oldinput=input; daca setez asta, o sa faca probleme la schimbari foarte lente
+    m_firsttime=0;
     return;
-  } else oldinput=input;
+  } else m_oldinput=input;
 
 
-  float pos=fmod(input*sequencestretch,1.0);if (pos<0.0) pos+=1.0;
+  float pos=fmod(input*m_sequencestretch,1.0);if (pos<0.0) pos+=1.0;
     
-  F2I(pos*sequencesize,p2);
-  p1=p2-1;if (p1<0) p1+=sequencesize;
+  F2I(pos*m_sequencesize,p2);
+  p1=p2-1;if (p1<0) p1+=m_sequencesize;
 
-  pos=fmod(pos*sequencesize,1.0);    
+  pos=fmod(pos*m_sequencesize,1.0);    
   if (pos<0.0) pos=0.0; else if (pos>1.0) pos=1.0;
-  pos=(atan((pos*2.0-1.0)*vowelclearness)/atan(vowelclearness)+1.0)*0.5;
+  pos=(atan((pos*2.0-1.0)*m_vowelclearness)/atan(m_vowelclearness)+1.0)*0.5;
 
-  p1=sequence[p1].nvowel;
-  p2=sequence[p2].nvowel;
+  p1=m_sequence[p1].nvowel;
+  p2=m_sequence[p2].nvowel;
     
-  if (firsttime!=0) {
-    for (int i=0;i<numformants;i++){
-	    currentformants[i].freq=formantpar[p1][i].freq*(1.0-pos)+formantpar[p2][i].freq*pos;
-	    currentformants[i].amp=formantpar[p1][i].amp*(1.0-pos)+formantpar[p2][i].amp*pos;
-	    currentformants[i].q=formantpar[p1][i].q*(1.0-pos)+formantpar[p2][i].q*pos;	
-	    formant[i].setfreq_and_q(currentformants[i].freq,currentformants[i].q*Qfactor);
-	    oldformantamp[i]=currentformants[i].amp;
+  if (m_firsttime!=0) {
+    for (int i=0;i<m_numformants;i++){
+	    m_currentformants[i].frequency=m_formantpar[p1][i].frequency*(1.0-pos)+m_formantpar[p2][i].frequency*pos;
+	    m_currentformants[i].amplitude=m_formantpar[p1][i].amplitude*(1.0-pos)+m_formantpar[p2][i].amplitude*pos;
+	    m_currentformants[i].q_factor=m_formantpar[p1][i].q_factor*(1.0-pos)+m_formantpar[p2][i].q_factor*pos;	
+	    m_formants[i].setfreq_and_q(m_currentformants[i].frequency,m_currentformants[i].q_factor*m_Qfactor);
+	    m_oldformantamp[i]=m_currentformants[i].amplitude;
     };
-    firsttime=0;
+    m_firsttime=0;
   } else {
-    for (int i=0;i<numformants;i++){
-	    currentformants[i].freq=currentformants[i].freq*(1.0-formantslowness)
-        +(formantpar[p1][i].freq*(1.0-pos)+formantpar[p2][i].freq*pos)*formantslowness;
+    for (int i=0;i<m_numformants;i++){
+	    m_currentformants[i].frequency=m_currentformants[i].frequency*(1.0-m_formantslowness)
+        +(m_formantpar[p1][i].frequency*(1.0-pos)+m_formantpar[p2][i].frequency*pos)*m_formantslowness;
 
-	    currentformants[i].amp=currentformants[i].amp*(1.0-formantslowness)
-        +(formantpar[p1][i].amp*(1.0-pos)+formantpar[p2][i].amp*pos)*formantslowness;
+	    m_currentformants[i].amplitude=m_currentformants[i].amplitude*(1.0-m_formantslowness)
+        +(m_formantpar[p1][i].amplitude*(1.0-pos)+m_formantpar[p2][i].amplitude*pos)*m_formantslowness;
 
-	    currentformants[i].q=currentformants[i].q*(1.0-formantslowness)
-        +(formantpar[p1][i].q*(1.0-pos)+formantpar[p2][i].q*pos)*formantslowness;
+	    m_currentformants[i].q_factor=m_currentformants[i].q_factor*(1.0-m_formantslowness)
+        +(m_formantpar[p1][i].q_factor*(1.0-pos)+m_formantpar[p2][i].q_factor*pos)*m_formantslowness;
 
-	    formant[i].setfreq_and_q(currentformants[i].freq,currentformants[i].q*Qfactor);
+	    m_formants[i].setfreq_and_q(m_currentformants[i].frequency,m_currentformants[i].q_factor*m_Qfactor);
     };
   };
     
-  oldQfactor=Qfactor;
+  m_oldQfactor=m_Qfactor;
 };
 
 void FormantFilter::setfreq(float frequency){
@@ -163,12 +163,12 @@ void FormantFilter::setfreq(float frequency){
 };
 
 void FormantFilter::setq(float q_){
-  Qfactor=q_;
-  for (int i=0;i<numformants;i++) formant[i].setq(Qfactor*currentformants[i].q);
+  m_Qfactor=q_;
+  for (int i=0;i<m_numformants;i++) m_formants[i].setq(m_Qfactor*m_currentformants[i].q_factor);
 };
 
 void FormantFilter::setfreq_and_q(float frequency,float q_){    
-  Qfactor=q_;    
+  m_Qfactor=q_;    
   setpos(frequency);
 };
 
@@ -176,19 +176,19 @@ void FormantFilter::setfreq_and_q(float frequency,float q_){
 void FormantFilter::filterout(float *smp){
   int i,j;
   for (i=0;i<SOUND_BUFFER_SIZE;i++) {
-    inbuffer[i]=smp[i];
+    m_inbuffer[i]=smp[i];
     smp[i]=0.0;
   };
     
-  for (j=0;j<numformants;j++) {
-    for (i=0;i<SOUND_BUFFER_SIZE;i++) tmpbuf[i]=inbuffer[i]*m_outgain;
-    formant[j].filterout(tmpbuf);
+  for (j=0;j<m_numformants;j++) {
+    for (i=0;i<SOUND_BUFFER_SIZE;i++) m_tmpbuf[i]=m_inbuffer[i]*m_outgain;
+    m_formants[j].filterout(m_tmpbuf);
 
-    if (ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j],currentformants[j].amp))
-      for (i=0;i<SOUND_BUFFER_SIZE;i++) smp[i]+=tmpbuf[i]*
-        INTERPOLATE_AMPLITUDE(oldformantamp[j],currentformants[j].amp,i,SOUND_BUFFER_SIZE);
-    else for (i=0;i<SOUND_BUFFER_SIZE;i++) smp[i]+=tmpbuf[i]*currentformants[j].amp;
-    oldformantamp[j]=currentformants[j].amp;
+    if (ABOVE_AMPLITUDE_THRESHOLD(m_oldformantamp[j],m_currentformants[j].amplitude))
+      for (i=0;i<SOUND_BUFFER_SIZE;i++) smp[i]+=m_tmpbuf[i]*
+        INTERPOLATE_AMPLITUDE(m_oldformantamp[j],m_currentformants[j].amplitude,i,SOUND_BUFFER_SIZE);
+    else for (i=0;i<SOUND_BUFFER_SIZE;i++) smp[i]+=m_tmpbuf[i]*m_currentformants[j].amplitude;
+    m_oldformantamp[j]=m_currentformants[j].amplitude;
   };
 };
 

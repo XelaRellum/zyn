@@ -25,7 +25,9 @@
 
 struct zyn_formant
 {
-  float freq,amp,q;//frequency,amplitude,Q
+  float frequency;
+  float amplitude;
+  float q_factor;
 };
 
 class FormantFilter : public Filter_
@@ -42,23 +44,29 @@ public:
 
   void cleanup();
 private:
-  AnalogFilter formant[FF_MAX_FORMANTS];
-  float inbuffer[SOUND_BUFFER_SIZE];
-  float tmpbuf[SOUND_BUFFER_SIZE];
+  AnalogFilter m_formants[FF_MAX_FORMANTS];
+  float m_inbuffer[SOUND_BUFFER_SIZE];
+  float m_tmpbuf[SOUND_BUFFER_SIZE];
 
-  struct zyn_formant formantpar[FF_MAX_VOWELS][FF_MAX_FORMANTS];
-  struct zyn_formant currentformants[FF_MAX_FORMANTS];
+  struct zyn_formant m_formantpar[FF_MAX_VOWELS][FF_MAX_FORMANTS];
+  struct zyn_formant m_currentformants[FF_MAX_FORMANTS];
 
   struct {
     unsigned char nvowel;
-  } sequence [FF_MAX_SEQUENCE];
+  } m_sequence[FF_MAX_SEQUENCE];
     
-  float oldformantamp[FF_MAX_FORMANTS];
+  float m_oldformantamp[FF_MAX_FORMANTS];
     
-  int sequencesize,numformants,firsttime;
-  float oldinput,slowinput;
-  float Qfactor,formantslowness,oldQfactor;
-  float vowelclearness,sequencestretch;
+  int m_sequencesize;
+  int m_numformants;
+  int m_firsttime;
+  float m_oldinput;
+  float m_slowinput;
+  float m_Qfactor;
+  float m_formantslowness;
+  float m_oldQfactor;
+  float m_vowelclearness;
+  float m_sequencestretch;
     
   void setpos(float input);
 };
