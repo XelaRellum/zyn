@@ -55,10 +55,6 @@ zyn_component_filter_analog_get_float(
       return percent_from_0_127(zyn_addsynth_ptr->m_filter_params.Pfreq) / 100;
     case ZYNADD_PARAMETER_FLOAT_Q_FACTOR:
       return percent_from_0_127(zyn_addsynth_ptr->m_filter_params.Pq) / 100;
-    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT:
-      return zyn_addsynth_ptr->m_filter_velocity_sensing_amount;
-    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION:
-      return zyn_addsynth_ptr->m_filter_velocity_scale_function;
     case ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING:
       return zyn_addsynth_ptr->m_filter_params.m_frequency_tracking;
     case ZYNADD_PARAMETER_FLOAT_VOLUME:
@@ -84,12 +80,6 @@ zyn_component_filter_analog_set_float(
       return;
     case ZYNADD_PARAMETER_FLOAT_Q_FACTOR:
       zyn_addsynth_ptr->m_filter_params.Pq = percent_to_0_127(value * 100);
-      return;
-    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT:
-      zyn_addsynth_ptr->m_filter_velocity_sensing_amount = value;
-      return;
-    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION:
-      zyn_addsynth_ptr->m_filter_velocity_scale_function = -value;
       return;
     case ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING:
       zyn_addsynth_ptr->m_filter_params.m_frequency_tracking = value;

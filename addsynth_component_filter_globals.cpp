@@ -49,9 +49,17 @@ zyn_component_filter_globals_get_float(
   void * context,
   unsigned int parameter)
 {
-    LOG_ERROR("Unknown filter global float parameter %u", parameter);
-    assert(0);
-    return 0.0;
+  switch (parameter)
+  {
+  case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT:
+    return zyn_addsynth_ptr->m_filter_velocity_sensing_amount;
+  case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION:
+    return zyn_addsynth_ptr->m_filter_velocity_scale_function;
+  }
+
+  LOG_ERROR("Unknown filter global float parameter %u", parameter);
+  assert(0);
+  return 0.0;
 }
 
 void
@@ -60,6 +68,16 @@ zyn_component_filter_globals_set_float(
   unsigned int parameter,
   float value)
 {
+  switch (parameter)
+  {
+    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT:
+      zyn_addsynth_ptr->m_filter_velocity_sensing_amount = value;
+      return;
+    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION:
+      zyn_addsynth_ptr->m_filter_velocity_scale_function = -value;
+      return;
+  }
+
   LOG_ERROR("Unknown filter global float parameter %u", parameter);
   assert(0);
 }
