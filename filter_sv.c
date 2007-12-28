@@ -27,6 +27,7 @@
 
 #include "common.h"
 #include "globals.h"
+#include "filter_common.h"
 #include "filter_sv.h"
 #include "util.h"
 
@@ -261,7 +262,7 @@ zyn_filter_sv_processor_compute_coefs(
 bool
 zyn_filter_sv_processor_create(
   zyn_filter_sv_handle filter_handle,
-  zyn_filter_sv_processor_handle * processor_handle_ptr)
+  zyn_filter_processor_handle * processor_handle_ptr)
 {
   struct zyn_filter_sv_processor * processor_ptr;
 
@@ -274,7 +275,7 @@ zyn_filter_sv_processor_create(
   processor_ptr->filter = filter_ptr;
   processor_ptr->sample_rate = filter_ptr->sample_rate;
 
-  *processor_handle_ptr = (zyn_filter_sv_processor_handle)processor_ptr;
+  *processor_handle_ptr = (zyn_filter_processor_handle)processor_ptr;
   return true;
 }
 
@@ -282,7 +283,7 @@ zyn_filter_sv_processor_create(
 
 void
 zyn_filter_sv_processor_destroy(
-  zyn_filter_sv_processor_handle processor_handle)
+  zyn_filter_processor_handle processor_handle)
 {
   free(processor_ptr);
 }
@@ -329,7 +330,7 @@ zyn_filter_sv_process_single(
 
 void
 zyn_filter_sv_processor_init(
-  zyn_filter_sv_processor_handle processor_handle,
+  zyn_filter_processor_handle processor_handle,
   float note_base_frequency,
   float velocity_adjust)
 {
@@ -341,7 +342,7 @@ zyn_filter_sv_processor_init(
 
 void
 zyn_filter_sv_process(
-  zyn_filter_sv_processor_handle processor_handle,
+  zyn_filter_processor_handle processor_handle,
   float frequency_adjust,
   zyn_sample_type * samples)
 {

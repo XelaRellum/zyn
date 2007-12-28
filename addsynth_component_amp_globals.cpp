@@ -29,6 +29,7 @@
 #include "lfo.h"
 #include "filter_parameters.h"
 #include "filter_base.h"
+#include "filter_common.h"
 #include "analog_filter.h"
 #include "sv_filter.h"
 #include "formant_filter.h"
