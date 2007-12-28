@@ -425,10 +425,10 @@ zyn_addsynth_get_audio_output(
 void
 zyn_addsynth_note_on(
   zyn_addsynth_handle handle,
-  unsigned int note)
+  unsigned int note,
+  unsigned int velocity)
 {
   unsigned int note_index;
-  unsigned char velocity;
   int masterkeyshift;
   float vel;
   zyn_sample_type notebasefreq;
@@ -447,7 +447,6 @@ zyn_addsynth_note_on(
 
 unused_note_channel_found:
   //printf("note on %u - channel %u\n", note, note_index);
-  velocity = 100;
   masterkeyshift = 0;
 
   vel = VelF(velocity/127.0, zyn_addsynth_ptr->velsns);

@@ -204,7 +204,7 @@ zynadd_run(
           switch (event[0] & 0xF0)
           {
           case 0x90:                /* note on */
-            zyn_addsynth_note_on(zynadd_ptr->synth, event[1]);
+            zyn_addsynth_note_on(zynadd_ptr->synth, event[1], event[2]);
             break;
           case 0x80:                /* note off */
             zyn_addsynth_note_off(zynadd_ptr->synth, event[1]);

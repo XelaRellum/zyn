@@ -47,7 +47,8 @@ zyn_addsynth_get_audio_output(
 void
 zyn_addsynth_note_on(
   zyn_addsynth_handle handle,
-  unsigned int note);
+  unsigned int note,
+  unsigned int velocity);
 
 void
 zyn_addsynth_note_off(
