@@ -123,3 +123,10 @@ $(DEPFILES):
 
 install: $(PLUGIN_NAME).lv2
 	@./install_lv2.sh zynadd.lv2
+
+.install_timestamp: $(PLUGIN_NAME).lv2
+	@sudo ./install_lv2.sh zynadd.lv2
+	@touch .install_timestamp
+
+# compile/link if needs to and install using sudo, if compile/link was not a nop
+maybe_sudo_install: .install_timestamp
