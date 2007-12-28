@@ -49,23 +49,19 @@ zyn_component_filter_sv_get_float(
   void * context,
   unsigned int parameter)
 {
-#if 0
     switch (parameter)
     {
     case ZYNADD_PARAMETER_FLOAT_FREQUNECY:
-      return percent_from_0_127(zyn_addsynth_ptr->m_filter_params.Pfreq) / 100;
+      return zyn_filter_sv_get_frequency(filter);
     case ZYNADD_PARAMETER_FLOAT_Q_FACTOR:
-      return percent_from_0_127(zyn_addsynth_ptr->m_filter_params.Pq) / 100;
-    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT:
-      return zyn_addsynth_ptr->m_filter_velocity_sensing_amount;
-    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION:
-      return zyn_addsynth_ptr->m_filter_velocity_scale_function;
+      return zyn_filter_sv_get_q_factor(filter);
     case ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING:
-      return zyn_addsynth_ptr->m_filter_params.m_frequency_tracking;
+      return zyn_filter_sv_get_frequency_tracking(filter);
+#if 0
     case ZYNADD_PARAMETER_FLOAT_VOLUME:
       return zyn_addsynth_ptr->m_filter_params.m_gain;
-    }
 #endif
+    }
 
     LOG_ERROR("Unknown sv filter float parameter %u", parameter);
     assert(0);
@@ -79,29 +75,23 @@ zyn_component_filter_sv_set_float(
   unsigned int parameter,
   float value)
 {
-#if 0
     switch (parameter)
     {
     case ZYNADD_PARAMETER_FLOAT_FREQUNECY:
-      zyn_addsynth_ptr->m_filter_params.Pfreq = percent_to_0_127(value * 100);
+      zyn_filter_sv_set_frequency(filter, value);
       return;
     case ZYNADD_PARAMETER_FLOAT_Q_FACTOR:
-      zyn_addsynth_ptr->m_filter_params.Pq = percent_to_0_127(value * 100);
-      return;
-    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT:
-      zyn_addsynth_ptr->m_filter_velocity_sensing_amount = value;
-      return;
-    case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION:
-      zyn_addsynth_ptr->m_filter_velocity_scale_function = -value;
+      zyn_filter_sv_set_q_factor(filter, value);
       return;
     case ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING:
-      zyn_addsynth_ptr->m_filter_params.m_frequency_tracking = value;
+      zyn_filter_sv_set_frequency_tracking(filter, value);
       return;
+#if 0
     case ZYNADD_PARAMETER_FLOAT_VOLUME:
       zyn_addsynth_ptr->m_filter_params.m_gain = value;
       return;
-    }
 #endif
+    }
 
     LOG_ERROR("Unknown sv filter float parameter %u", parameter);
     assert(0);

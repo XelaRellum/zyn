@@ -85,7 +85,10 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_REUSED_OFFSET                   100
 
 /* float - reused */
-#define ZYNADD_PARAMETER_FLOAT_VOLUME           (ZYNADD_PARAMETER_REUSED_OFFSET + 0) /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_VOLUME                      (ZYNADD_PARAMETER_REUSED_OFFSET + 0) /* 0 .. 100 */
+#define ZYNADD_PARAMETER_FLOAT_FREQUNECY                   (ZYNADD_PARAMETER_REUSED_OFFSET + 1) /* -5 .. 5; 0 .. 1 for legacy filter implementations */
+#define ZYNADD_PARAMETER_FLOAT_Q_FACTOR                    (ZYNADD_PARAMETER_REUSED_OFFSET + 2) /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING          (ZYNADD_PARAMETER_REUSED_OFFSET + 3) /* -1 .. 1 */
 
 /* float - globals */
 #define ZYNADD_PARAMETER_FLOAT_PANORAMA                    0 /* -1 .. 1 */
@@ -116,12 +119,9 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_FLOAT_LFO_DEPTH_RANDOMNESS        5 /* 0 .. 100 */
 #define ZYNADD_PARAMETER_FLOAT_LFO_FREQUENCY_RANDOMNESS    6 /* 0 .. 100 */
 
-/* float filter */
-#define ZYNADD_PARAMETER_FLOAT_FREQUNECY                   0 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_Q_FACTOR                    1 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT     2 /* 0 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION   3 /* -1 .. 1 */
-#define ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING          4 /* -1 .. 1 */
+/* float filter globals */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_AMOUNT     0 /* 0 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING_FUNCTION   1 /* -1 .. 1 */
 
 /* float - oscillator */
 #define ZYNADD_PARAMETER_FLOAT_OSCILLATOR_BASE_FUNCTION_ADJUST     0 /* 0 .. 1 */

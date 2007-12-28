@@ -136,6 +136,51 @@ zyn_filter_sv_set_type(
   LOG_DEBUG("SV filter type set to %d", filter_ptr->type);
 }
 
+float
+zyn_filter_sv_get_frequency(
+  zyn_filter_sv_handle filter_handle)
+{
+  return filter_ptr->frequency;
+}
+
+void
+zyn_filter_sv_set_frequency(
+  zyn_filter_sv_handle filter_handle,
+  float frequency)
+{
+  filter_ptr->frequency = frequency;
+}
+
+float
+zyn_filter_sv_get_q_factor(
+  zyn_filter_sv_handle filter_handle)
+{
+  return filter_ptr->q_factor;
+}
+
+void
+zyn_filter_sv_set_q_factor(
+  zyn_filter_sv_handle filter_handle,
+  float q_factor)
+{
+  filter_ptr->q_factor = q_factor;
+}
+
+float
+zyn_filter_sv_get_frequency_tracking(
+  zyn_filter_sv_handle filter_handle)
+{
+  return filter_ptr->frequency_tracking;
+}
+
+void
+zyn_filter_sv_set_frequency_tracking(
+  zyn_filter_sv_handle filter_handle,
+  float frequency_tracking)
+{
+  filter_ptr->frequency_tracking = frequency_tracking;
+}
+
 void
 zyn_filter_sv_destroy(
   zyn_filter_sv_handle filter_handle)
