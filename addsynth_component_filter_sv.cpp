@@ -57,10 +57,8 @@ zyn_component_filter_sv_get_float(
       return zyn_filter_sv_get_q_factor(filter);
     case ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING:
       return zyn_filter_sv_get_frequency_tracking(filter);
-#if 0
     case ZYNADD_PARAMETER_FLOAT_VOLUME:
-      return zyn_addsynth_ptr->m_filter_params.m_gain;
-#endif
+      return zyn_filter_sv_get_gain(filter);
     }
 
     LOG_ERROR("Unknown sv filter float parameter %u", parameter);
@@ -86,11 +84,9 @@ zyn_component_filter_sv_set_float(
     case ZYNADD_PARAMETER_FLOAT_FREQUENCY_TRACKING:
       zyn_filter_sv_set_frequency_tracking(filter, value);
       return;
-#if 0
     case ZYNADD_PARAMETER_FLOAT_VOLUME:
-      zyn_addsynth_ptr->m_filter_params.m_gain = value;
+      return zyn_filter_sv_set_gain(filter, value);
       return;
-#endif
     }
 
     LOG_ERROR("Unknown sv filter float parameter %u", parameter);
@@ -104,10 +100,8 @@ zyn_component_filter_sv_get_int(
 {
   switch (parameter)
   {
-#if 0
   case ZYNADD_PARAMETER_INT_STAGES:
-    return zyn_addsynth_ptr->m_filter_params.m_additional_stages + 1;
-#endif
+    return zyn_filter_sv_get_stages(filter);
   case ZYNADD_PARAMETER_ENUM_FILTER_TYPE:
     return zyn_filter_sv_get_type(filter);
   }
@@ -126,13 +120,8 @@ zyn_component_filter_sv_set_int(
 {
   switch (parameter)
   {
-#if 0
   case ZYNADD_PARAMETER_INT_STAGES:
-    assert(value > 0);
-    assert(value <= MAX_FILTER_STAGES);
-    zyn_addsynth_ptr->m_filter_params.m_additional_stages = value - 1;
-    return;
-#endif
+    return zyn_filter_sv_set_stages(filter, value);
   case ZYNADD_PARAMETER_ENUM_FILTER_TYPE:
     zyn_filter_sv_set_type(filter, value);
     return;

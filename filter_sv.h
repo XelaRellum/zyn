@@ -74,6 +74,24 @@ zyn_filter_sv_set_frequency_tracking(
   zyn_filter_sv_handle filter_handle,
   float frequency_tracking);
 
+float
+zyn_filter_sv_get_gain(
+  zyn_filter_sv_handle filter_handle);
+
+void
+zyn_filter_sv_set_gain(
+  zyn_filter_sv_handle filter_handle,
+  float gain);
+
+int
+zyn_filter_sv_get_stages(
+  zyn_filter_sv_handle filter_handle);
+
+void
+zyn_filter_sv_set_stages(
+  zyn_filter_sv_handle filter_handle,
+  int stages);
+
 void
 zyn_filter_sv_destroy(
   zyn_filter_sv_handle handle);

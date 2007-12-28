@@ -181,6 +181,38 @@ zyn_filter_sv_set_frequency_tracking(
   filter_ptr->frequency_tracking = frequency_tracking;
 }
 
+float
+zyn_filter_sv_get_gain(
+  zyn_filter_sv_handle filter_handle)
+{
+  return filter_ptr->gain;
+}
+
+void
+zyn_filter_sv_set_gain(
+  zyn_filter_sv_handle filter_handle,
+  float gain)
+{
+  filter_ptr->gain = gain;
+}
+
+int
+zyn_filter_sv_get_stages(
+  zyn_filter_sv_handle filter_handle)
+{
+  return filter_ptr->additional_stages + 1;
+}
+
+void
+zyn_filter_sv_set_stages(
+  zyn_filter_sv_handle filter_handle,
+  int stages)
+{
+  assert(stages > 0);
+  assert(stages <= MAX_FILTER_STAGES);
+  filter_ptr->additional_stages  = stages - 1;
+}
+
 void
 zyn_filter_sv_destroy(
   zyn_filter_sv_handle filter_handle)
