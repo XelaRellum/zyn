@@ -45,85 +45,74 @@
 #define zyn_addsynth_ptr ((struct zyn_addsynth *)context)
 
 float
-zyn_component_filter_globals_get_float(
+zyn_component_filter_formant_get_float(
   void * context,
   unsigned int parameter)
 {
-    LOG_ERROR("Unknown filter global float parameter %u", parameter);
-    assert(0);
-    return 0.0;
+  LOG_ERROR("Unknown formant filter float parameter %u", parameter);
+  assert(0);
+
+  return 0.0;
 }
 
 void
-zyn_component_filter_globals_set_float(
+zyn_component_filter_formant_set_float(
   void * context,
   unsigned int parameter,
   float value)
 {
-  LOG_ERROR("Unknown filter global float parameter %u", parameter);
+  LOG_ERROR("Unknown formant filter float parameter %u", parameter);
   assert(0);
 }
 
 signed int
-zyn_component_filter_globals_get_int(
+zyn_component_filter_formant_get_int(
   void * context,
   unsigned int parameter)
 {
-  switch (parameter)
-  {
-  case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
-    return ZYN_FILTER_TYPE_STATE_VARIABLE;
-  }
-
-  LOG_ERROR("Unknown filter global int/enum parameter %u", parameter);
+  LOG_ERROR("Unknown formant filter int/enum parameter %u", parameter);
   assert(0);
 
   return -1;
 }
 
 void
-zyn_component_filter_globals_set_int(
+zyn_component_filter_formant_set_int(
   void * context,
   unsigned int parameter,
   signed int value)
 {
-  switch (parameter)
-  {
-  case ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY:
-    return;
-  }
-
-  LOG_ERROR("Unknown filter global int/enum parameter %u", parameter);
+  LOG_ERROR("Unknown formant filter int/enum parameter %u", parameter);
   assert(0);
 }
 
 bool
-zyn_component_filter_globals_get_bool(
+zyn_component_filter_formant_get_bool(
   void * context,
   unsigned int parameter)
 {
-  LOG_ERROR("Unknown filter global bool parameter %u", parameter);
+  LOG_ERROR("Unknown formant filter bool parameter %u", parameter);
   assert(0);
 
   return false;
 }
 
 void
-zyn_component_filter_globals_set_bool(
+zyn_component_filter_formant_set_bool(
   void * context,
   unsigned int parameter,
   bool value)
 {
-  LOG_ERROR("Unknown filter global bool parameter %u", parameter);
+  LOG_ERROR("Unknown formant filter bool parameter %u", parameter);
   assert(0);
 }
 
 #undef zyn_addsynth_ptr
 
 void
-zyn_addsynth_component_init_filter_globals(
+zyn_addsynth_component_init_filter_formant(
   struct zyn_component_descriptor * component_ptr,
   struct zyn_addsynth * zyn_addsynth_ptr)
 {
-  ZYN_INIT_COMPONENT(component_ptr, zyn_addsynth_ptr, zyn_component_filter_globals_);
+  ZYN_INIT_COMPONENT(component_ptr, zyn_addsynth_ptr, zyn_component_filter_formant_);
 }

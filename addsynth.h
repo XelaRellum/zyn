@@ -62,22 +62,28 @@ zyn_addsynth_destroy(
 #define ZYNADD_COMPONENT_AMP_ENV                  1
 #define ZYNADD_COMPONENT_AMP_LFO                  2
 #define ZYNADD_COMPONENT_FILTER_GLOBALS           3
-#define ZYNADD_COMPONENT_FILTER_ENV               4
-#define ZYNADD_COMPONENT_FILTER_LFO               5
-#define ZYNADD_COMPONENT_FREQUENCY_GLOBALS        6
-#define ZYNADD_COMPONENT_FREQUENCY_ENV            7
-#define ZYNADD_COMPONENT_FREQUENCY_LFO            8
-#define ZYNADD_COMPONENT_PORTAMENTO               9
+#define ZYNADD_COMPONENT_FILTER_ANALOG            4
+#define ZYNADD_COMPONENT_FILTER_FORMANT           5
+#define ZYNADD_COMPONENT_FILTER_SV                6
+#define ZYNADD_COMPONENT_FILTER_ENV               7
+#define ZYNADD_COMPONENT_FILTER_LFO               8
+#define ZYNADD_COMPONENT_FREQUENCY_GLOBALS        9
+#define ZYNADD_COMPONENT_FREQUENCY_ENV           10
+#define ZYNADD_COMPONENT_FREQUENCY_LFO           11
+#define ZYNADD_COMPONENT_PORTAMENTO              12
 
-#define ZYNADD_GLOBAL_COMPONENTS_COUNT           10
+#define ZYNADD_GLOBAL_COMPONENTS_COUNT           13
 
 #define ZYNADD_COMPONENT_VOICE_GLOBALS            0
 #define ZYNADD_COMPONENT_VOICE_OSCILLATOR         1
 
 #define ZYNADD_VOICE_COMPONENTS_COUNT             2
 
-/* float - reused */
+/* when parameter index is used in more than one component
+   it does need not to conflict with unique parameters */
 #define ZYNADD_PARAMETER_REUSED_OFFSET                   100
+
+/* float - reused */
 #define ZYNADD_PARAMETER_FLOAT_VOLUME           (ZYNADD_PARAMETER_REUSED_OFFSET + 0) /* 0 .. 100 */
 
 /* float - globals */
@@ -149,11 +155,10 @@ zyn_addsynth_destroy(
 
 #define ZYNADD_PARAMETER_ENUM_LFO_SHAPE                             1000
 #define ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY                       1001
-#define ZYNADD_PARAMETER_ENUM_ANALOG_FILTER_TYPE                    1002
+#define ZYNADD_PARAMETER_ENUM_FILTER_TYPE                           1002
 #define ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION              1003
 #define ZYNADD_PARAMETER_ENUM_OSCILLATOR_WAVESHAPE_TYPE             1004
 #define ZYNADD_PARAMETER_ENUM_OSCILLATOR_SPECTRUM_ADJUST_TYPE       1005
-#define ZYNADD_PARAMETER_ENUM_SV_FILTER_TYPE                        1006
 
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
 

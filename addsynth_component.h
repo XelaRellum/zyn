@@ -104,6 +104,21 @@ zyn_addsynth_component_init_filter_globals(
   struct zyn_addsynth * zyn_addsynth_ptr);
 
 void
+zyn_addsynth_component_init_filter_analog(
+  struct zyn_component_descriptor * component_ptr,
+  struct zyn_addsynth * zyn_addsynth_ptr);
+
+void
+zyn_addsynth_component_init_filter_formant(
+  struct zyn_component_descriptor * component_ptr,
+  struct zyn_addsynth * zyn_addsynth_ptr);
+
+void
+zyn_addsynth_component_init_filter_sv(
+  struct zyn_component_descriptor * component_ptr,
+  struct zyn_addsynth * zyn_addsynth_ptr);
+
+void
 zyn_addsynth_component_init_filter_envelope(
   struct zyn_component_descriptor * component_ptr,
   EnvelopeParams * envelope_params_ptr);

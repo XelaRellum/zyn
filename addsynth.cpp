@@ -318,6 +318,18 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_FILTER_GLOBALS,
     zyn_addsynth_ptr);
 
+  zyn_addsynth_component_init_filter_analog(
+    zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_FILTER_ANALOG,
+    zyn_addsynth_ptr);
+
+  zyn_addsynth_component_init_filter_formant(
+    zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_FILTER_FORMANT,
+    zyn_addsynth_ptr);
+
+  zyn_addsynth_component_init_filter_sv(
+    zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_FILTER_SV,
+    zyn_addsynth_ptr);
+
   zyn_addsynth_component_init_filter_envelope(
     zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_FILTER_ENV,
     &zyn_addsynth_ptr->m_filter_envelope_params);
