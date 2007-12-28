@@ -104,6 +104,8 @@ ADnote::ADnote(
   if (!zyn_filter_sv_processor_create(synth_ptr->m_filter_sv, &m_filter_sv_processor_right))
   {
   }
+
+  m_filter_category = ZYN_FILTER_TYPE_STATE_VARIABLE;
 }
 
 void
@@ -137,11 +139,17 @@ ADnote::note_on(
 
   m_panning = (panorama + 1.0) / 2; // -1..1 -> 0 - 1
 
-  m_filter_center_pitch =
-    m_synth_ptr->m_filter_params.getfreq() + // center freq
-    m_synth_ptr->m_filter_velocity_sensing_amount * 6.0 * // velocity sensing
-    (zyn_velocity_scale(m_velocity, m_synth_ptr->m_filter_velocity_scale_function) - 1);
-  m_filter_center_pitch += m_synth_ptr->m_filter_params.getfreqtracking(m_basefreq);
+  if (m_filter_category == ZYN_FILTER_TYPE_STATE_VARIABLE)
+  {
+  }
+  else
+  {
+    m_filter_center_pitch =
+      m_synth_ptr->m_filter_params.getfreq() + // center freq
+      m_synth_ptr->m_filter_velocity_sensing_amount * 6.0 * // velocity sensing
+      (zyn_velocity_scale(m_velocity, m_synth_ptr->m_filter_velocity_scale_function) - 1);
+    m_filter_center_pitch += m_synth_ptr->m_filter_params.getfreqtracking(m_basefreq);
+  }
 
   if (m_synth_ptr->GlobalPar.PPunchStrength != 0)
   {
@@ -712,12 +720,18 @@ ADnote::computecurrentparameters()
     m_amplitude_envelope.envout_dB() *
     m_amplitude_lfo.amplfoout();
 
-  temp_filter_frequency = m_filter_left.getrealfreq(m_filter_center_pitch + m_filter_envelope.envout() + m_filter_lfo.lfoout());
-
-  m_filter_left.setfreq_and_q(temp_filter_frequency, m_filter_q_factor);
-  if (m_stereo)
+  if (m_filter_category == ZYN_FILTER_TYPE_STATE_VARIABLE)
   {
-    m_filter_right.setfreq_and_q(temp_filter_frequency, m_filter_q_factor);
+  }
+  else
+  {
+    temp_filter_frequency = m_filter_left.getrealfreq(m_filter_center_pitch + m_filter_envelope.envout() + m_filter_lfo.lfoout());
+
+    m_filter_left.setfreq_and_q(temp_filter_frequency, m_filter_q_factor);
+    if (m_stereo)
+    {
+      m_filter_right.setfreq_and_q(temp_filter_frequency, m_filter_q_factor);
+    }
   }
 
   // compute the portamento, if it is used by this note
@@ -1265,22 +1279,28 @@ ADnote::noteout(
     }
   }
 
-
   // Processing Global parameters
-  m_filter_left.filterout(&outl[0]);
 
-  if (!m_stereo)
+  if (m_filter_category == ZYN_FILTER_TYPE_STATE_VARIABLE)
   {
-    // set the right channel=left channel
-    for (i=0;i<SOUND_BUFFER_SIZE;i++)
-    {
-      outr[i]=outl[i];
-      m_bypassr[i]=m_bypassl[i];
-    }
   }
   else
   {
-    m_filter_right.filterout(&outr[0]);
+    m_filter_left.filterout(&outl[0]);
+
+    if (!m_stereo)
+    {
+      // set the right channel=left channel
+      for (i=0;i<SOUND_BUFFER_SIZE;i++)
+      {
+        outr[i]=outl[i];
+        m_bypassr[i]=m_bypassl[i];
+      }
+    }
+    else
+    {
+      m_filter_right.filterout(&outr[0]);
+    }
   }
 
   for (i=0;i<SOUND_BUFFER_SIZE;i++)

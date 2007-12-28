@@ -146,6 +146,7 @@ private:
   LFO m_filter_lfo;
   LFO m_frequency_lfo;
 
+  int m_filter_category;     // One of ZYN_FILTER_TYPE_XXX
   Filter m_filter_left;
   Filter m_filter_right;
   zyn_filter_sv_processor_handle m_filter_sv_processor_left;
