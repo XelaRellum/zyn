@@ -49,6 +49,12 @@
 
 #define ZYN_DEFAULT_POLYPHONY 60
 
+// (94.0 / 64.0 - 1) * 5.0 = 2.34375
+#define ZYN_GLOBAL_FILTER_INITIAL_FREQUENCY 2.34375
+
+// 40.0 / 127.0 = 0.31496062992125984
+#define ZYN_GLOBAL_FILTER_INITIAL_Q 0.31496062992125984
+
 bool
 zyn_addsynth_create(
   float sample_rate,
@@ -84,7 +90,7 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->m_amplitude_envelope_params.init_adsr(64, true, 0, 40, 127, 25, false);
 
   zyn_addsynth_ptr->m_filter_params.init(sample_rate, ZYN_FILTER_ANALOG_TYPE_LPF2, 94, 40);
-  if (!zyn_filter_sv_create(sample_rate, &zyn_addsynth_ptr->m_filter_sv))
+  if (!zyn_filter_sv_create(sample_rate, ZYN_GLOBAL_FILTER_INITIAL_FREQUENCY, ZYN_GLOBAL_FILTER_INITIAL_Q, &zyn_addsynth_ptr->m_filter_sv))
   {
     goto fail_free_synth;
   }

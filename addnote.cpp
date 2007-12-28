@@ -120,6 +120,7 @@ ADnote::note_on(
   unsigned int voice_index;
   unsigned int i;
   int tmp[m_synth_ptr->voices_count];
+  float filter_velocity_adjust;
 
   m_portamento = portamento;
   m_midinote = midinote;
@@ -141,6 +142,14 @@ ADnote::note_on(
 
   if (m_filter_category == ZYN_FILTER_TYPE_STATE_VARIABLE)
   {
+    filter_velocity_adjust = m_synth_ptr->m_filter_velocity_sensing_amount * 6.0 * // velocity sensing
+      (zyn_velocity_scale(m_velocity, m_synth_ptr->m_filter_velocity_scale_function) - 1);
+
+    zyn_filter_sv_processor_init(m_filter_sv_processor_left, freq, filter_velocity_adjust);
+    if (m_stereo)
+    {
+      zyn_filter_sv_processor_init(m_filter_sv_processor_right, freq, filter_velocity_adjust);
+    }
   }
   else
   {
@@ -720,10 +729,7 @@ ADnote::computecurrentparameters()
     m_amplitude_envelope.envout_dB() *
     m_amplitude_lfo.amplfoout();
 
-  if (m_filter_category == ZYN_FILTER_TYPE_STATE_VARIABLE)
-  {
-  }
-  else
+  if (m_filter_category != ZYN_FILTER_TYPE_STATE_VARIABLE)
   {
     temp_filter_frequency = m_filter_left.getrealfreq(m_filter_center_pitch + m_filter_envelope.envout() + m_filter_lfo.lfoout());
 
@@ -1125,6 +1131,7 @@ ADnote::noteout(
 {
   int i;
   unsigned int voice_index;
+  float filter_adjust;
 
   silence_two_buffers(outl, outr, SOUND_BUFFER_SIZE);
 
@@ -1283,23 +1290,32 @@ ADnote::noteout(
 
   if (m_filter_category == ZYN_FILTER_TYPE_STATE_VARIABLE)
   {
+    filter_adjust = m_filter_envelope.envout() + m_filter_lfo.lfoout();
+
+    zyn_filter_sv_process(m_filter_sv_processor_left, filter_adjust, outl);
+
+    if (m_stereo)
+    {
+      zyn_filter_sv_process(m_filter_sv_processor_right, filter_adjust, outr);
+    }
   }
   else
   {
     m_filter_left.filterout(&outl[0]);
 
-    if (!m_stereo)
-    {
-      // set the right channel=left channel
-      for (i=0;i<SOUND_BUFFER_SIZE;i++)
-      {
-        outr[i]=outl[i];
-        m_bypassr[i]=m_bypassl[i];
-      }
-    }
-    else
+    if (m_stereo)
     {
       m_filter_right.filterout(&outr[0]);
+    }
+  }
+
+  if (!m_stereo)
+  {
+    // set the right channel=left channel
+    for (i=0;i<SOUND_BUFFER_SIZE;i++)
+    {
+      outr[i]=outl[i];
+      m_bypassr[i]=m_bypassl[i];
     }
   }
 

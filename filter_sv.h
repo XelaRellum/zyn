@@ -34,6 +34,8 @@ typedef struct { int unused; } * zyn_filter_sv_processor_handle;
 bool
 zyn_filter_sv_create(
   float sample_rate,
+  float frequency,
+  float q_factor,
   zyn_filter_sv_handle * handle_ptr);
 
 void
@@ -50,8 +52,15 @@ zyn_filter_sv_processor_destroy(
   zyn_filter_sv_processor_handle processor_handle);
 
 void
+zyn_filter_sv_processor_init(
+  zyn_filter_sv_processor_handle processor_handle,
+  float note_base_frequency,
+  float velocity_adjust);
+
+void
 zyn_filter_sv_process(
   zyn_filter_sv_processor_handle processor_handle,
+  float frequency_adjust,       /* lfo/envelope adjust */
   zyn_sample_type *samples);
 
 #if 0
