@@ -91,7 +91,7 @@ zyn_addsynth_create(
 
   zyn_addsynth_ptr->filter_type = ZYN_FILTER_TYPE_ANALOG;
   zyn_addsynth_ptr->m_filter_params.init(sample_rate, ZYN_FILTER_ANALOG_TYPE_LPF2, 94, 40);
-  if (!zyn_filter_sv_create(sample_rate, ZYN_GLOBAL_FILTER_INITIAL_FREQUENCY, ZYN_GLOBAL_FILTER_INITIAL_Q, &zyn_addsynth_ptr->m_filter_sv))
+  if (!zyn_filter_sv_create(sample_rate, ZYN_GLOBAL_FILTER_INITIAL_FREQUENCY, ZYN_GLOBAL_FILTER_INITIAL_Q, &zyn_addsynth_ptr->filter_sv))
   {
     goto fail_free_synth;
   }
@@ -329,7 +329,7 @@ zyn_addsynth_create(
 
   zyn_addsynth_component_init_filter_sv(
     zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_FILTER_SV,
-    zyn_addsynth_ptr);
+    zyn_addsynth_ptr->filter_sv);
 
   zyn_addsynth_component_init_filter_envelope(
     zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_FILTER_ENV,
@@ -511,7 +511,7 @@ zyn_addsynth_destroy(
     zyn_oscillator_uninit(&zyn_addsynth_ptr->voices_params_ptr[voice_index].modulator_oscillator);
   }
 
-  zyn_filter_sv_destroy(zyn_addsynth_ptr->m_filter_sv);
+  zyn_filter_sv_destroy(zyn_addsynth_ptr->filter_sv);
 
   // ADnoteParameters temp end
 

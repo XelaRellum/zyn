@@ -249,7 +249,7 @@ struct zyn_addsynth
 
   int filter_type;              /* filter category/supertype, one of ZYN_FILTER_TYPE_XXX */
   FilterParams m_filter_params;
-  zyn_filter_sv_handle m_filter_sv;
+  zyn_filter_sv_handle filter_sv;
 
   // Velocity sensing amount of the Filter, 0 .. 1
   float m_filter_velocity_sensing_amount;

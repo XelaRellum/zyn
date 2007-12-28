@@ -28,7 +28,7 @@ extern "C" {
 } /* Adjust editor indent */
 #endif
 
-typedef struct { int unused; } * zyn_filter_sv_handle;
+typedef struct _zyn_filter_sv_handle { int unused; } * zyn_filter_sv_handle;
 typedef struct { int unused; } * zyn_filter_sv_processor_handle;
 
 bool
@@ -37,6 +37,15 @@ zyn_filter_sv_create(
   float frequency,
   float q_factor,
   zyn_filter_sv_handle * handle_ptr);
+
+int
+zyn_filter_sv_get_type(
+  zyn_filter_sv_handle filter_handle);
+
+void
+zyn_filter_sv_set_type(
+  zyn_filter_sv_handle filter_handle,
+  int type);
 
 void
 zyn_filter_sv_destroy(

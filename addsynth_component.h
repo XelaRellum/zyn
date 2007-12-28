@@ -116,7 +116,7 @@ zyn_addsynth_component_init_filter_formant(
 void
 zyn_addsynth_component_init_filter_sv(
   struct zyn_component_descriptor * component_ptr,
-  struct zyn_addsynth * zyn_addsynth_ptr);
+  zyn_filter_sv_handle filter);
 
 void
 zyn_addsynth_component_init_filter_envelope(

@@ -97,11 +97,11 @@ ADnote::ADnote(
 
   m_synth_ptr = synth_ptr;
 
-  if (!zyn_filter_sv_processor_create(synth_ptr->m_filter_sv, &m_filter_sv_processor_left))
+  if (!zyn_filter_sv_processor_create(synth_ptr->filter_sv, &m_filter_sv_processor_left))
   {
   }
 
-  if (!zyn_filter_sv_processor_create(synth_ptr->m_filter_sv, &m_filter_sv_processor_right))
+  if (!zyn_filter_sv_processor_create(synth_ptr->filter_sv, &m_filter_sv_processor_right))
   {
   }
 }

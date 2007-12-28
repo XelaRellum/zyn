@@ -79,6 +79,7 @@ struct zyn_filter_sv_processor
   float frequency_real;         /* Frequency, in Hz */
   float q_factor;
   float q_factor_computed;
+  int type;
     
   bool above_nyquist;                 /* this is true if the frequency is above the nyquist */
   bool old_above_nyquist;
@@ -116,6 +117,24 @@ zyn_filter_sv_create(
 }
 
 #define filter_ptr ((struct zyn_filter_sv *)filter_handle)
+
+int
+zyn_filter_sv_get_type(
+  zyn_filter_sv_handle filter_handle)
+{
+  LOG_DEBUG("SV filter type is %d", filter_ptr->type);
+  return filter_ptr->type;
+}
+
+void
+zyn_filter_sv_set_type(
+  zyn_filter_sv_handle filter_handle,
+  int type)
+{
+  assert(type >= 0 && type < ZYN_FILTER_SV_TYPES_COUNT);
+  filter_ptr->type = type;
+  LOG_DEBUG("SV filter type set to %d", filter_ptr->type);
+}
 
 void
 zyn_filter_sv_destroy(
@@ -350,6 +369,13 @@ zyn_filter_sv_process(
     LOG_DEBUG("Additional stages count changed");
     zyn_filter_sv_processor_cleanup(processor_ptr);
     processor_ptr->additional_stages = processor_ptr->filter->additional_stages;
+    needs_coefs_recalculation = true;
+  }
+
+  if (processor_ptr->first_time || processor_ptr->type != processor_ptr->filter->type)
+  {
+    LOG_DEBUG("Type changed");
+    processor_ptr->type = processor_ptr->filter->type;
     needs_coefs_recalculation = true;
   }
 

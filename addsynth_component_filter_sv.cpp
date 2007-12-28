@@ -42,7 +42,7 @@
 #include "addsynth_internal.h"
 #include "log.h"
 
-#define zyn_addsynth_ptr ((struct zyn_addsynth *)context)
+#define filter ((zyn_filter_sv_handle)context)
 
 float
 zyn_component_filter_sv_get_float(
@@ -119,7 +119,7 @@ zyn_component_filter_sv_get_int(
     return zyn_addsynth_ptr->m_filter_params.m_additional_stages + 1;
 #endif
   case ZYNADD_PARAMETER_ENUM_FILTER_TYPE:
-    return ZYN_FILTER_SV_TYPE_LOWPASS;
+    return zyn_filter_sv_get_type(filter);
   }
 
   LOG_ERROR("Unknown sv filter int/enum parameter %u", parameter);
@@ -144,6 +144,7 @@ zyn_component_filter_sv_set_int(
     return;
 #endif
   case ZYNADD_PARAMETER_ENUM_FILTER_TYPE:
+    zyn_filter_sv_set_type(filter, value);
     return;
   }
 
@@ -172,12 +173,12 @@ zyn_component_filter_sv_set_bool(
   assert(0);
 }
 
-#undef zyn_addsynth_ptr
+#undef filter
 
 void
 zyn_addsynth_component_init_filter_sv(
   struct zyn_component_descriptor * component_ptr,
-  struct zyn_addsynth * zyn_addsynth_ptr)
+  zyn_filter_sv_handle filter)
 {
-  ZYN_INIT_COMPONENT(component_ptr, zyn_addsynth_ptr, zyn_component_filter_sv_);
+  ZYN_INIT_COMPONENT(component_ptr, filter, zyn_component_filter_sv_);
 }
