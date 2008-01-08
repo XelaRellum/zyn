@@ -20,11 +20,11 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <lv2.h>
 
 #include "common.h"
 #include "list.h"
 #include "addsynth.h"
-#include "lv2dynparam/lv2.h"
 #include "lv2dynparam/lv2dynparam.h"
 #include "lv2dynparam/plugin.h"
 #include "zynadd_internal.h"

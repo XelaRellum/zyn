@@ -24,9 +24,9 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#include <lv2.h>
 
 #include "common.h"
-#include "lv2dynparam/lv2.h"
 #include "lv2-miditype.h"
 #include "lv2-midifunctions.h"
 #include "zynadd.h"

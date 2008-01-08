@@ -22,9 +22,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <lv2.h>
 
 #include "common.h"
-#include "lv2dynparam/lv2.h"
 #include "addsynth.h"
 #include "lv2dynparam/lv2dynparam.h"
 #include "lv2dynparam/plugin.h"
