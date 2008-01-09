@@ -1,0 +1,10 @@
+The zyn project main goal is to extract synth engines from ZynAddSubFX
+and pack them in LV2 plugin format. Resulting plugins are heavily
+based on work made by Nasca Octavian Paul. If you like the amazing
+sounds these plugins generate you should thank Paul for this.
+
+http://home.gna.org/zyn/
+
+zynadd plugin is expected to work at least with zynjacku host:
+
+http://home.gna.org/zynjacku/
