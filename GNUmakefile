@@ -135,4 +135,4 @@ maybe_sudo_install: .install_timestamp
 # run it through zynjacku and use jack_connect to connect it
 test_run: maybe_sudo_install
 	@(sleep 2 ; jack_snapshot restore ~/zynadd.jack_snapshot)&
-	@zynjacku http://home.gna.org/zyn/zynadd/0
+	@zynjacku http://home.gna.org/zyn/zynadd/1

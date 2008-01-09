@@ -4,7 +4,7 @@
 @prefix ll: <http://ll-plugins.nongnu.org/lv2/namespace#>.
 @prefix llext: <http://ll-plugins.nongnu.org/lv2/ext/>.
 
-<http://home.gna.org/zyn/zynadd/0>
+<http://home.gna.org/zyn/zynadd/1>
   a lv2:Plugin;
   doap:name "zynadd";
   doap:license <http://usefulinc.com/doap/licenses/gpl>;
