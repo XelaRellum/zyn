@@ -1,0 +1,8 @@
+make
+make install
+
+You probably want to run later as superuser to install plugin
+system-wide
+
+Installation will try to deduce where to install from your LV2_PATH
+unless you override it using LV2_INSTALL_PATH
