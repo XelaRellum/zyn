@@ -19,7 +19,7 @@ LIBRARIES = -DPIC -Wall $(strip $(shell pkg-config --libs fftw3 lv2dynparamplugi
 
 CC = gcc -c
 CXX = g++ -c
-CFLAGS := -g -fPIC -DPIC -Wall -Werror $(strip $(shell pkg-config --cflags fftw3 lv2dynparamplugin1))
+CFLAGS := -g -fPIC -DPIC -Wall -Werror $(strip $(shell pkg-config --cflags fftw3 lv2core lv2dynparamplugin1))
 
 GENDEP_SED_EXPR = "s/^\\(.*\\)\\.o *: /$(subst /,\/,$(@:.d=.o)) $(subst /,\/,$@) : /g"
 GENDEP_C = set -e; $(GCC_PREFIX)gcc -MM $(CFLAGS) $< | sed $(GENDEP_SED_EXPR) > $@; [ -s $@ ] || rm -f $@
