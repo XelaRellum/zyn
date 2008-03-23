@@ -382,6 +382,8 @@ zyn_filter_sv_process(
     LOG_DEBUG("Frequency really changed (%f != %f)", frequency, processor_ptr->frequency);
   }
 
+  frequency_real = 0.0;         /* fix warning */
+
   if (processor_ptr->first_time || frequency_changed)
   {
     /* convert to real frequency (Hz) */

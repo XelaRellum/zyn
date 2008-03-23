@@ -166,6 +166,8 @@ zynadd_run(
 
   now = 0;
   event_time = -1.0;
+  event = NULL;
+  event_size = 0;
     
   while (now < samples_count)
   {
