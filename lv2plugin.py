@@ -66,11 +66,11 @@ class lv2plugin_proxy(Object.task_gen):
         #print "self '%s'" % self
         self.hook(self.tool, node)
 
-class lv2plugin(Object.task_gen):
+class lv2pluginobj(Object.task_gen):
     def __init__(self, type = 'cc', env=None):
         Object.task_gen.__init__(self)
         self.type = type
-        self.tool = Object.g_allclasses[type]('shlib')
+        self.tool = Object.task_gen.classes[type]('shlib')
 
     def apply_core(self):
         #print "lv2plugin.apply_core() called."
@@ -84,14 +84,15 @@ class lv2plugin(Object.task_gen):
         Object.task_gen.apply_core(self)
 
     def get_hook(self, ext):
-        for cls in Object.g_allclasses.keys():
+        classes = Object.task_gen.classes
+        for cls in classes.keys():
             if cls == 'lv2plugin':
                 continue
 
             if cls != self.type:
                 continue
 
-            map = Object.g_allclasses[cls].mappings
+            map = classes[cls].mappings
             for x in map:
                 if x == ext:
                     hook = map[x]
@@ -124,7 +125,5 @@ def install_target(self):
     bundle_files = self.ttl
     bundle_files.append(self.target + '.so')
     install_files('LV2_INSTALL_DIR', self.target + '.lv2', bundle_files, self.env)
-
-Object.register('lv2plugin', lv2plugin)
 
 taskgen(install_target)
