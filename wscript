@@ -18,9 +18,9 @@ def configure(conf):
     conf.check_tool('compiler_cxx')
     conf.check_tool('lv2plugin', tooldir='.')
 
-    pkgconfig_lv2dynparam = conf.create_pkgconfig_configurator()
-    pkgconfig_lv2dynparam.name = 'lv2dynparamplugin1'
-    pkgconfig_lv2dynparam.run()
+    conf.check_pkg('fftw3', mandatory=True)
+    conf.check_pkg('lv2core', mandatory=True)
+    conf.check_pkg('lv2dynparamplugin1', mandatory=True)
 
 def build(bld):
     zynadd = bld.create_obj('lv2plugin')
