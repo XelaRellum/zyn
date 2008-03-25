@@ -51,7 +51,7 @@ def get_lv2_install_dir():
 
     return None
 
-class lv2plugin_proxy(Object.task_gen):
+class lv2plugin_proxy_abstract(Object.task_gen):
     def __init__(self, tool, hook):
         Object.task_gen.__init__(self)
         self.tool = tool
@@ -66,7 +66,7 @@ class lv2plugin_proxy(Object.task_gen):
         #print "self '%s'" % self
         self.hook(self.tool, node)
 
-class lv2pluginobj(Object.task_gen):
+class lv2plugin_taskgen(Object.task_gen):
     def __init__(self, type = 'cc', env=None):
         Object.task_gen.__init__(self)
         self.type = type
@@ -96,7 +96,7 @@ class lv2pluginobj(Object.task_gen):
             for x in map:
                 if x == ext:
                     hook = map[x]
-                    obj = lv2plugin_proxy(self.tool, hook)
+                    obj = lv2plugin_proxy_abstract(self.tool, hook)
                     return obj.the_hook
 
         return None
