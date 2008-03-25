@@ -81,6 +81,7 @@ class lv2plugin_taskgen(Object.task_gen):
         self.tool.env['shlib_PATTERN'] = '%s.so'
         self.tool.uselib = self.uselib
         self.tool.ttl = self.ttl
+        self.tool.lv2 = True
         Object.task_gen.apply_core(self)
 
     def get_hook(self, ext):
@@ -111,7 +112,16 @@ def detect(conf):
         status = 'will be deduced from LV2_PATH'
     display_msg('LV2 installation directory', status, 'GREEN')
 
-def install_target(self):
+@taskgen
+@feature('normal')
+@after('apply_objdeps')
+@before('install_target')
+def install_lv2(self):
+    if not getattr(self, 'lv2', None):
+        return
+
+    self.meths.remove('install_target')
+
     if not Params.g_install:
         return
 
@@ -125,5 +135,3 @@ def install_target(self):
     bundle_files = self.ttl
     bundle_files.append(self.target + '.so')
     install_files('LV2_INSTALL_DIR', self.target + '.lv2', bundle_files, self.env)
-
-taskgen(install_target)
