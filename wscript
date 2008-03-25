@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
+# TODO: check these flags and how to add them to waf
+# LIBRARIES = -DPIC -Wall
+# CFLAGS := -g -fPIC -DPIC -Wall -Werror
+
 # the following two variables are used by the target "waf dist"
 VERSION='2'
 APPNAME='zyn'
@@ -10,8 +14,10 @@ srcdir = '.'
 blddir = 'build'
 
 def set_options(opt):
+    opt.parser.remove_option('--prefix') # prefix as commonly used concept has no use here, so we remove it to not add confusion
     opt.tool_options('compiler_cc')
     opt.tool_options('compiler_cxx')
+    opt.tool_options('lv2plugin', tooldir='.')
 
 def configure(conf):
     conf.check_tool('compiler_cc')
