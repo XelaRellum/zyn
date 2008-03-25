@@ -24,7 +24,7 @@ def configure(conf):
 
 def build(bld):
     zynadd = bld.create_obj('lv2plugin')
-    zynadd.uselib = 'LV2DYNPARAMPLUGIN1'
+    zynadd.uselib = 'LV2DYNPARAMPLUGIN1 LV2CORE FFTW3'
     zynadd.target = 'zynadd'
     zynadd.ttl = ['zynadd.ttl', 'manifest.ttl']
     zynadd.source = [
