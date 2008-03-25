@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 # encoding: utf-8
+#
 # Copyright (C) 2008 Nedko Arnaudov <nedko@arnaudov.name>
+#
+# waf tool for lv2 plugins
 
 import Object
 from Object import taskgen, after, before, feature
@@ -97,15 +100,26 @@ class lv2plugin(Object.task_gen):
 
         return None
 
+def set_options(opt):
+    opt.add_option('--lv2-dir', type='string', default='', dest='LV2_INSTALL_DIR', help='Force directory where LV2 plugin(s) will be installed.')
+
+def detect(conf):
+    conf.env['LV2_INSTALL_DIR'] = getattr(Params.g_options, 'LV2_INSTALL_DIR')
+    status = conf.env['LV2_INSTALL_DIR']
+    if not status:
+        status = 'will be deduced from LV2_PATH'
+    display_msg('LV2 installation directory', status, 'GREEN')
+
 def install_target(self):
     if not Params.g_install:
         return
 
-    self.env['LV2_INSTALL_DIR'] = get_lv2_install_dir()
     if not self.env['LV2_INSTALL_DIR']:
-        Params.fatal('Cannot locate LV2 plugins directory')
-    else:
-        display_msg('LV2 installation directory', self.env['LV2_INSTALL_DIR'], 'GREEN')
+        self.env['LV2_INSTALL_DIR'] = get_lv2_install_dir()
+        if not self.env['LV2_INSTALL_DIR']:
+            Params.fatal('Cannot locate LV2 plugins directory')
+
+    display_msg('LV2 installation directory', self.env['LV2_INSTALL_DIR'], 'GREEN')
 
     bundle_files = self.ttl
     bundle_files.append(self.target + '.so')
