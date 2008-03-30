@@ -67,10 +67,15 @@ class lv2plugin_proxy_abstract(Object.task_gen):
         self.hook(self.tool, node)
 
 class lv2plugin_taskgen(Object.task_gen):
-    def __init__(self, type = 'cc', env=None):
+    def __init__(self, type = 'cpp', env=None):
         Object.task_gen.__init__(self)
         self.type = type
         self.tool = Object.task_gen.classes[type]('shlib')
+        if type == 'cpp':
+            self.tool.m_type_initials = 'cpp'
+            self.tool.features.append('cc')
+            self.tool.ccflags = ''
+            self.tool.mappings['.c'] = Object.task_gen.mappings['.cc']
 
     def apply_core(self):
         #print "lv2plugin.apply_core() called."
