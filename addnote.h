@@ -54,6 +54,8 @@ public:
   void relasekey();
   bool finished();
 
+  void force_disable();
+
 private:
   void setfreq(int nvoice,REALTYPE freq);
   void setfreqFM(int nvoice,REALTYPE freq);

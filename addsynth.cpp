@@ -80,6 +80,8 @@ zyn_addsynth_create(
   zyn_addsynth_ptr->polyphony = ZYN_DEFAULT_POLYPHONY;
   zyn_addsynth_ptr->notes_array = (struct note_channel *)malloc(ZYN_DEFAULT_POLYPHONY * sizeof(struct note_channel));
 
+  zyn_addsynth_ptr->all_sound_off = false;
+
   zyn_addsynth_ptr->velsns = 64;
   zyn_addsynth_ptr->fft = zyn_fft_create(OSCIL_SIZE);
 
@@ -419,6 +421,22 @@ zyn_addsynth_get_audio_output(
     }
   }
 
+  if (zyn_addsynth_ptr->all_sound_off)
+  {
+    fadeout_two_buffers(buffer_left, buffer_right, SOUND_BUFFER_SIZE);
+
+    for (note_index = 0 ; note_index < zyn_addsynth_ptr->polyphony ; note_index++)
+    {
+      if (zyn_addsynth_ptr->notes_array[note_index].midinote != -1)
+      {
+        zyn_addsynth_ptr->notes_array[note_index].note_ptr->force_disable();
+        zyn_addsynth_ptr->notes_array[note_index].midinote = -1;
+      }
+    }
+
+    zyn_addsynth_ptr->all_sound_off = false;
+  }
+
   zyn_portamento_update(&zyn_addsynth_ptr->portamento);
 }
 
@@ -489,6 +507,28 @@ zyn_addsynth_note_off(
       zyn_addsynth_ptr->notes_array[note_index].note_ptr->relasekey();
     }
   }
+}
+
+void
+zyn_addsynth_all_notes_off(
+  zyn_addsynth_handle handle)
+{
+  unsigned int note_index;
+
+  for (note_index = 0 ; note_index < zyn_addsynth_ptr->polyphony ; note_index++)
+  {
+    if (zyn_addsynth_ptr->notes_array[note_index].midinote != -1)
+    {
+      zyn_addsynth_ptr->notes_array[note_index].note_ptr->relasekey();
+    }
+  }
+}
+
+void
+zyn_addsynth_all_sound_off(
+  zyn_addsynth_handle handle)
+{
+  zyn_addsynth_ptr->all_sound_off = true;
 }
 
 void

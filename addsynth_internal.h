@@ -228,6 +228,7 @@ struct zyn_addsynth
   float sample_rate;
   unsigned int polyphony;
   struct note_channel * notes_array;
+  bool all_sound_off;
   zyn_fft_handle fft;
   unsigned char velsns;         // velocity sensing (amplitude velocity scale)
   zyn_sample_type oldfreq;      // this is used for portamento

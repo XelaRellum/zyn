@@ -56,6 +56,14 @@ zyn_addsynth_note_off(
   unsigned int note);
 
 void
+zyn_addsynth_all_notes_off(
+  zyn_addsynth_handle handle);
+
+void
+zyn_addsynth_all_sound_off(
+  zyn_addsynth_handle handle);
+
+void
 zyn_addsynth_destroy(
   zyn_addsynth_handle handle);
 

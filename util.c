@@ -139,6 +139,23 @@ mix_add_two_buffers(
 }
 
 void
+fadeout_two_buffers(
+  zyn_sample_type * buffer1,
+  zyn_sample_type * buffer2,
+  size_t size)
+{
+  zyn_sample_type fade;
+
+  while (size)
+  {
+    fade = 1.0 - (zyn_sample_type)size / (zyn_sample_type)SOUND_BUFFER_SIZE;
+    size--;
+    buffer1[size] *= fade;
+    buffer2[size] *= fade;
+  }
+}
+
+void
 copy_buffer(
   zyn_sample_type * buffer_dest,
   zyn_sample_type * buffer_src,

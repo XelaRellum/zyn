@@ -54,6 +54,12 @@ mix_add_two_buffers(
   size_t size);
 
 void
+fadeout_two_buffers(
+  zyn_sample_type * buffer1,
+  zyn_sample_type * buffer2,
+  size_t size);
+
+void
 copy_buffer(
   zyn_sample_type * buffer_dest,
   zyn_sample_type * buffer_src,

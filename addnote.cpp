@@ -558,7 +558,7 @@ void ADnote::KillVoice(unsigned int voice_index)
  * Kill the note
  */
 void
-ADnote::KillNote()
+ADnote::force_disable()
 {
   unsigned int voice_index;
 
@@ -584,7 +584,7 @@ ADnote::~ADnote()
 {
   if (m_note_enabled)
   {
-    KillNote();
+    force_disable();
   }
 
   zyn_filter_sv_processor_destroy(m_filter_sv_processor_left);
@@ -1375,7 +1375,7 @@ ADnote::noteout(
       outr[i] *= tmp;
     }
 
-    KillNote();
+    force_disable();
   }
 }
 

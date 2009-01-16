@@ -211,6 +211,17 @@ zynadd_run(
           case 0x80:                /* note off */
             zyn_addsynth_note_off(zynadd_ptr->synth, event[1]);
             break;
+          case 0xB0:
+            switch (event[1])
+            {
+            case 0x78:          /* all sound off */
+              zyn_addsynth_all_sound_off(zynadd_ptr->synth);
+              break;
+            case 0x7B:          /* all notes off */
+              zyn_addsynth_all_notes_off(zynadd_ptr->synth);
+              break;
+            }
+            break;
           }
         }
 
