@@ -65,7 +65,7 @@ struct addsynth_voice
   int DelayTicks;
     
   /* Waveform of the Voice */ 
-  REALTYPE *OscilSmp;    
+  zyn_sample_type * OscilSmp;    
 
   /************************************
    *     FREQUENCY PARAMETERS          *
@@ -111,10 +111,10 @@ struct addsynth_voice
   int FMVoice;
 
   // Voice Output used by other voices if use this as modullator
-  REALTYPE *VoiceOut;
+  zyn_sample_type * VoiceOut;
 
   /* Wave of the Voice */ 
-  REALTYPE *FMSmp;    
+  zyn_sample_type * FMSmp;
 
   REALTYPE FMVolume;
   REALTYPE FMDetune; //in cents
@@ -233,6 +233,7 @@ zyn_addnote_create(
   zyn_addnote_handle * handle_ptr)
 {
   struct addnote * note_ptr;
+  unsigned int voice_index;
 
   // we still need to use C++ allocation because some constructors need to be invoked
   // For example, AnalogFilter has virtual methods
@@ -242,11 +243,18 @@ zyn_addnote_create(
     return false;
   }
 
-  note_ptr->tmpwave = new REALTYPE [SOUND_BUFFER_SIZE];
-  note_ptr->bypassl = new REALTYPE [SOUND_BUFFER_SIZE];
-  note_ptr->bypassr = new REALTYPE [SOUND_BUFFER_SIZE];
+  note_ptr->tmpwave = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * SOUND_BUFFER_SIZE);
+  note_ptr->bypassl = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * SOUND_BUFFER_SIZE);
+  note_ptr->bypassr = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * SOUND_BUFFER_SIZE);
 
   note_ptr->voices_ptr = (struct addsynth_voice *)malloc(sizeof(struct addsynth_voice) * synth_ptr->voices_count);
+  for (voice_index = 0 ; voice_index < note_ptr->synth_ptr->voices_count ; voice_index++)
+  {
+    // the extra points contains the first point
+    note_ptr->voices_ptr[voice_index].OscilSmp = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * (OSCIL_SIZE + OSCIL_SMP_EXTRA_SAMPLES));
+    note_ptr->voices_ptr[voice_index].FMSmp = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * (OSCIL_SIZE + OSCIL_SMP_EXTRA_SAMPLES));
+    note_ptr->voices_ptr[voice_index].VoiceOut = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * SOUND_BUFFER_SIZE);
+  }
 
   note_ptr->osc_pos_hi_ptr = (int *)malloc(sizeof(int) * synth_ptr->voices_count);
   note_ptr->osc_pos_lo_ptr = (float *)malloc(sizeof(float) * synth_ptr->voices_count);
@@ -367,18 +375,8 @@ kill_voice(
   struct addnote * note_ptr,
   unsigned int voice_index)
 {
-  delete [] (note_ptr->voices_ptr[voice_index].OscilSmp);
-
-  if ((note_ptr->voices_ptr[voice_index].fm_type != ZYN_FM_TYPE_NONE) && (note_ptr->voices_ptr[voice_index].FMVoice < 0))
-  {
-    delete note_ptr->voices_ptr[voice_index].FMSmp;
-  }
-
-  if (note_ptr->voices_ptr[voice_index].VoiceOut != NULL)
-  {
-    // do not delete, yet: perhaps is used by another voice
-    silence_buffer(note_ptr->voices_ptr[voice_index].VoiceOut, SOUND_BUFFER_SIZE);
-  }
+  // silence the voice, perhaps is used by another voice
+  silence_buffer(note_ptr->voices_ptr[voice_index].VoiceOut, SOUND_BUFFER_SIZE);
 
   note_ptr->voices_ptr[voice_index].enabled = false;
 }
@@ -894,9 +892,6 @@ zyn_addnote_note_on(
     zyn_oscillator_new_rand_seed(
       &note_ptr->synth_ptr->voices_params_ptr[voice_index].oscillator,
       rand());
-    note_ptr->voices_ptr[voice_index].OscilSmp = NULL;
-    note_ptr->voices_ptr[voice_index].FMSmp = NULL;
-    note_ptr->voices_ptr[voice_index].VoiceOut = NULL;
 
     note_ptr->voices_ptr[voice_index].FMVoice = -1;
 
@@ -962,9 +957,6 @@ zyn_addnote_note_on(
     note_ptr->osc_pos_lo_ptr[voice_index] = 0.0;
     note_ptr->osc_pos_hi_FM_ptr[voice_index] = 0;
     note_ptr->osc_pos_lo_FM_ptr[voice_index] = 0.0;
-
-    // the extra points contains the first point
-    note_ptr->voices_ptr[voice_index].OscilSmp = new REALTYPE [OSCIL_SIZE + OSCIL_SMP_EXTRA_SAMPLES];
 
     // Get the voice's oscil or external's voice oscil
     if (note_ptr->synth_ptr->voices_params_ptr[voice_index].Pextoscil != -1)
@@ -1198,8 +1190,6 @@ zyn_addnote_note_on(
         &note_ptr->synth_ptr->voices_params_ptr[voice_index].modulator_oscillator,
         rand());
 
-      note_ptr->voices_ptr[voice_index].FMSmp = new zyn_sample_type[OSCIL_SIZE + OSCIL_SMP_EXTRA_SAMPLES];
-
       // Perform Anti-aliasing only on MORPH or RING MODULATION
 
       if (note_ptr->synth_ptr->voices_params_ptr[voice_index].PextFMoscil != -1)
@@ -1274,13 +1264,8 @@ zyn_addnote_note_on(
     {
       if (note_ptr->voices_ptr[i].FMVoice == (int)voice_index)
       {
-        note_ptr->voices_ptr[voice_index].VoiceOut = new zyn_sample_type[SOUND_BUFFER_SIZE];
+        silence_buffer(note_ptr->voices_ptr[voice_index].VoiceOut, SOUND_BUFFER_SIZE);
       }
-    }
-
-    if (note_ptr->voices_ptr[voice_index].VoiceOut != NULL)
-    {
-      silence_buffer(note_ptr->voices_ptr[voice_index].VoiceOut, SOUND_BUFFER_SIZE);
     }
   }
 }
@@ -1300,13 +1285,6 @@ zyn_addnote_force_disable(
     {
       kill_voice(note_ptr, voice_index);
     }
-
-    // delete VoiceOut
-    if (note_ptr->voices_ptr[voice_index].VoiceOut != NULL)
-    {
-      delete(note_ptr->voices_ptr[voice_index].VoiceOut);
-      note_ptr->voices_ptr[voice_index].VoiceOut = NULL;
-    }
   }
 
   note_ptr->note_enabled = false;
@@ -1316,6 +1294,8 @@ void
 zyn_addnote_destroy(
   zyn_addnote_handle handle)
 {
+  unsigned int voice_index;
+
   if (note_ptr->note_enabled)
   {
     zyn_addnote_force_disable(handle);
@@ -1344,11 +1324,19 @@ zyn_addnote_destroy(
   free(note_ptr->osc_pos_hi_FM_ptr);
   free(note_ptr->osc_pos_lo_FM_ptr);
 
+  for (voice_index = 0 ; voice_index < note_ptr->synth_ptr->voices_count ; voice_index++)
+  {
+    // the extra points contains the first point
+    free(note_ptr->voices_ptr[voice_index].OscilSmp);
+    free(note_ptr->voices_ptr[voice_index].FMSmp);
+    free(note_ptr->voices_ptr[voice_index].VoiceOut);
+  }
+
   free(note_ptr->voices_ptr);
 
-  delete [] note_ptr->tmpwave;
-  delete [] note_ptr->bypassl;
-  delete [] note_ptr->bypassr;
+  free(note_ptr->tmpwave);
+  free(note_ptr->bypassl);
+  free(note_ptr->bypassr);
 
   delete note_ptr;
 }
