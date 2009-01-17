@@ -24,13 +24,7 @@
 #include "filter_common.h"
 #include "filter_sv.h"
 
-class ADnote;
-
-struct note_channel
-{
-  int midinote;               // MIDI note, -1 when note "channel" is not playing
-  ADnote * note_ptr;
-};
+struct note_channel;
 
 #define ZYN_FM_TYPE_NONE          0
 #define ZYN_FM_TYPE_MORPH         1

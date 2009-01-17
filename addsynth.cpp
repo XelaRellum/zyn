@@ -54,6 +54,12 @@
 // 40.0 / 127.0 = 0.31496062992125984
 #define ZYN_GLOBAL_FILTER_INITIAL_Q 0.31496062992125984
 
+struct note_channel
+{
+  int midinote;               // MIDI note, -1 when note "channel" is not playing
+  zyn_addnote_handle note_handle;
+};
+
 bool
 zyn_addsynth_create(
   float sample_rate,
@@ -298,7 +304,12 @@ zyn_addsynth_create(
 
   for (note_index = 0 ; note_index < ZYN_DEFAULT_POLYPHONY ; note_index++)
   {
-    zyn_addsynth_ptr->notes_array[note_index].note_ptr = new ADnote(zyn_addsynth_ptr);
+    if (!zyn_addnote_create(
+          zyn_addsynth_ptr,
+          &zyn_addsynth_ptr->notes_array[note_index].note_handle))
+    {
+    }
+
     zyn_addsynth_ptr->notes_array[note_index].midinote = -1;
   }
 
@@ -395,6 +406,7 @@ zyn_addsynth_get_audio_output(
   unsigned int note_index;
   zyn_sample_type note_buffer_left[SOUND_BUFFER_SIZE];
   zyn_sample_type note_buffer_right[SOUND_BUFFER_SIZE];
+  bool note_active;
 
   silence_two_buffers(buffer_left, buffer_right, SOUND_BUFFER_SIZE);
 
@@ -404,7 +416,10 @@ zyn_addsynth_get_audio_output(
     {
       //printf("mixing note channel %u\n", note_index);
 
-      zyn_addsynth_ptr->notes_array[note_index].note_ptr->noteout(note_buffer_left, note_buffer_right);
+      note_active = zyn_addnote_noteout(
+        zyn_addsynth_ptr->notes_array[note_index].note_handle,
+        note_buffer_left,
+        note_buffer_right);
 
       mix_add_two_buffers(
         buffer_left,
@@ -413,7 +428,7 @@ zyn_addsynth_get_audio_output(
         note_buffer_right,
         SOUND_BUFFER_SIZE);
 
-      if (zyn_addsynth_ptr->notes_array[note_index].note_ptr->finished())
+      if (!note_active)
       {
         zyn_addsynth_ptr->notes_array[note_index].midinote = -1;
       }
@@ -428,7 +443,7 @@ zyn_addsynth_get_audio_output(
     {
       if (zyn_addsynth_ptr->notes_array[note_index].midinote != -1)
       {
-        zyn_addsynth_ptr->notes_array[note_index].note_ptr->force_disable();
+        zyn_addnote_force_disable(zyn_addsynth_ptr->notes_array[note_index].note_handle);
         zyn_addsynth_ptr->notes_array[note_index].midinote = -1;
       }
     }
@@ -481,7 +496,9 @@ unused_note_channel_found:
   zyn_addsynth_ptr->oldfreq = notebasefreq;
 
   zyn_addsynth_ptr->notes_array[note_index].midinote = note;
-  zyn_addsynth_ptr->notes_array[note_index].note_ptr->note_on(
+
+  zyn_addnote_note_on(
+    zyn_addsynth_ptr->notes_array[note_index].note_handle,
     zyn_addsynth_ptr->random_panorama ? RND : zyn_addsynth_ptr->panorama,
     zyn_addsynth_ptr->random_grouping,
     notebasefreq,
@@ -503,7 +520,7 @@ zyn_addsynth_note_off(
   {
     if (zyn_addsynth_ptr->notes_array[note_index].midinote == (char)note)
     {
-      zyn_addsynth_ptr->notes_array[note_index].note_ptr->relasekey();
+      zyn_addnote_note_off(zyn_addsynth_ptr->notes_array[note_index].note_handle);
     }
   }
 }
@@ -518,7 +535,7 @@ zyn_addsynth_all_notes_off(
   {
     if (zyn_addsynth_ptr->notes_array[note_index].midinote != -1)
     {
-      zyn_addsynth_ptr->notes_array[note_index].note_ptr->relasekey();
+      zyn_addnote_note_off(zyn_addsynth_ptr->notes_array[note_index].note_handle);
     }
   }
 }
