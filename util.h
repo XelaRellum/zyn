@@ -40,6 +40,11 @@ zyn_velocity_scale(float velocity, float scaling);
 extern REALTYPE getdetune(unsigned char type,unsigned short int coarsedetune,unsigned short int finedetune);
 
 void
+silence_buffer(
+  zyn_sample_type * buffer,
+  size_t size);
+
+void
 silence_two_buffers(
   zyn_sample_type * buffer1,
   zyn_sample_type * buffer2,

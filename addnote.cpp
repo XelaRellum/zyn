@@ -117,8 +117,9 @@ ADnote::note_on(
 {
   unsigned int voice_index;
   unsigned int i;
-  int tmp[m_synth_ptr->voices_count];
   float filter_velocity_adjust;
+  int voice_oscillator_index;
+  REALTYPE tmp;
 
   m_portamento = portamento;
   m_midinote = midinote;
@@ -256,23 +257,25 @@ ADnote::note_on(
     m_voices_ptr[voice_index].OscilSmp = new REALTYPE [OSCIL_SIZE + OSCIL_SMP_EXTRA_SAMPLES];
 
     // Get the voice's oscil or external's voice oscil
-    int vc = voice_index;
-
     if (m_synth_ptr->voices_params_ptr[voice_index].Pextoscil != -1)
     {
-      vc = m_synth_ptr->voices_params_ptr[voice_index].Pextoscil;
+      voice_oscillator_index = m_synth_ptr->voices_params_ptr[voice_index].Pextoscil;
+    }
+    else
+    {
+      voice_oscillator_index = voice_index;
     }
 
     if (!random_grouping)
     {
       zyn_oscillator_new_rand_seed(
-        &m_synth_ptr->voices_params_ptr[vc].oscillator,
+        &m_synth_ptr->voices_params_ptr[voice_oscillator_index].oscillator,
         rand());
     }
 
     m_osc_pos_hi_ptr[voice_index] =
       zyn_oscillator_get(
-        &m_synth_ptr->voices_params_ptr[vc].oscillator,
+        &m_synth_ptr->voices_params_ptr[voice_oscillator_index].oscillator,
         m_voices_ptr[voice_index].OscilSmp,
         getvoicebasefreq(voice_index),
         m_synth_ptr->voices_params_ptr[voice_index].resonance);
@@ -327,7 +330,7 @@ ADnote::note_on(
 
     m_first_tick_ptr[voice_index] = true;
     m_voices_ptr[voice_index].DelayTicks = (int)((exp(m_synth_ptr->voices_params_ptr[voice_index].PDelay / 127.0 * log(50.0)) - 1.0) / SOUND_BUFFER_SIZE / 10.0 * m_synth_ptr->sample_rate);
-  }
+  } // voices loop
 
   // Global Parameters
   m_frequency_envelope.init(m_synth_ptr->sample_rate, &m_synth_ptr->m_frequency_envelope_params, m_basefreq);
@@ -489,33 +492,42 @@ ADnote::note_on(
 
       // Perform Anti-aliasing only on MORPH or RING MODULATION
 
-      int vc=voice_index;
-      if (m_synth_ptr->voices_params_ptr[voice_index].PextFMoscil!=-1) vc=m_synth_ptr->voices_params_ptr[voice_index].PextFMoscil;
+      if (m_synth_ptr->voices_params_ptr[voice_index].PextFMoscil != -1)
+      {
+        voice_oscillator_index = m_synth_ptr->voices_params_ptr[voice_index].PextFMoscil;
+      }
+      else
+      {
+        voice_oscillator_index = voice_index;
+      }
 
-      REALTYPE tmp = 1.0;
-      if ((m_synth_ptr->voices_params_ptr[vc].modulator_oscillator.Padaptiveharmonics != 0) ||
+      if ((m_synth_ptr->voices_params_ptr[voice_oscillator_index].modulator_oscillator.Padaptiveharmonics != 0) ||
           (m_voices_ptr[voice_index].fm_type == ZYN_FM_TYPE_MORPH) ||
           (m_voices_ptr[voice_index].fm_type == ZYN_FM_TYPE_RING_MOD))
       {
         tmp = getFMvoicebasefreq(voice_index);
       }
+      else
+      {
+        tmp = 1.0;
+      }
 
       if (!random_grouping)
       {
         zyn_oscillator_new_rand_seed(
-          &m_synth_ptr->voices_params_ptr[vc].modulator_oscillator,
+          &m_synth_ptr->voices_params_ptr[voice_oscillator_index].modulator_oscillator,
           rand());
       }
 
       m_osc_pos_hi_FM_ptr[voice_index] = m_osc_pos_hi_ptr[voice_index];
       m_osc_pos_hi_FM_ptr[voice_index] += zyn_oscillator_get(
-        &m_synth_ptr->voices_params_ptr[vc].modulator_oscillator,
+        &m_synth_ptr->voices_params_ptr[voice_oscillator_index].modulator_oscillator,
         m_voices_ptr[voice_index].FMSmp,
         tmp,
         false);
       m_osc_pos_hi_FM_ptr[voice_index] %= OSCIL_SIZE;
 
-      for (int i = 0 ; i < OSCIL_SMP_EXTRA_SAMPLES ; i++)
+      for (i = 0 ; i < OSCIL_SMP_EXTRA_SAMPLES ; i++)
       {
         m_voices_ptr[voice_index].FMSmp[OSCIL_SIZE + i] = m_voices_ptr[voice_index].FMSmp[i];
       }
@@ -544,30 +556,21 @@ ADnote::note_on(
 
       m_FM_new_amplitude_ptr[voice_index] *= m_voices_ptr[voice_index].m_fm_amplitude_envelope.envout_dB();
     }
-  }
+  } // voice parameter init loop
 
   for (voice_index = 0 ; voice_index < m_synth_ptr->voices_count ; voice_index++)
   {
     for (i = voice_index + 1 ; i < m_synth_ptr->voices_count ; i++)
     {
-      tmp[i] = 0;
-    }
-
-    for (i = voice_index + 1 ; i < m_synth_ptr->voices_count ; i++)
-    {
-      if (m_voices_ptr[i].FMVoice == (int)voice_index && tmp[i] == 0)
+      if (m_voices_ptr[i].FMVoice == (int)voice_index)
       {
         m_voices_ptr[voice_index].VoiceOut = new REALTYPE[SOUND_BUFFER_SIZE];
-        tmp[i] = 1;
       }
     }
 
     if (m_voices_ptr[voice_index].VoiceOut != NULL)
     {
-      for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
-      {
-        m_voices_ptr[voice_index].VoiceOut[i] = 0.0;
-      }
+      silence_buffer(m_voices_ptr[voice_index].VoiceOut, SOUND_BUFFER_SIZE);
     }
   }
 }
@@ -577,7 +580,6 @@ ADnote::note_on(
  */
 void ADnote::KillVoice(unsigned int voice_index)
 {
-  int i;
   delete [] (m_voices_ptr[voice_index].OscilSmp);
 
   if ((m_voices_ptr[voice_index].fm_type != ZYN_FM_TYPE_NONE) && (m_voices_ptr[voice_index].FMVoice < 0))
@@ -587,11 +589,8 @@ void ADnote::KillVoice(unsigned int voice_index)
 
   if (m_voices_ptr[voice_index].VoiceOut != NULL)
   {
-    for (i = 0 ; i < SOUND_BUFFER_SIZE ; i++)
-    {
-      // do not delete, yet: perhaps is used by another voice
-      m_voices_ptr[voice_index].VoiceOut[i] = 0.0;
-    }
+    // do not delete, yet: perhaps is used by another voice
+    silence_buffer(m_voices_ptr[voice_index].VoiceOut, SOUND_BUFFER_SIZE);
   }
 
   m_voices_ptr[voice_index].enabled = false;

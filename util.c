@@ -109,6 +109,18 @@ getdetune(
 }
 
 void
+silence_buffer(
+  zyn_sample_type * buffer,
+  size_t size)
+{
+  while (size)
+  {
+    size--;
+    buffer[size] = 0.0;
+  }
+}
+
+void
 silence_two_buffers(
   zyn_sample_type * buffer1,
   zyn_sample_type * buffer2,
