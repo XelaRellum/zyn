@@ -564,7 +564,7 @@ ADnote::note_on(
     {
       if (m_voices_ptr[i].FMVoice == (int)voice_index)
       {
-        m_voices_ptr[voice_index].VoiceOut = new REALTYPE[SOUND_BUFFER_SIZE];
+        m_voices_ptr[voice_index].VoiceOut = new zyn_sample_type[SOUND_BUFFER_SIZE];
       }
     }
 
