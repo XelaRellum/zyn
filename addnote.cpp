@@ -42,11 +42,86 @@
 #include "addsynth.h"
 #include "portamento.h"
 #include "addsynth_internal.h"
-#include "addsynth_voice.h"
 #include "addnote.h"
 
 #define LOG_LEVEL LOG_LEVEL_ERROR
 #include "log.h"
+
+/***********************************************************/
+/*                    VOICE PARAMETERS                     */
+/***********************************************************/
+struct addsynth_voice
+{
+  /* If the voice is enabled */
+  bool enabled; 
+
+  /* Voice Type (sound/noise)*/
+  bool white_noise;
+
+  /* Filter Bypass */
+  int filterbypass;
+          
+  /* Delay (ticks) */
+  int DelayTicks;
+    
+  /* Waveform of the Voice */ 
+  REALTYPE *OscilSmp;    
+
+  /************************************
+   *     FREQUENCY PARAMETERS          *
+   ************************************/
+  int fixedfreq;//if the frequency is fixed to 440 Hz
+  int fixedfreqET;//if the "fixed" frequency varies according to the note (ET)
+
+  // cents = basefreq*VoiceDetune
+  REALTYPE Detune,FineDetune;
+    
+  Envelope m_frequency_envelope;
+  LFO m_frequency_lfo;
+
+  /***************************
+   *   AMPLITUDE PARAMETERS   *
+   ***************************/
+
+  /* Panning 0.0=left, 0.5 - center, 1.0 = right */
+  REALTYPE Panning;
+  REALTYPE Volume;// [-1.0 .. 1.0]
+
+  Envelope m_amplitude_envelope;
+  LFO m_amplitude_lfo;
+
+  /*************************
+   *   FILTER PARAMETERS    *
+   *************************/
+    
+  Filter m_voice_filter;
+    
+  REALTYPE FilterCenterPitch;/* Filter center Pitch*/
+  REALTYPE FilterFreqTracking;
+
+  Envelope m_filter_envelope;
+  LFO m_filter_lfo;
+
+  /****************************
+   *   MODULLATOR PARAMETERS   *
+   ****************************/
+
+  unsigned int fm_type;
+
+  int FMVoice;
+
+  // Voice Output used by other voices if use this as modullator
+  REALTYPE *VoiceOut;
+
+  /* Wave of the Voice */ 
+  REALTYPE *FMSmp;    
+
+  REALTYPE FMVolume;
+  REALTYPE FMDetune; //in cents
+    
+  Envelope m_fm_frequency_envelope;
+  Envelope m_fm_amplitude_envelope;
+};
 
 ADnote::ADnote(
   struct zyn_addsynth * synth_ptr)

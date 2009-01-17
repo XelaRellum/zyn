@@ -40,7 +40,6 @@
 #include "filter.h"
 #include "portamento.h"
 #include "addsynth_internal.h"
-#include "addsynth_voice.h"
 #include "addnote.h"
 #include "util.h"
 
