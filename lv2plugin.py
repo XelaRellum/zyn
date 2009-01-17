@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 #
-# Copyright (C) 2008 Nedko Arnaudov <nedko@arnaudov.name>
+# Copyright (C) 2008,2009 Nedko Arnaudov <nedko@arnaudov.name>
 #
 # waf tool for lv2 plugins
 
