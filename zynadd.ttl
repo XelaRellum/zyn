@@ -2,6 +2,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix doap: <http://usefulinc.com/ns/doap#>.
 @prefix llext: <http://ll-plugins.nongnu.org/lv2/ext/>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
 
 <http://home.gna.org/zyn/zynadd/1>
   a lv2:Plugin;
