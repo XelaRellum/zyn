@@ -248,7 +248,7 @@ zyn_addnote_create(
   note_ptr->bypassr = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * SOUND_BUFFER_SIZE);
 
   note_ptr->voices_ptr = (struct addsynth_voice *)malloc(sizeof(struct addsynth_voice) * synth_ptr->voices_count);
-  for (voice_index = 0 ; voice_index < note_ptr->synth_ptr->voices_count ; voice_index++)
+  for (voice_index = 0 ; voice_index < synth_ptr->voices_count ; voice_index++)
   {
     // the extra points contains the first point
     note_ptr->voices_ptr[voice_index].OscilSmp = (zyn_sample_type *)malloc(sizeof(zyn_sample_type) * (OSCIL_SIZE + OSCIL_SMP_EXTRA_SAMPLES));
