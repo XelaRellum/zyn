@@ -181,6 +181,7 @@ zyn_addsynth_get_global_component(
 zyn_addsynth_component
 zyn_addsynth_get_voice_component(
   zyn_addsynth_handle handle,
+  unsigned int voice,
   unsigned int component);
 
 float

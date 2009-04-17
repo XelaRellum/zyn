@@ -596,8 +596,15 @@ zyn_addsynth_get_global_component(
 zyn_addsynth_component
 zyn_addsynth_get_voice_component(
   zyn_addsynth_handle handle,
+  unsigned int voice,
   unsigned int component)
 {
+  if (voice >= zyn_addsynth_ptr->voices_count)
+  {
+    assert(0);
+    return NULL;
+  }
+
   if (component >= ZYNADD_VOICE_COMPONENTS_COUNT)
   {
     assert(0);
