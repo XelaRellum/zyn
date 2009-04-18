@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <lv2.h>
 
@@ -45,9 +46,10 @@ zynadd_appear_parameter(
   lv2dynparam_plugin_group parent_group;
 
   LOG_DEBUG(
-    "Appearing parameter \"%s\"/\"%s\" -> %u",
+    "Appearing parameter \"%s\"/\"%s\" -> %p:%u",
     parameter_ptr->parent_ptr ? parameter_ptr->parent_ptr->name_ptr : "",
     parameter_ptr->name_ptr,
+    parameter_ptr->addsynth_component,
     parameter_ptr->addsynth_parameter);
 
   if (parameter_ptr->parent_ptr == NULL)
@@ -388,6 +390,8 @@ zynadd_dynparam_init(
   struct zyn_forest_initializer top_forest_initializer;
   struct zyn_forest_initializer voice_forest_initializer;
   unsigned int i;
+  unsigned int j;
+  char voice_group_names[VOICES_COUNT][20];
 
   INIT_LIST_HEAD(&zynadd_ptr->groups);
   INIT_LIST_HEAD(&zynadd_ptr->parameters);
@@ -397,10 +401,14 @@ zynadd_dynparam_init(
     zynadd_ptr->synth_global_components[i] = zyn_addsynth_get_global_component(zynadd_ptr->synth, i);
   }
 
-  for (i = 0 ; i < ZYNADD_VOICE_COMPONENTS_COUNT ; i++)
+  for (i = 0 ; i < VOICES_COUNT ; i++)
   {
-    zynadd_ptr->synth_voice0_components[i] = zyn_addsynth_get_voice_component(zynadd_ptr->synth, 0, i);
-    //LOG_DEBUG("Voice component %p", zynadd_ptr->synth_voice0_components[i]);
+    for (j = 0 ; j < ZYNADD_VOICE_COMPONENTS_COUNT ; j++)
+    {
+      LOG_DEBUG("Voice %u component %u", i, j);
+      zynadd_ptr->synth_voice_components[i * ZYNADD_VOICE_COMPONENTS_COUNT + j] = zyn_addsynth_get_voice_component(zynadd_ptr->synth, i, j);
+      LOG_DEBUG("Voice component %p", zynadd_ptr->synth_voice_components[i * ZYNADD_VOICE_COMPONENTS_COUNT + j]);
+    }
   }
 
   LOG_DEBUG("Preparing top forest...");
@@ -419,16 +427,23 @@ zynadd_dynparam_init(
 
   LOG_DEBUG("Preparing voice forest...");
 
-  if (!zynadd_dynparam_forest_initializer_prepare(
+  for (i = 0 ; i < VOICES_COUNT ; i++)
+  {
+    sprintf(voice_group_names[i], "Voice %u", i + 1);
+
+    g_voice_forest_map.groups[0].name = voice_group_names[i];
+
+    if (!zynadd_dynparam_forest_initializer_prepare(
         &voice_forest_initializer,
         &g_voice_forest_map,
         top_forest_initializer.groups[zynadd_top_forest_map_get_voices_group()],
-        zynadd_ptr->synth_voice0_components,
+        zynadd_ptr->synth_voice_components + i * ZYNADD_VOICE_COMPONENTS_COUNT,
         zynadd_ptr,
         &zynadd_ptr->groups,
         &zynadd_ptr->parameters))
-  {
-    goto fail_clear_top_forest_initializer;
+      {
+	goto fail_clear_top_forest_initializer;
+      }
   }
 
   if (!lv2dynparam_plugin_instantiate(

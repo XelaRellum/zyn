@@ -21,6 +21,11 @@
 #ifndef ZYNADD_INTERNAL_H__A38C6254_E7AD_443E_AA5F_A5AB3FCB8B06__INCLUDED
 #define ZYNADD_INTERNAL_H__A38C6254_E7AD_443E_AA5F_A5AB3FCB8B06__INCLUDED
 
+/*
+ * The number of voices of additive synth for a single note
+ */
+#define VOICES_COUNT 8
+
 #define LV2DYNPARAM_PARAMETER_TYPE_BOOL               1
 #define LV2DYNPARAM_PARAMETER_TYPE_FLOAT              2
 #define LV2DYNPARAM_PARAMETER_TYPE_INT                3
@@ -87,7 +92,7 @@ struct zynadd
 
   zyn_addsynth_handle synth;
   zyn_addsynth_component synth_global_components[ZYNADD_GLOBAL_COMPONENTS_COUNT];
-  zyn_addsynth_component synth_voice0_components[ZYNADD_VOICE_COMPONENTS_COUNT];
+  zyn_addsynth_component synth_voice_components[VOICES_COUNT * ZYNADD_VOICE_COMPONENTS_COUNT];
 
   zyn_sample_type synth_output_left[SOUND_BUFFER_SIZE];
   zyn_sample_type synth_output_right[SOUND_BUFFER_SIZE];

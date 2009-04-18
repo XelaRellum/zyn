@@ -39,11 +39,6 @@
 //#define LOG_LEVEL LOG_LEVEL_DEBUG
 #include "log.h"
 
-/*
- * The number of voices of additive synth for a single note
- */
-#define NUM_VOICES 8
-
 #define LV2_PORT_MIDI_IN 0
 #define LV2_PORT_OUTPUT_LEFT 1
 #define LV2_PORT_OUTPUT_RIGHT 2
@@ -107,7 +102,7 @@ zynadd_instantiate(
 
   zynadd_ptr->sample_rate = sample_rate;
 
-  if (!zyn_addsynth_create(sample_rate, NUM_VOICES, &zynadd_ptr->synth))
+  if (!zyn_addsynth_create(sample_rate, VOICES_COUNT, &zynadd_ptr->synth))
   {
     goto fail_free_ports;
   }

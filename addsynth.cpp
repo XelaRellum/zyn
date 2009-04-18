@@ -611,7 +611,7 @@ zyn_addsynth_get_voice_component(
     return NULL;
   }
 
-  return zyn_addsynth_ptr->voices_components + component;
+  return zyn_addsynth_ptr->voices_components + voice * ZYNADD_VOICE_COMPONENTS_COUNT + component;
 }
 
 float percent_from_0_127(unsigned char value)
