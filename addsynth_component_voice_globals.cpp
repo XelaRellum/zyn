@@ -101,6 +101,8 @@ zyn_component_voice_globals_get_bool(
 {
   switch (parameter)
   {
+  case ZYNADD_PARAMETER_BOOL_ENABLED:
+    return voice_params_ptr->enabled;
   case ZYNADD_PARAMETER_BOOL_RESONANCE:
     return voice_params_ptr->resonance;
   case ZYNADD_PARAMETER_BOOL_WHITE_NOISE:
@@ -120,6 +122,10 @@ zyn_component_voice_globals_set_bool(
 {
   switch (parameter)
   {
+  case ZYNADD_PARAMETER_BOOL_ENABLED:
+    LOG_DEBUG("voice enabled -> %s (%p)", value ? "on" : "off", voice_params_ptr);
+    voice_params_ptr->enabled = value;
+    return;
   case ZYNADD_PARAMETER_BOOL_RESONANCE:
     LOG_DEBUG("voice resonance -> %s (%p)", value ? "on" : "off", voice_params_ptr);
     voice_params_ptr->resonance = value;

@@ -159,8 +159,9 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_BOOL_PORTAMENTO_PITCH_THRESHOLD_ABOVE  1
 
 /* bool - voice */
-#define ZYNADD_PARAMETER_BOOL_RESONANCE                         0
-#define ZYNADD_PARAMETER_BOOL_WHITE_NOISE                       1
+#define ZYNADD_PARAMETER_BOOL_ENABLED                           0
+#define ZYNADD_PARAMETER_BOOL_RESONANCE                         1
+#define ZYNADD_PARAMETER_BOOL_WHITE_NOISE                       2
 
 #define ZYNADD_PARAMETER_ENUM_LFO_SHAPE                             1000
 #define ZYNADD_PARAMETER_ENUM_FILTER_CATEGORY                       1001
