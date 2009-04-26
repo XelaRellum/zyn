@@ -119,12 +119,12 @@ zyn_get_detune(
 
   if (finedetune < 8192)
   {
-    findet =- findet;
+    findet = -findet;
   }
 
   if (cdetune < 0)
   {
-    cdet =- cdet;
+    cdet = -cdet;
   }
     
   return octdet + cdet + findet;
