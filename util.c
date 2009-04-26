@@ -20,6 +20,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "common.h"
 #include "util.h"
@@ -67,7 +68,7 @@ zyn_velocity_scale(float velocity, float scaling)
  * Get the detune in cents 
  */
 REALTYPE
-getdetune(
+zyn_get_detune(
   unsigned char type,
   unsigned short int coarsedetune,
   unsigned short int finedetune)
@@ -96,22 +97,24 @@ getdetune(
 
   switch (type)
   {
-//  case 1: is used for the default (see below)
-  case 2:
+  case ZYN_DETUNE_TYPE_L35CENTS:
+    cdet = fabs(cdetune * 50.0);
+    findet = fabs(fdetune / 8192.0) * 35.0; // almost like "Paul's Sound Designer 2"
+  case ZYN_DETUNE_TYPE_L10CENTS:
     cdet = fabs(cdetune * 10.0);
     findet = fabs(fdetune / 8192.0) * 10.0;
     break;
-  case 3:
+  case ZYN_DETUNE_TYPE_E100CENTS:
     cdet = fabs(cdetune * 100);
     findet = pow(10, fabs(fdetune / 8192.0) * 3.0) / 10.0 - 0.1;
     break;
-  case 4:
+  case ZYN_DETUNE_TYPE_E1200CENTS:
     cdet = fabs(cdetune * 701.95500087); // perfect fifth
     findet = (pow(2, fabs(fdetune / 8192.0) * 12.0) - 1.0) / 4095 * 1200;
     break;
   default:
-    cdet = fabs(cdetune * 50.0);
-    findet = fabs(fdetune / 8192.0) * 35.0; // almost like "Paul's Sound Designer 2"
+    assert(0);
+    return 0;
   }
 
   if (finedetune < 8192)

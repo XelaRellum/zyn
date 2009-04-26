@@ -279,7 +279,7 @@ zyn_addnote_create(
 
   note_ptr->stereo = synth_ptr->stereo;
 
-  note_ptr->detune = getdetune(
+  note_ptr->detune = zyn_get_detune(
     synth_ptr->detune.type,
     synth_ptr->detune.coarse,
     synth_ptr->detune.fine);
@@ -835,6 +835,7 @@ zyn_addnote_note_on(
   float filter_velocity_adjust;
   int voice_oscillator_index;
   REALTYPE tmp;
+  unsigned char detune_type;
 
   note_ptr->portamento = portamento;
   note_ptr->midinote = midinote;
@@ -911,52 +912,40 @@ zyn_addnote_note_on(
     note_ptr->voices_ptr[voice_index].enabled = true;
     note_ptr->voices_ptr[voice_index].fixed_detune = note_ptr->synth_ptr->voices_params_ptr[voice_index].fixed_detune;
 
-    // use the Globalpars.detunetype if the detunetype is 0
-    if (note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.type != 0)
+    // calculate voice detune
     {
+      if (note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.type == ZYN_DETUNE_TYPE_GLOBAL)
+      {
+        detune_type = note_ptr->synth_ptr->detune.type;
+      }
+      else
+      {
+        detune_type = note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.type;
+      }
+
       // coarse detune
-      note_ptr->voices_ptr[voice_index].Detune =
-        getdetune(
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.type,
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.coarse,
-          8192);
+      note_ptr->voices_ptr[voice_index].Detune = zyn_get_detune(detune_type, note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.coarse, 8192);
 
       // fine detune
-      note_ptr->voices_ptr[voice_index].FineDetune =
-        getdetune(
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.type,
-          0,
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.fine);
-    }
-    else
-    {
-      // coarse detune
-      note_ptr->voices_ptr[voice_index].Detune = getdetune(
-        note_ptr->synth_ptr->detune.type,
-        note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.coarse,
-        8192);
-
-      // fine detune
-      note_ptr->voices_ptr[voice_index].FineDetune = getdetune(
-        note_ptr->synth_ptr->detune.type,
-        0,
-        note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.fine);
+      note_ptr->voices_ptr[voice_index].FineDetune = zyn_get_detune(detune_type, 0, note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.fine);
     }
 
-    if (note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.type != 0)
+    // calculate voice fm detune
     {
-      note_ptr->voices_ptr[voice_index].FMDetune = 
-        getdetune(
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.type,
+      if (note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.type == ZYN_DETUNE_TYPE_GLOBAL)
+      {
+        detune_type = note_ptr->synth_ptr->detune.type;
+      }
+      else
+      {
+        detune_type = note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.type;
+      }
+
+      note_ptr->voices_ptr[voice_index].FMDetune =
+        zyn_get_detune(
+          detune_type,
           note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.coarse,
           note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.fine);
-    }
-    else
-    {
-      note_ptr->voices_ptr[voice_index].FMDetune = getdetune(
-        note_ptr->synth_ptr->detune.type,
-        note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.coarse,
-        note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.fine);
     }
 
     note_ptr->osc_pos_hi_ptr[voice_index] = 0;

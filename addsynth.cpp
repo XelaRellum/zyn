@@ -179,7 +179,7 @@ zyn_addsynth_create(
 //  zyn_addsynth_ptr->GlobalPar.stereo = true;      // Stereo
   zyn_addsynth_ptr->detune.fine = 8192;//zero
   zyn_addsynth_ptr->detune.coarse = 0;
-  zyn_addsynth_ptr->detune.type = 1;
+  zyn_addsynth_ptr->detune.type = ZYN_DETUNE_TYPE_L35CENTS;
   zyn_addsynth_ptr->detune_bandwidth = 0.0;
     
   /* Amplitude Global Parameters */
@@ -213,7 +213,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PPanning=64;//center
     zyn_addsynth_ptr->voices_params_ptr[voice_index].detune.fine = 8192;//8192=0
     zyn_addsynth_ptr->voices_params_ptr[voice_index].detune.coarse = 0;
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].detune.type = 0;
+    zyn_addsynth_ptr->voices_params_ptr[voice_index].detune.type = ZYN_DETUNE_TYPE_GLOBAL;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFreqLfoEnabled=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFreqEnvelopeEnabled=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PAmpEnvelopeEnabled=0;
@@ -231,7 +231,7 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFMVolumeDamp=64;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].fm_detune.fine = 8192;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].fm_detune.coarse = 0;
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].fm_detune.type = 0;
+    zyn_addsynth_ptr->voices_params_ptr[voice_index].fm_detune.type = ZYN_DETUNE_TYPE_GLOBAL;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFMFreqEnvelopeEnabled=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFMAmpEnvelopeEnabled=0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].PFMVelocityScaleFunction=64; 

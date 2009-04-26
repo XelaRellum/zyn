@@ -112,6 +112,12 @@
 #define ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPE_THERSHOLD_UP    3
 #define ZYN_OSCILLATOR_SPECTRUM_ADJUST_TYPES_COUNT          4
 
+#define ZYN_DETUNE_TYPE_GLOBAL        0 /* use global detune type, valid only for voice parameters */
+#define ZYN_DETUNE_TYPE_L35CENTS      1
+#define ZYN_DETUNE_TYPE_L10CENTS      2
+#define ZYN_DETUNE_TYPE_E100CENTS     3
+#define ZYN_DETUNE_TYPE_E1200CENTS    4
+
 #ifdef __cplusplus
 extern "C" {
 #endif
