@@ -48,14 +48,10 @@ struct zyn_fixed_detune
 
 struct zyn_detune
 {
-  /* Fine detune */
-  unsigned short int fine;
-
-  /* Coarse detune + octave */
-  unsigned short int coarse;
-
-  /* Detune type */
-  unsigned char type;
+  signed int type;       /* Detune type, one of ZYN_DETUNE_TYPE_XXX */
+  signed int octave;     /* Octave, -8..7 */
+  signed int coarse;     /* Coarse detune, -64 .. 63 */
+  float fine;            /* Fine detune, -1..1 */
 };
 
 /***********************************************************/

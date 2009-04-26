@@ -38,9 +38,10 @@ zyn_velocity_scale(float velocity, float scaling);
 
 REALTYPE
 zyn_get_detune(
-  unsigned char type,
-  unsigned short int coarsedetune,
-  unsigned short int finedetune);
+  signed int type,
+  signed int octave,
+  signed int coarse,
+  float fine);
 
 void
 silence_buffer(

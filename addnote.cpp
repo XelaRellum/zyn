@@ -281,6 +281,7 @@ zyn_addnote_create(
 
   note_ptr->detune = zyn_get_detune(
     synth_ptr->detune.type,
+    synth_ptr->detune.octave,
     synth_ptr->detune.coarse,
     synth_ptr->detune.fine);
 
@@ -924,10 +925,19 @@ zyn_addnote_note_on(
       }
 
       // coarse detune
-      note_ptr->voices_ptr[voice_index].Detune = zyn_get_detune(detune_type, note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.coarse, 8192);
+      note_ptr->voices_ptr[voice_index].Detune =
+        zyn_get_detune(
+          detune_type,
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.octave,
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.coarse,
+          0.0);
 
       // fine detune
-      note_ptr->voices_ptr[voice_index].FineDetune = zyn_get_detune(detune_type, 0, note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.fine);
+      note_ptr->voices_ptr[voice_index].FineDetune = zyn_get_detune(
+        detune_type,
+        0,
+        0,
+        note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.fine);
     }
 
     // calculate voice fm detune
@@ -944,6 +954,7 @@ zyn_addnote_note_on(
       note_ptr->voices_ptr[voice_index].FMDetune =
         zyn_get_detune(
           detune_type,
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.octave,
           note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.coarse,
           note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.fine);
     }

@@ -69,65 +69,43 @@ zyn_velocity_scale(float velocity, float scaling)
  */
 REALTYPE
 zyn_get_detune(
-  unsigned char type,
-  unsigned short int coarsedetune,
-  unsigned short int finedetune)
+  signed int type,
+  signed int octave,
+  signed int coarse,
+  float fine)
 {
-  REALTYPE octdet;
   REALTYPE cdet;
   REALTYPE findet;
-
-  // Get Octave
-  int octave = coarsedetune / 1024;
-  if (octave >= 8)
-  {
-    octave -= 16;
-  }
-
-  octdet = octave * 1200.0;
-
-  // Coarse and fine detune
-  int cdetune = coarsedetune % 1024;
-  if (cdetune > 512)
-  {
-    cdetune -= 1024;
-  }
-    
-  int fdetune = finedetune - 8192;
 
   switch (type)
   {
   case ZYN_DETUNE_TYPE_L35CENTS:
-    cdet = fabs(cdetune * 50.0);
-    findet = fabs(fdetune / 8192.0) * 35.0; // almost like "Paul's Sound Designer 2"
+    cdet = coarse * 50.0;
+    findet = fabs(fine) * 35.0; // almost like "Paul's Sound Designer 2"
   case ZYN_DETUNE_TYPE_L10CENTS:
-    cdet = fabs(cdetune * 10.0);
-    findet = fabs(fdetune / 8192.0) * 10.0;
+    cdet = fabs(coarse * 10.0);
+    findet = fabs(fine) * 10.0;
     break;
   case ZYN_DETUNE_TYPE_E100CENTS:
-    cdet = fabs(cdetune * 100);
-    findet = pow(10, fabs(fdetune / 8192.0) * 3.0) / 10.0 - 0.1;
+    cdet = coarse * 100;
+    findet = pow(10, fabs(fine) * 3.0) / 10.0 - 0.1;
     break;
   case ZYN_DETUNE_TYPE_E1200CENTS:
-    cdet = fabs(cdetune * 701.95500087); // perfect fifth
-    findet = (pow(2, fabs(fdetune / 8192.0) * 12.0) - 1.0) / 4095 * 1200;
+    cdet = coarse * 701.95500087; // perfect fifth
+    findet = (pow(2, fabs(fine) * 12.0) - 1.0) / 4095 * 1200;
     break;
   default:
     assert(0);
     return 0;
   }
 
-  if (finedetune < 8192)
+  /* we compute detune using fabs(fine) so we need to adjust detune sign */
+  if (fine < 0.0)
   {
     findet = -findet;
   }
 
-  if (cdetune < 0)
-  {
-    cdet = -cdet;
-  }
-    
-  return octdet + cdet + findet;
+  return octave * 1200.0 + cdet + findet;
 }
 
 void
