@@ -33,41 +33,29 @@ struct note_channel;
 #define ZYN_FM_TYPE_FREQ_MOD      4
 #define ZYN_FM_TYPE_PITCH_MOD     5 /* code for this is disabled for some reason */
 
-struct ADnoteGlobalParam
+#define ZYN_DETUNE_NORMAL           0 /* the base frequency is normal one */
+#define ZYN_DETUNE_FIXED_440        1 /* the base frequency is fixed to 440 Hz */
+#define ZYN_DETUNE_EQUAL_TEMPERATE  2 /* Equal temperate */
+
+struct zyn_fixed_detune
 {
-  /******************************************
-   *     FREQUENCY GLOBAL PARAMETERS        *
-   ******************************************/
-  unsigned short int PDetune;//fine detune
-  unsigned short int PCoarseDetune;//coarse detune+octave
-  unsigned char PDetuneType;//detune type
+  int mode;			/* One of ZYN_DETUNE_XXX */
 
-  unsigned char PBandwidth;//how much the relative fine detunes of the voices are changed
+  /* 0 .. 127 */
+  /* at 64, 1 MIDI halftone -> 1 frequency halftone */
+  unsigned char equal_temperate;
+};
 
-  /********************************************
-   *     AMPLITUDE GLOBAL PARAMETERS          *
-   ********************************************/
+struct zyn_detune
+{
+  /* Fine detune */
+  unsigned short int fine;
 
-  // 0-127, Master volume
-  unsigned char PVolume;
+  /* Coarse detune + octave */
+  unsigned short int coarse;
 
-  // 0-127, velocity sensing
-  unsigned char PAmpVelocityScaleFunction;
-
-  // 0-127
-  unsigned char PPunchStrength;
-
-  // 0-127
-  unsigned char PPunchTime;
-
-  // 0-127
-  unsigned char PPunchStretch;
-
-  // 0-127
-  unsigned char PPunchVelocitySensing;
-
-  // RESONANCE
-  struct zyn_resonance resonance;
+  /* Detune type */
+  unsigned char type;
 };
 
 /***********************************************************/
@@ -104,22 +92,8 @@ struct zyn_addnote_voice_parameters
    *     FREQUENCY PARAMETERS        *
    **********************************/
 
-  /* If the base frequency is fixed to 440 Hz*/
-  unsigned char Pfixedfreq;
-
-  /* Equal temperate (this is used only if the Pfixedfreq is enabled)
-     If this parameter is 0, the frequency is fixed (to 440 Hz);
-     if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
-  unsigned char PfixedfreqET;
-
-  /* Fine detune */
-  unsigned short int PDetune;
-
-  /* Coarse detune + octave */
-  unsigned short int PCoarseDetune;
-
-  /* Detune type */
-  unsigned char PDetuneType;
+  struct zyn_detune detune;
+  struct zyn_fixed_detune fixed_detune;
 
   /* Frequency Envelope */
   unsigned char PFreqEnvelopeEnabled;
@@ -197,14 +171,8 @@ struct zyn_addnote_voice_parameters
   /* Modullator Velocity Sensing */
   unsigned char PFMVelocityScaleFunction;
 
-  /* Fine Detune of the Modullator*/
-  unsigned short int PFMDetune;
-
-  /* Coarse Detune of the Modullator */
-  unsigned short int PFMCoarseDetune;
-
-  /* The detune type */
-  unsigned char PFMDetuneType;
+  /* Detune of the Modullator */
+  struct zyn_detune fm_detune;
 
   /* Frequency Envelope of the Modullator */
   unsigned char PFMFreqEnvelopeEnabled;
@@ -238,6 +206,27 @@ struct zyn_addsynth
   // How the Harmonic Amplitude is applied to voices that use the same oscillator
   bool random_grouping;
 
+  // RESONANCE
+  struct zyn_resonance resonance;
+
+  // 0-127, Master volume
+  unsigned char PVolume;
+
+  // 0-127, velocity sensing
+  unsigned char PAmpVelocityScaleFunction;
+
+  // 0-127
+  unsigned char PPunchStrength;
+
+  // 0-127
+  unsigned char PPunchTime;
+
+  // 0-127
+  unsigned char PPunchStretch;
+
+  // 0-127
+  unsigned char PPunchVelocitySensing;
+
   // Amplitude LFO parameters
   struct zyn_lfo_parameters amplitude_lfo_params;
 
@@ -258,12 +247,16 @@ struct zyn_addsynth
 
   EnvelopeParams m_filter_envelope_params;
 
+  struct zyn_detune detune;
+
+  /* how much the relative fine detunes of the voices are changed */
+  /* -1.0 .. 1.0 */
+  float detune_bandwidth;
+
   // Frequency LFO parameters
   struct zyn_lfo_parameters frequency_lfo_params;
 
   EnvelopeParams m_frequency_envelope_params;
-
-  ADnoteGlobalParam GlobalPar;
 
   zyn_portamento portamento;
 

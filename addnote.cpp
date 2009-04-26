@@ -23,6 +23,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "globals.h"
 #include "resonance.h"
@@ -70,8 +71,8 @@ struct addsynth_voice
   /************************************
    *     FREQUENCY PARAMETERS          *
    ************************************/
-  int fixedfreq;//if the frequency is fixed to 440 Hz
-  int fixedfreqET;//if the "fixed" frequency varies according to the note (ET)
+
+  struct zyn_fixed_detune fixed_detune;
 
   // cents = basefreq*VoiceDetune
   REALTYPE Detune,FineDetune;
@@ -279,14 +280,14 @@ zyn_addnote_create(
   note_ptr->stereo = synth_ptr->stereo;
 
   note_ptr->detune = getdetune(
-    synth_ptr->GlobalPar.PDetuneType,
-    synth_ptr->GlobalPar.PCoarseDetune,
-    synth_ptr->GlobalPar.PDetune);
+    synth_ptr->detune.type,
+    synth_ptr->detune.coarse,
+    synth_ptr->detune.fine);
 
   /*
    * Get the Multiplier of the fine detunes of the voices
    */
-  note_ptr->bandwidth_detune_multiplier = (synth_ptr->GlobalPar.PBandwidth - 64.0) / 64.0;
+  note_ptr->bandwidth_detune_multiplier = synth_ptr->detune_bandwidth;
   note_ptr->bandwidth_detune_multiplier =
     pow(
       2.0,
@@ -319,36 +320,42 @@ getvoicebasefreq(
   int nvoice)
 {
   REALTYPE detune;
+  REALTYPE frequency;
+  int equal_temperate;
+  REALTYPE tmp;
 
   detune = note_ptr->voices_ptr[nvoice].Detune / 100.0;
   detune += note_ptr->voices_ptr[nvoice].FineDetune / 100.0 * note_ptr->synth_ptr->bandwidth_relbw * note_ptr->bandwidth_detune_multiplier;
   detune += note_ptr->detune / 100.0;
 
-  if (note_ptr->voices_ptr[nvoice].fixedfreq == 0)
+  switch (note_ptr->voices_ptr[nvoice].fixed_detune.mode)
   {
-    return note_ptr->basefreq * pow(2, detune / 12.0);
-  }
-  else
-  {
-    // the fixed freq is enabled
-    REALTYPE fixedfreq = 440.0;
-    int fixedfreqET = note_ptr->voices_ptr[nvoice].fixedfreqET;
-    if (fixedfreqET!=0)
+  case ZYN_DETUNE_NORMAL:
+    frequency = note_ptr->basefreq;
+    break;
+  case ZYN_DETUNE_FIXED_440:
+    frequency = 440.0;
+    break;
+  case ZYN_DETUNE_EQUAL_TEMPERATE:
+    // the frequency varies according the keyboard note
+    equal_temperate = note_ptr->voices_ptr[nvoice].fixed_detune.equal_temperate;
+    tmp = (note_ptr->midinote - 69.0) / 12.0 * (pow(2.0, (equal_temperate - 1) / 63.0) - 1.0);
+							 
+    if (equal_temperate <= 64)
     {
-      // if the frequency varies according the keyboard note
-      REALTYPE tmp = (note_ptr->midinote - 69.0) / 12.0 * (pow(2.0,(fixedfreqET-1)/63.0) - 1.0);
-      if (fixedfreqET <= 64)
-      {
-        fixedfreq *= pow(2.0,tmp);
-      }
-      else
-      {
-        fixedfreq *= pow(3.0,tmp);
-      }
+      frequency = 440 * pow(2.0, tmp);
     }
-
-    return fixedfreq * pow(2.0, detune / 12.0);
+    else
+    {
+      frequency = 440 * pow(3.0, tmp);
+    }
+    break;
+  default:
+    assert(0);
+    return 440;
   }
+
+  return frequency * pow(2.0, detune / 12.0);
 }
 
 /*
@@ -869,16 +876,16 @@ zyn_addnote_note_on(
     note_ptr->filter_center_pitch += note_ptr->synth_ptr->m_filter_params.getfreqtracking(note_ptr->basefreq);
   }
 
-  if (note_ptr->synth_ptr->GlobalPar.PPunchStrength != 0)
+  if (note_ptr->synth_ptr->PPunchStrength != 0)
   {
     note_ptr->punch_enabled = true;
     note_ptr->punch_t = 1.0; // start from 1.0 and to 0.0
-    note_ptr->punch_initial_value = pow(10, 1.5 * note_ptr->synth_ptr->GlobalPar.PPunchStrength / 127.0) - 1.0;
-    note_ptr->punch_initial_value *= VelF(note_ptr->velocity, note_ptr->synth_ptr->GlobalPar.PPunchVelocitySensing);
+    note_ptr->punch_initial_value = pow(10, 1.5 * note_ptr->synth_ptr->PPunchStrength / 127.0) - 1.0;
+    note_ptr->punch_initial_value *= VelF(note_ptr->velocity, note_ptr->synth_ptr->PPunchVelocitySensing);
 
-    REALTYPE time = pow(10, 3.0 * note_ptr->synth_ptr->GlobalPar.PPunchTime / 127.0) / 10000.0; // 0.1 .. 100 ms
+    REALTYPE time = pow(10, 3.0 * note_ptr->synth_ptr->PPunchTime / 127.0) / 10000.0; // 0.1 .. 100 ms
 
-    REALTYPE stretch = pow(440.0/freq, note_ptr->synth_ptr->GlobalPar.PPunchStretch / 64.0);
+    REALTYPE stretch = pow(440.0/freq, note_ptr->synth_ptr->PPunchStretch / 64.0);
 
     note_ptr->punch_duration = 1.0 / (time * note_ptr->synth_ptr->sample_rate * stretch);
   }
@@ -902,55 +909,54 @@ zyn_addnote_note_on(
     }
 
     note_ptr->voices_ptr[voice_index].enabled = true;
-    note_ptr->voices_ptr[voice_index].fixedfreq = note_ptr->synth_ptr->voices_params_ptr[voice_index].Pfixedfreq;
-    note_ptr->voices_ptr[voice_index].fixedfreqET = note_ptr->synth_ptr->voices_params_ptr[voice_index].PfixedfreqET;
+    note_ptr->voices_ptr[voice_index].fixed_detune = note_ptr->synth_ptr->voices_params_ptr[voice_index].fixed_detune;
 
     // use the Globalpars.detunetype if the detunetype is 0
-    if (note_ptr->synth_ptr->voices_params_ptr[voice_index].PDetuneType != 0)
+    if (note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.type != 0)
     {
       // coarse detune
       note_ptr->voices_ptr[voice_index].Detune =
         getdetune(
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].PDetuneType,
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].PCoarseDetune,
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.type,
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.coarse,
           8192);
 
       // fine detune
       note_ptr->voices_ptr[voice_index].FineDetune =
         getdetune(
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].PDetuneType,
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.type,
           0,
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].PDetune);
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.fine);
     }
     else
     {
       // coarse detune
       note_ptr->voices_ptr[voice_index].Detune = getdetune(
-        note_ptr->synth_ptr->GlobalPar.PDetuneType,
-        note_ptr->synth_ptr->voices_params_ptr[voice_index].PCoarseDetune,
+        note_ptr->synth_ptr->detune.type,
+        note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.coarse,
         8192);
 
       // fine detune
       note_ptr->voices_ptr[voice_index].FineDetune = getdetune(
-        note_ptr->synth_ptr->GlobalPar.PDetuneType,
+        note_ptr->synth_ptr->detune.type,
         0,
-        note_ptr->synth_ptr->voices_params_ptr[voice_index].PDetune);
+        note_ptr->synth_ptr->voices_params_ptr[voice_index].detune.fine);
     }
 
-    if (note_ptr->synth_ptr->voices_params_ptr[voice_index].PFMDetuneType != 0)
+    if (note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.type != 0)
     {
       note_ptr->voices_ptr[voice_index].FMDetune = 
         getdetune(
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].PFMDetuneType,
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].PFMCoarseDetune,
-          note_ptr->synth_ptr->voices_params_ptr[voice_index].PFMDetune);
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.type,
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.coarse,
+          note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.fine);
     }
     else
     {
       note_ptr->voices_ptr[voice_index].FMDetune = getdetune(
-        note_ptr->synth_ptr->GlobalPar.PDetuneType,
-        note_ptr->synth_ptr->voices_params_ptr[voice_index].PFMCoarseDetune,
-        note_ptr->synth_ptr->voices_params_ptr[voice_index].PFMDetune);
+        note_ptr->synth_ptr->detune.type,
+        note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.coarse,
+        note_ptr->synth_ptr->voices_params_ptr[voice_index].fm_detune.fine);
     }
 
     note_ptr->osc_pos_hi_ptr[voice_index] = 0;
@@ -1051,8 +1057,8 @@ zyn_addnote_note_on(
     &note_ptr->synth_ptr->amplitude_lfo_params,
     ZYN_LFO_TYPE_AMPLITUDE);
 
-  note_ptr->volume = 4.0 * pow(0.1, 3.0 * (1.0 - note_ptr->synth_ptr->GlobalPar.PVolume / 96.0)); // -60 dB .. 0 dB
-  note_ptr->volume *= VelF(note_ptr->velocity, note_ptr->synth_ptr->GlobalPar.PAmpVelocityScaleFunction); // velocity sensing
+  note_ptr->volume = 4.0 * pow(0.1, 3.0 * (1.0 - note_ptr->synth_ptr->PVolume / 96.0)); // -60 dB .. 0 dB
+  note_ptr->volume *= VelF(note_ptr->velocity, note_ptr->synth_ptr->PAmpVelocityScaleFunction); // velocity sensing
 
   note_ptr->amplitude_envelope.envout_dB(); // discard the first envelope output
 

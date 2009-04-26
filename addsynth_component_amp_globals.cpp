@@ -47,17 +47,17 @@ zyn_component_amp_globals_get_float(
   case ZYNADD_PARAMETER_FLOAT_PANORAMA:
     return zyn_addsynth_ptr->panorama;
   case ZYNADD_PARAMETER_FLOAT_VOLUME:
-    return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.PVolume);
+    return percent_from_0_127(zyn_addsynth_ptr->PVolume);
   case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING:
-    return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.PAmpVelocityScaleFunction);
+    return percent_from_0_127(zyn_addsynth_ptr->PAmpVelocityScaleFunction);
   case ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH:
-    return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.PPunchStrength);
+    return percent_from_0_127(zyn_addsynth_ptr->PPunchStrength);
   case ZYNADD_PARAMETER_FLOAT_PUNCH_TIME:
-    return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.PPunchTime);
+    return percent_from_0_127(zyn_addsynth_ptr->PPunchTime);
   case ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH:
-    return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.PPunchStretch);
+    return percent_from_0_127(zyn_addsynth_ptr->PPunchStretch);
   case ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING:
-    return percent_from_0_127(zyn_addsynth_ptr->GlobalPar.PPunchVelocitySensing);
+    return percent_from_0_127(zyn_addsynth_ptr->PPunchVelocitySensing);
   case ZYNADD_PARAMETER_FLOAT_PITCH_BEND_RANGE:
     return zyn_addsynth_ptr->pitch_bend_range;
   case ZYNADD_PARAMETER_FLOAT_PITCH_BEND:
@@ -80,22 +80,22 @@ zyn_component_amp_globals_set_float(
     zyn_addsynth_ptr->panorama = value;
     return;
   case ZYNADD_PARAMETER_FLOAT_VOLUME:
-    zyn_addsynth_ptr->GlobalPar.PVolume = percent_to_0_127(value);
+    zyn_addsynth_ptr->PVolume = percent_to_0_127(value);
     return;
   case ZYNADD_PARAMETER_FLOAT_VELOCITY_SENSING:
-    zyn_addsynth_ptr->GlobalPar.PAmpVelocityScaleFunction = percent_to_0_127(value);
+    zyn_addsynth_ptr->PAmpVelocityScaleFunction = percent_to_0_127(value);
     return;
   case ZYNADD_PARAMETER_FLOAT_PUNCH_STRENGTH:
-    zyn_addsynth_ptr->GlobalPar.PPunchStrength = percent_to_0_127(value);
+    zyn_addsynth_ptr->PPunchStrength = percent_to_0_127(value);
     return;
   case ZYNADD_PARAMETER_FLOAT_PUNCH_TIME:
-    zyn_addsynth_ptr->GlobalPar.PPunchTime = percent_to_0_127(value);
+    zyn_addsynth_ptr->PPunchTime = percent_to_0_127(value);
     return;
   case ZYNADD_PARAMETER_FLOAT_PUNCH_STRETCH:
-    zyn_addsynth_ptr->GlobalPar.PPunchStretch = percent_to_0_127(value);
+    zyn_addsynth_ptr->PPunchStretch = percent_to_0_127(value);
     return;
   case ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING:
-    zyn_addsynth_ptr->GlobalPar.PPunchVelocitySensing = percent_to_0_127(value);
+    zyn_addsynth_ptr->PPunchVelocitySensing = percent_to_0_127(value);
     return;
   case ZYNADD_PARAMETER_FLOAT_PITCH_BEND_RANGE:
     zyn_addsynth_ptr->pitch_bend_range = value;
