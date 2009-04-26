@@ -128,6 +128,16 @@ zyn_addsynth_component_init_frequency_globals(
   struct zyn_component_descriptor * component_ptr);
 
 void
+zyn_addsynth_component_init_detune(
+  struct zyn_component_descriptor * component_ptr,
+  struct zyn_detune * detune_ptr);
+
+void
+zyn_addsynth_component_init_fixed_detune(
+  struct zyn_component_descriptor * component_ptr,
+  struct zyn_fixed_detune * fixed_detune_ptr);
+
+void
 zyn_addsynth_component_init_frequency_envelope(
   struct zyn_component_descriptor * component_ptr,
   EnvelopeParams * envelope_params_ptr);

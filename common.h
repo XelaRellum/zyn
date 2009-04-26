@@ -118,6 +118,10 @@
 #define ZYN_DETUNE_TYPE_E100CENTS     3
 #define ZYN_DETUNE_TYPE_E1200CENTS    4
 
+#define ZYN_DETUNE_MODE_NORMAL           0 /* the base frequency is normal one */
+#define ZYN_DETUNE_MODE_FIXED_440        1 /* the base frequency is fixed to 440 Hz */
+#define ZYN_DETUNE_MODE_EQUAL_TEMPERATE  2 /* Equal temperate */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

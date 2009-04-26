@@ -200,7 +200,7 @@ zyn_addsynth_create(
   {
     zyn_addsynth_ptr->voices_params_ptr[voice_index].enabled = false;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].white_noise = false;
-    zyn_addsynth_ptr->voices_params_ptr[voice_index].fixed_detune.mode = ZYN_DETUNE_NORMAL;
+    zyn_addsynth_ptr->voices_params_ptr[voice_index].fixed_detune.mode = ZYN_DETUNE_MODE_NORMAL;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].fixed_detune.equal_temperate = 0;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].resonance = true;
     zyn_addsynth_ptr->voices_params_ptr[voice_index].Pfilterbypass=0;
@@ -322,6 +322,10 @@ zyn_addsynth_create(
     zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_AMP_GLOBALS,
     zyn_addsynth_ptr);
 
+  zyn_addsynth_component_init_detune(
+    zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_DETUNE,
+    &zyn_addsynth_ptr->detune);
+
   zyn_addsynth_component_init_amp_envelope(
     zyn_addsynth_ptr->global_components + ZYNADD_COMPONENT_AMP_ENV,
     &zyn_addsynth_ptr->m_amplitude_envelope_params);
@@ -384,6 +388,18 @@ zyn_addsynth_create(
     zyn_addsynth_component_init_oscillator(
       zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_VOICE_COMPONENTS_COUNT + ZYNADD_COMPONENT_VOICE_OSCILLATOR,
       &zyn_addsynth_ptr->voices_params_ptr[voice_index].oscillator);
+
+    zyn_addsynth_component_init_detune(
+      zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_VOICE_COMPONENTS_COUNT + ZYNADD_COMPONENT_VOICE_DETUNE,
+      &zyn_addsynth_ptr->voices_params_ptr[voice_index].detune);
+
+    zyn_addsynth_component_init_fixed_detune(
+      zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_VOICE_COMPONENTS_COUNT + ZYNADD_COMPONENT_VOICE_FIXED_DETUNE,
+      &zyn_addsynth_ptr->voices_params_ptr[voice_index].fixed_detune);
+
+    zyn_addsynth_component_init_detune(
+      zyn_addsynth_ptr->voices_components + voice_index * ZYNADD_VOICE_COMPONENTS_COUNT + ZYNADD_COMPONENT_VOICE_MODULATOR_DETUNE,
+      &zyn_addsynth_ptr->voices_params_ptr[voice_index].fm_detune);
   }
 
   *handle_ptr = (zyn_addsynth_handle)zyn_addsynth_ptr;

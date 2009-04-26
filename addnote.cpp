@@ -330,13 +330,13 @@ getvoicebasefreq(
 
   switch (note_ptr->voices_ptr[nvoice].fixed_detune.mode)
   {
-  case ZYN_DETUNE_NORMAL:
+  case ZYN_DETUNE_MODE_NORMAL:
     frequency = note_ptr->basefreq;
     break;
-  case ZYN_DETUNE_FIXED_440:
+  case ZYN_DETUNE_MODE_FIXED_440:
     frequency = 440.0;
     break;
-  case ZYN_DETUNE_EQUAL_TEMPERATE:
+  case ZYN_DETUNE_MODE_EQUAL_TEMPERATE:
     // the frequency varies according the keyboard note
     equal_temperate = note_ptr->voices_ptr[nvoice].fixed_detune.equal_temperate;
     tmp = (note_ptr->midinote - 69.0) / 12.0 * (pow(2.0, (equal_temperate - 1) / 63.0) - 1.0);

@@ -33,13 +33,9 @@ struct note_channel;
 #define ZYN_FM_TYPE_FREQ_MOD      4
 #define ZYN_FM_TYPE_PITCH_MOD     5 /* code for this is disabled for some reason */
 
-#define ZYN_DETUNE_NORMAL           0 /* the base frequency is normal one */
-#define ZYN_DETUNE_FIXED_440        1 /* the base frequency is fixed to 440 Hz */
-#define ZYN_DETUNE_EQUAL_TEMPERATE  2 /* Equal temperate */
-
 struct zyn_fixed_detune
 {
-  int mode;			/* One of ZYN_DETUNE_XXX */
+  int mode;			/* One of ZYN_DETUNE_MODE_XXX */
 
   /* 0 .. 127 */
   /* at 64, 1 MIDI halftone -> 1 frequency halftone */

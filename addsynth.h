@@ -80,13 +80,17 @@ zyn_addsynth_destroy(
 #define ZYNADD_COMPONENT_FREQUENCY_ENV           10
 #define ZYNADD_COMPONENT_FREQUENCY_LFO           11
 #define ZYNADD_COMPONENT_PORTAMENTO              12
+#define ZYNADD_COMPONENT_DETUNE                  13
 
-#define ZYNADD_GLOBAL_COMPONENTS_COUNT           13
+#define ZYNADD_GLOBAL_COMPONENTS_COUNT           14
 
 #define ZYNADD_COMPONENT_VOICE_GLOBALS            0
 #define ZYNADD_COMPONENT_VOICE_OSCILLATOR         1
+#define ZYNADD_COMPONENT_VOICE_DETUNE             2
+#define ZYNADD_COMPONENT_VOICE_FIXED_DETUNE       3
+#define ZYNADD_COMPONENT_VOICE_MODULATOR_DETUNE   4
 
-#define ZYNADD_VOICE_COMPONENTS_COUNT             2
+#define ZYNADD_VOICE_COMPONENTS_COUNT             5
 
 /* when parameter index is used in more than one component
    it does need not to conflict with unique parameters */
@@ -107,6 +111,7 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_FLOAT_PUNCH_VELOCITY_SENSING      5 /* 0 .. 100 */
 #define ZYNADD_PARAMETER_FLOAT_PITCH_BEND_RANGE            6 /* -6400 .. 6400, in cents */
 #define ZYNADD_PARAMETER_FLOAT_PITCH_BEND                  7 /* -1 .. 1 */
+#define ZYNADD_PARAMETER_FLOAT_DETUNE_BANDWIDTH            8 /* -1 .. 1 */
 
 /* float - envelope */
 #define ZYNADD_PARAMETER_FLOAT_ENV_ATTACK_VALUE            0 /* 0 .. 100 */
@@ -140,6 +145,9 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME             0 /* 0 .. 1 */
 #define ZYNADD_PARAMETER_FLOAT_PORTAMENTO_TIME_STRETCH     1 /* -1 .. 1 */
 
+/* float - detune */
+#define ZYNADD_PARAMETER_FLOAT_DETUNE_FINE                 0 /* -1 .. 1 */
+
 /* bool - globals */
 #define ZYNADD_PARAMETER_BOOL_RANDOM_PANORAMA                       0
 #define ZYNADD_PARAMETER_BOOL_STEREO                                1
@@ -169,10 +177,17 @@ zyn_addsynth_destroy(
 #define ZYNADD_PARAMETER_ENUM_OSCILLATOR_BASE_FUNCTION              1003
 #define ZYNADD_PARAMETER_ENUM_OSCILLATOR_WAVESHAPE_TYPE             1004
 #define ZYNADD_PARAMETER_ENUM_OSCILLATOR_SPECTRUM_ADJUST_TYPE       1005
+#define ZYNADD_PARAMETER_ENUM_DETUNE_TYPE                           1006
+#define ZYNADD_PARAMETER_ENUM_FIXED_DETUNE_MODE                     1007
 
 #define ZYNADD_PARAMETER_INT_STAGES                             0 /* 1 .. 5 */
 
 #define ZYNADD_PARAMETER_INT_PORTAMENTO_PITCH_THRESHOLD  1 /* 0 .. 127 */
+
+#define ZYNADD_PARAMETER_INT_DETUNE_OCTAVE                 0 /* -8 .. 7 */
+#define ZYNADD_PARAMETER_INT_DETUNE_COARSE                 1 /* -64 .. 63 */
+
+#define ZYNADD_PARAMETER_INT_FIXED_DETUNE_EQUAL_TEMPERATE  0 /* 0 .. 127 */
 
 zyn_addsynth_component
 zyn_addsynth_get_global_component(
