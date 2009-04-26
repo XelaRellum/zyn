@@ -288,11 +288,10 @@ zyn_addnote_create(
   /*
    * Get the Multiplier of the fine detunes of the voices
    */
-  note_ptr->bandwidth_detune_multiplier = synth_ptr->detune_bandwidth;
   note_ptr->bandwidth_detune_multiplier =
     pow(
       2.0,
-      note_ptr->bandwidth_detune_multiplier * pow(fabs(note_ptr->bandwidth_detune_multiplier), 0.2) * 5.0);
+      synth_ptr->detune_bandwidth * pow(fabs(synth_ptr->detune_bandwidth), 0.2) * 5.0);
 
   note_ptr->note_enabled = false;
 
