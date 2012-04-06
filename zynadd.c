@@ -27,7 +27,7 @@
 #include <lv2.h>
 
 #include "common.h"
-#include "lv2-miditype.h"
+#include "lv2-midiport.h"
 #include "lv2-midifunctions.h"
 #include "zynadd.h"
 #include "addsynth.h"
